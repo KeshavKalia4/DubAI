@@ -1,14 +1,17 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import NavBar from '@/components/NavBar';
 
 export default function Home() {
+  const router = useRouter();
+
   const handleUserClick = () => {
-    console.log('user');
+    router.push('/user');
   };
 
   const handleContributorClick = () => {
-    console.log('contributor');
+    router.push('/contributor');
   };
 
   return (
