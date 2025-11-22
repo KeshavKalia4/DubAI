@@ -36,6 +36,13 @@ export interface ContentItem {
   date?: string; // ISO string for events
   location?: string;
   imageUrl?: string;
+  
+  // Enhanced Features
+  coordinates?: { lat: number; lng: number };
+  attendees?: { count: number; friends: string[] };
+  images?: string[];
+  stories?: { id: string; imageUrl: string; expiresAt: string }[];
+  aiSummary?: string;
 }
 
 export interface Tag {

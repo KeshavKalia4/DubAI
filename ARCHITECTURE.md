@@ -103,7 +103,17 @@ A simple, deterministic algorithm to start.
 
 ---
 
-## 5. Technical Strategy
+## 5. Enhanced "For You" Experience
+
+We are evolving the "For You" page into an immersive, social experience (Instagram-style).
+
+**For detailed documentation on features like Stories, Swipe Mode, and the Snap Map, please refer to:**
+
+- [for_you_page.md](./for_you_page.md)
+
+---
+
+## 6. Technical Strategy
 
 ### Phase 1: Config-Based (Current Step)
 

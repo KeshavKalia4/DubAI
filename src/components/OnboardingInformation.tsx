@@ -5,12 +5,12 @@ import { getOrganizationById } from '../config/organizations';
 import { availableTags } from '../data/mockData';
 import { UserProfile } from '../types';
 
-interface OnboardingWizardProps {
+interface OnboardingInformationProps {
   organizationId: string;
   onComplete: (profile: UserProfile) => void;
 }
 
-const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
+const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
   organizationId,
   onComplete,
 }) => {
@@ -28,7 +28,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
     } else {
       // Complete
       const profile: UserProfile = {
-        id: 'user-' + Date.now(),
+        id: crypto.randomUUID(),
         name: 'Demo User',
         email: 'demo@' + org.domains[0],
         organizationId: org.id,
@@ -52,7 +52,7 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
     <div className="max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg border border-gray-200">
       <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900">Welcome to {org.name}</h2>
-        <p className="text-gray-500">Let's personalize your experience.</p>
+        <p className="text-gray-500">Let&apos;s personalize your experience.</p>
       </div>
 
       {step === 1 && (
@@ -124,4 +124,4 @@ const OnboardingWizard: React.FC<OnboardingWizardProps> = ({
   );
 };
 
-export default OnboardingWizard;
+export default OnboardingInformation;

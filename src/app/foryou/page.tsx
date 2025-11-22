@@ -1,8 +1,10 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
+import { MapPin } from 'lucide-react';
 import NavBar from '../../components/NavBar';
-import OnboardingWizard from '../../components/OnboardingWizard';
+import OnboardingInformation from '../../components/OnboardingInformation';
 import ForYouFeed from '../../components/ForYouFeed';
 import { UserProfile } from '../../types';
 
@@ -29,21 +31,32 @@ export default function ForYouPage() {
         )}
 
         {!userProfile ? (
-          <OnboardingWizard
+          <OnboardingInformation
             organizationId={defaultOrgId}
             onComplete={(profile) => setUserProfile(profile)}
           />
         ) : (
           <div className="space-y-8">
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-              <h2 className="text-lg font-semibold mb-2 text-gray-900">Your Profile</h2>
-              <div className="flex gap-4 text-sm text-gray-600">
-                <span>Major: <strong className="text-gray-900">{userProfile.major}</strong></span>
-                <span>Year: <strong className="text-gray-900">{userProfile.year}</strong></span>
-                <span>Interests: <strong className="text-gray-900">{userProfile.tags.join(', ')}</strong></span>
+              <div className="flex justify-between items-start">
+                <div>
+                  <h2 className="text-lg font-semibold mb-2 text-gray-900">Your Profile</h2>
+                  <div className="flex gap-4 text-sm text-gray-600">
+                    <span>Major: <strong className="text-gray-900">{userProfile.major}</strong></span>
+                    <span>Year: <strong className="text-gray-900">{userProfile.year}</strong></span>
+                    <span>Interests: <strong className="text-gray-900">{userProfile.tags.map(tag => tag.charAt(0).toUpperCase() + tag.slice(1)).join(', ')}</strong></span>
+                  </div>
+                </div>
+                <Link
+                  href="/experiments/map"
+                  className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
+                >
+                  <MapPin className="w-4 h-4" />
+                  <span className="text-sm font-medium">Campus Map</span>
+                </Link>
               </div>
             </div>
-            
+
             <ForYouFeed user={userProfile} />
           </div>
         )}
