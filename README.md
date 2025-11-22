@@ -1,4 +1,4 @@
-# DubAI 🎓
+# DubAI
 
 AI for UW students. One intelligent system that knows everything about campus.
 
@@ -6,43 +6,66 @@ AI for UW students. One intelligent system that knows everything about campus.
 
 ## Features
 
-- 🏫 Campus information and navigation
-- 📚 Course recommendations and planning
-- 🍕 Dining hall menus and hours
+- Campus information and navigation
+- Course recommendations and planning
+- Dining hall menus and hours
 
 ## Tech Stack
 
-- **Framework**: Next.js 14 with App Router
-- **Language**: TypeScript, Python
-- **Styling**: Tailwind CSS
-- **AI**: [Anthropic API / OpenAI embeddings]
+- **Frontend**: Next.js 16, React 19, TypeScript, Tailwind CSS
+- **Backend**: Python, FastAPI
+- **AI**: Anthropic API / OpenAI
 - **Database**: Supabase
+
+---
+
+## Project Structure
+
+```
+DubAI/
+├── frontend/          # Next.js frontend application
+│   ├── src/
+│   │   ├── app/       # Next.js App Router pages
+│   │   └── components/# React components
+│   └── public/        # Static assets
+│
+├── backend/           # Python FastAPI backend
+│   ├── src/
+│   │   ├── api/       # API route handlers
+│   │   ├── services/  # Business logic
+│   │   └── models/    # Data models
+│   └── requirements.txt
+│
+├── .gitignore
+└── README.md
+```
 
 ---
 
 ## Development
 
-### Getting Started
+### Frontend
 
-First, install dependencies:
 ```bash
+cd frontend
 npm install
-```
-
-Then run the development server:
-```bash
 npm run dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to see the app.
 
-### Project Structure
+### Backend
 
-- `app/` - Next.js app router pages and layouts
-- `components/` - Reusable React components
-- `lib/` - Utility functions and API integrations
-- [Add more as you build]
+```bash
+cd backend
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+uvicorn src.main:app --reload
+```
+
+API will be available at [http://localhost:8000](http://localhost:8000).
 
 ---
 
-*Built with [Next.js](https://nextjs.org) and [Tailwind CSS](https://tailwindcss.com)*
+*Built with [Next.js](https://nextjs.org), [FastAPI](https://fastapi.tiangolo.com), and [Tailwind CSS](https://tailwindcss.com)*
