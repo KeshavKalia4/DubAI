@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { MessageCircle } from 'lucide-react';
 
 export default function NavBar() {
     const handleProfileClick = () => {
@@ -11,6 +12,10 @@ export default function NavBar() {
         <nav className="flex w-full items-center justify-between bg-[#1A1A2E] px-6 py-4">
             <Link href="/" className="text-xl font-semibold text-white hover:text-purple-300 transition-colors">
                 DubAI
+            </Link>
+            <Link href="/chat" className="flex items-center gap-2 text-white hover:text-purple-300 transition-colors">
+                <MessageCircle className="h-5 w-5" />
+                <span> Chat </span>
             </Link>
             <button
                 onClick={handleProfileClick}
