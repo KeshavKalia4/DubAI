@@ -3,15 +3,15 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { MapPin } from 'lucide-react';
-import NavBar from '../../components/NavBar';
-import OnboardingInformation from '../../components/OnboardingInformation';
-import ForYouFeed from '../../components/ForYouFeed';
-import { UserProfile } from '../../types';
+import NavBar from '@/components/NavBar';
+import OnboardingInformation from '@/components/OnboardingInformation';
+import ForYouFeed from '@/components/ForYouFeed';
+import { UserProfile } from '@/types';
 
 export default function ForYouPage() {
   // In a real app, this would come from AuthContext or Database
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  
+
   // Default to UW for this demo, but this could be dynamic based on login
   const defaultOrgId = 'uw-seattle';
 

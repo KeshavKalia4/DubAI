@@ -36,7 +36,7 @@ export interface ContentItem {
   date?: string; // ISO string for events
   location?: string;
   imageUrl?: string;
-  
+
   // Enhanced Features
   coordinates?: { lat: number; lng: number };
   attendees?: { count: number; friends: string[] };
