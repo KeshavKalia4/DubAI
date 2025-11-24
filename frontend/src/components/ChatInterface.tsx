@@ -18,6 +18,8 @@ interface Conversation {
 export default function ChatInterface() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
+    // TODO: Wire up setConversations for adding/managing chat history
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [conversations, setConversations] = useState<Conversation[]>([
         {
             id: '1',

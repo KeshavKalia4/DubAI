@@ -42,3 +42,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local documentation
+MISTAKES.md
+for_you_page.md
+phase1-homepage-to-foryou.md
