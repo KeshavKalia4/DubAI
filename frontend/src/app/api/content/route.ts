@@ -6,9 +6,3 @@ export async function GET() {
     const contentItems: ContentItem[] = mockContent;
     return NextResponse.json(contentItems);
 }
-
-function simulationDbDelay(ms: number): Promise<void> {
-    return new Promise((resolve) => {
-        setTimeout(resolve, ms);
-    })
-}
