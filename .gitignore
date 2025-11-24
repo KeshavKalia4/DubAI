@@ -58,6 +58,10 @@ build/
 # mypy
 .mypy_cache/
 
+# Scrapy
+.scrapy/
+backend/crawler/output/
+
 # ===================
 # Shared / Misc
 # ===================

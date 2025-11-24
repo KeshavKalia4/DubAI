@@ -34,6 +34,9 @@ DubAI/
 │   │   ├── api/       # API route handlers
 │   │   ├── services/  # Business logic
 │   │   └── models/    # Data models
+│   ├── crawler/       # Scrapy web scraper
+│   │   ├── scrapers/  # Spider implementations
+│   │   └── scrapy.cfg # Scrapy configuration
 │   └── requirements.txt
 │
 ├── .gitignore
@@ -65,6 +68,19 @@ uvicorn src.main:app --reload
 ```
 
 API will be available at [http://localhost:8000](http://localhost:8000).
+
+### Web Scraper (Crawler)
+
+The crawler uses Scrapy to scrape UW websites for RAG context.
+
+```bash
+cd backend
+source venv/bin/activate
+cd crawler
+scrapy crawl uw  # Run the UW spider
+```
+
+See [backend/crawler/README.md](backend/crawler/README.md) for detailed usage.
 
 ---
 
