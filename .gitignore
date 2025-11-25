@@ -43,7 +43,19 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local documentation
-MISTAKES.md
-for_you_page.md
-phase1-homepage-to-foryou.md
+# python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.venv/
+env/
+.env/
+*.egg-info/
+*.egg
+.pytest_cache/
+.mypy_cache/
+
+# scrapy
+.scrapy/
+backend/crawler/output/
