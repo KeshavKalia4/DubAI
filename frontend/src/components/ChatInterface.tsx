@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { sendChatMessage } from '@/lib/chatService';
 
 interface Message {
     id: string;
@@ -18,6 +19,8 @@ interface Conversation {
 export default function ChatInterface() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
     // TODO: Wire up setConversations for adding/managing chat history
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [conversations, setConversations] = useState<Conversation[]>([
@@ -63,7 +66,7 @@ export default function ChatInterface() {
         setMessages([]);
     };
 
-    const handleSend = () => {
+    const handleSend = async () => {
         if (!input.trim()) return;
 
         const userMessage: Message = {
@@ -74,6 +77,24 @@ export default function ChatInterface() {
 
         setMessages((prev) => [...prev, userMessage]);
         setInput('');
+        setIsLoading(true); // Start Loading
+
+        //Call the service
+        try {
+            const aiResponse = await sendChatMessage(userMessage.content);
+
+            const assistantMessage: Message = {
+                id: (Date.now() + 1).toString(),
+                role: 'assistant',
+                content: aiResponse.response,
+            };
+
+            setMessages((prev) => [...prev, assistantMessage]);
+        } catch (error) {
+            console.error('Chat error', error);
+        } finally {
+            setIsLoading(false); // Stop Loading
+        }
     };
 
     const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -98,15 +119,15 @@ export default function ChatInterface() {
     };
 
     return (
-        <div className="flex h-screen bg-white dark:bg-gray-900">
+        <div className="flex h-full bg-white dark:bg-gray-900">
             {/* Sidebar */}
-            <div className="w-64 flex-shrink-0 border-r border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800">
+            <div className="w-64 flex-shrink-0 border-r border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800 flex flex-col">
                 <div className="flex h-full flex-col">
                     {/* New Chat Button */}
                     <div className="p-3">
                         <button
                             onClick={handleNewChat}
-                            className="flex w-full items-center gap-3 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                            className="flex w-full items-center gap-4 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -114,7 +135,7 @@ export default function ChatInterface() {
                                 viewBox="0 0 24 24"
                                 strokeWidth={1.5}
                                 stroke="currentColor"
-                                className="h-5 w-5"
+                                className="h-8 w-5"
                             >
                                 <path
                                     strokeLinecap="round"
@@ -163,7 +184,7 @@ export default function ChatInterface() {
                                     <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
                                         How can I help you today?
                                     </h2>
-                                    <p className="mt-2 text-gray-600 dark:text-gray-400">
+                                    <p className="mt-8 text-gray-600 dark:text-gray-400">
                                         Ask me anything about UW events, activities, and campus life.
                                     </p>
                                 </div>
@@ -203,25 +224,23 @@ export default function ChatInterface() {
                                 className="max-h-32 flex-1 resize-none border-none bg-transparent px-2 py-2 text-gray-900 placeholder-gray-500 focus:outline-none dark:text-gray-100 dark:placeholder-gray-400"
                             />
                             <button
-                                onClick={handleSend}
-                                disabled={!input.trim()}
-                                className="rounded-lg bg-blue-600 p-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                                aria-label="Send message"
+                               onClick={handleSend}
+                               disabled={!input.trim() || isLoading} //Disable when loading
+                               className="rounded-lg bg-blue-600 p-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                               aria-label="Send message"
                             >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth={1.5}
-                                    stroke="currentColor"
-                                    className="h-5 w-5"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"
-                                    />
-                                </svg>
+                                {isLoading ? (
+                                    //Spinner (When loading)
+                                    <svg className="h-5 w-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                ) : (
+                                    // Send icon (when not loading)
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                                    </svg>
+                                )}
                             </button>
                         </div>
                     </div>

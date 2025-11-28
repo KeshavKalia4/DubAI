@@ -3,6 +3,7 @@
 import React, { useMemo } from 'react';
 import { ContentItem, UserProfile } from '../types';
 import { mockContent } from '../data/mockData';
+import { badges } from '@/config/designTokens';
 
 interface ForYouFeedProps {
   user: UserProfile;
@@ -62,13 +63,7 @@ const ContentCard: React.FC<{ item: ContentItem }> = ({ item }) => {
     <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
       <div className="flex justify-between items-start mb-2">
         <span
-          className={`text-xs font-semibold px-2 py-1 rounded uppercase ${
-            item.type === 'event'
-              ? 'bg-blue-100 text-blue-800'
-              : item.type === 'club'
-              ? 'bg-green-100 text-green-800'
-              : 'bg-gray-100 text-gray-800'
-          }`}
+          className={`text text-xs font-semibold px-2 py-1 rounded uppercase ${badges[item.type].bg} ${badges[item.type].text}`}
         >
           {item.type}
         </span>

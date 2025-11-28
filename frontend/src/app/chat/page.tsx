@@ -10,7 +10,7 @@ export default function ChatPage() {
       <NavBar />
 
       {/* Chat Interface */}
-      <div className="flex-1 overflow-hidden has-bottom-nav">
+      <div className="flex-1 overflow-hidden">
         <ChatInterface />
       </div>
     </div>
