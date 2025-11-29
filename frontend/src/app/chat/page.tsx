@@ -5,7 +5,7 @@ import ChatInterface from '@/components/ChatInterface';
 
 export default function ChatPage() {
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-gray-50 dark:bg-gray-950">
       {/* NavBar - includes both top nav (desktop) and bottom nav (mobile) */}
       <NavBar />
 

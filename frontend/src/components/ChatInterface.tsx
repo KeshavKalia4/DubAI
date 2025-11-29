@@ -182,7 +182,7 @@ export default function ChatInterface() {
                             <div className="flex h-full items-center justify-center">
                                 <div className="text-center">
                                     <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
-                                        How can I help you today?
+                                        DubAI
                                     </h2>
                                     <p className="mt-8 text-gray-600 dark:text-gray-400">
                                         Ask me anything about UW events, activities, and campus life.

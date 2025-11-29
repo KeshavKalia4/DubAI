@@ -3,11 +3,18 @@
 import React, { useMemo } from 'react';
 import { ContentItem, UserProfile } from '../types';
 import { mockContent } from '../data/mockData';
-import { badges } from '@/config/designTokens';
 
 interface ForYouFeedProps {
   user: UserProfile;
 }
+
+// Type to badge color mapping
+const typeColors: Record<string, { border: string; bg: string; text: string }> = {
+  event: { border: 'border-l-purple-500', bg: 'bg-purple-50', text: 'text-purple-700' },
+  club: { border: 'border-l-blue-500', bg: 'bg-blue-50', text: 'text-blue-700' },
+  opportunity: { border: 'border-l-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-700' },
+  announcement: { border: 'border-l-amber-500', bg: 'bg-amber-50', text: 'text-amber-700' },
+};
 
 const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
   const recommendations = useMemo(() => {
@@ -44,43 +51,80 @@ const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
   }, [user]);
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-800">For You</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div className="space-y-8">
+      <h2 className="text-3xl font-semibold text-gray-900 dark:text-white tracking-tight">For You</h2>
+
+      {/* Uniform Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {recommendations.map((item) => (
           <ContentCard key={item.id} item={item} />
         ))}
       </div>
+
       {recommendations.length === 0 && (
-        <p className="text-gray-500">No recommendations found. Try adding more interests!</p>
+        <div className="text-center py-16">
+          <p className="text-gray-400 dark:text-gray-500 text-lg">No recommendations found. Try adding more interests!</p>
+        </div>
       )}
     </div>
   );
 };
 
-const ContentCard: React.FC<{ item: ContentItem }> = ({ item }) => {
+const ContentCard: React.FC<{
+  item: ContentItem;
+}> = ({ item }) => {
+  const colors = typeColors[item.type] || typeColors.event;
+
   return (
-    <div className="bg-white p-4 rounded-lg shadow-md border border-gray-200 hover:shadow-lg transition-shadow">
-      <div className="flex justify-between items-start mb-2">
-        <span
-          className={`text text-xs font-semibold px-2 py-1 rounded uppercase ${badges[item.type].bg} ${badges[item.type].text}`}
-        >
-          {item.type}
-        </span>
-        {item.date && (
-          <span className="text-xs text-gray-500" suppressHydrationWarning>
-            {new Date(item.date).toLocaleDateString()}
+    <div
+      className={`
+        group relative bg-white dark:bg-gray-800 rounded-2xl p-6
+        border-l-4 ${colors.border}
+        shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]
+        hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)]
+        hover:scale-[1.02]
+        transition-all duration-300 ease-out
+        cursor-pointer overflow-hidden
+        h-full
+      `}
+    >
+      {/* Subtle gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 dark:from-purple-900/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+      <div className="relative h-full flex flex-col">
+        {/* Header */}
+        <div className="flex justify-between items-start mb-4">
+          <span className={`text-xs font-medium px-3 py-1.5 rounded-full ${colors.bg} dark:opacity-90 ${colors.text}`}>
+            {item.type}
           </span>
-        )}
-      </div>
-      <h3 className="text-lg font-bold mb-1 text-gray-900">{item.title}</h3>
-      <p className="text-sm text-gray-600 mb-3 line-clamp-2">{item.description}</p>
-      <div className="flex flex-wrap gap-1">
-        {item.tags.map((tag) => (
-          <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
-            #{tag}
-          </span>
-        ))}
+          {item.date && (
+            <span className="text-xs text-gray-400 dark:text-gray-500 font-medium" suppressHydrationWarning>
+              {new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+            </span>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 flex flex-col">
+          <h3 className="font-semibold mb-2 text-gray-900 dark:text-white text-lg">
+            {item.title}
+          </h3>
+          <p className="text-gray-500 dark:text-gray-400 mb-4 text-sm line-clamp-2">
+            {item.description}
+          </p>
+        </div>
+
+        {/* Tags */}
+        <div className="flex flex-wrap gap-2 mt-auto">
+          {item.tags.slice(0, 3).map((tag) => (
+            <span
+              key={tag}
+              className="text-xs text-gray-400 dark:text-gray-500 font-medium"
+            >
+              #{tag}
+            </span>
+          ))}
+        </div>
       </div>
     </div>
   );

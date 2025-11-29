@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { MessageCircle } from 'lucide-react';
+import ThemeToggle from './ThemeToggle';
 
 export default function NavBar() {
     const handleProfileClick = () => {
@@ -9,34 +10,40 @@ export default function NavBar() {
     };
 
     return (
-        <nav className="flex w-full items-center justify-between bg-[#1A1A2E] px-6 py-4">
-            <Link href="/" className="text-xl font-semibold text-white hover:text-purple-300 transition-colors">
+        <nav className="sticky top-0 z-50 flex w-full items-center justify-between bg-white/70 dark:bg-gray-900/70 backdrop-blur-lg border-b border-gray-100 dark:border-gray-800 px-8 py-4">
+            <Link href="/" className="text-2xl font-semibold text-gray-900 dark:text-white hover:text-purple-600 dark:hover:text-purple-400 transition-colors">
                 DubAI
             </Link>
-            <Link href="/chat" className="flex items-center gap-2 text-white hover:text-purple-300 transition-colors">
-                <MessageCircle className="h-5 w-5" />
-                <span> Chat </span>
-            </Link>
-            <button
-                onClick={handleProfileClick}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500 hover:bg-purple-600 transition-colors"
-                aria-label="Profile"
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="h-6 w-6 text-white"
+            <div className="flex items-center gap-4">
+                <Link
+                    href="/chat"
+                    className="flex items-center gap-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors px-4 py-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
                 >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-                    />
-                </svg>
-            </button>
+                    <MessageCircle className="h-5 w-5" />
+                    <span className="font-medium">Chat</span>
+                </Link>
+                <ThemeToggle />
+                <button
+                    onClick={handleProfileClick}
+                    className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-500 to-purple-600 hover:shadow-lg hover:scale-105 transition-all duration-200"
+                    aria-label="Profile"
+                >
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="h-5 w-5 text-white"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
+                        />
+                    </svg>
+                </button>
+            </div>
         </nav>
     );
 }
