@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useMemo } from 'react';
+import { MapPin, Trash2 } from 'lucide-react';
 import { ContentItem, UserProfile } from '../types';
-import { mockContent } from '../data/mockData';
+import { useEvents } from '../hooks/useEvents';
 
 interface ForYouFeedProps {
   user: UserProfile;
@@ -17,9 +18,13 @@ const typeColors: Record<string, { border: string; bg: string; text: string }> =
 };
 
 const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
+  const { events, deleteEvent, isLoaded } = useEvents();
+
   const recommendations = useMemo(() => {
+    if (!isLoaded) return [];
+
     // 1. Filter by Organization
-    const orgContent = mockContent.filter(
+    const orgContent = events.filter(
       (item) => item.organizationId === user.organizationId
     );
 
@@ -48,7 +53,7 @@ const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
     return scoredContent
       .sort((a, b) => b.score - a.score)
       .map((entry) => entry.item);
-  }, [user]);
+  }, [user, events, isLoaded]);
 
   return (
     <div className="space-y-8">
@@ -57,7 +62,7 @@ const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
       {/* Uniform Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         {recommendations.map((item) => (
-          <ContentCard key={item.id} item={item} />
+          <ContentCard key={item.id} item={item} onDelete={deleteEvent} />
         ))}
       </div>
 
@@ -72,8 +77,17 @@ const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
 
 const ContentCard: React.FC<{
   item: ContentItem;
-}> = ({ item }) => {
+  onDelete: (eventId: string) => boolean;
+}> = ({ item, onDelete }) => {
   const colors = typeColors[item.type] || typeColors.event;
+  const isCustomEvent = item.id.startsWith('custom-');
+
+  const handleDelete = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (confirm('Are you sure you want to delete this event?')) {
+      onDelete(item.id);
+    }
+  };
 
   return (
     <div
@@ -97,11 +111,22 @@ const ContentCard: React.FC<{
           <span className={`text-xs font-medium px-3 py-1.5 rounded-full ${colors.bg} dark:opacity-90 ${colors.text}`}>
             {item.type}
           </span>
-          {item.date && (
-            <span className="text-xs text-gray-400 dark:text-gray-500 font-medium" suppressHydrationWarning>
-              {new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-            </span>
-          )}
+          <div className="flex items-center gap-2">
+            {item.date && (
+              <span className="text-xs text-gray-400 dark:text-gray-500 font-medium" suppressHydrationWarning>
+                {new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+              </span>
+            )}
+            {isCustomEvent && (
+              <button
+                onClick={handleDelete}
+                className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-all"
+                aria-label="Delete event"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Content */}
@@ -109,9 +134,17 @@ const ContentCard: React.FC<{
           <h3 className="font-semibold mb-2 text-gray-900 dark:text-white text-lg">
             {item.title}
           </h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-4 text-sm line-clamp-2">
+          <p className="text-gray-500 dark:text-gray-400 mb-3 text-sm line-clamp-2">
             {item.description}
           </p>
+          {item.location && (
+            <div className="flex items-center gap-1.5 mb-4">
+              <MapPin className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+                {item.location}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Tags */}
