@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { sendChatMessage } from '@/lib/chatService';
-import { Menu, X } from 'lucide-react';
+import { Menu } from 'lucide-react';
 
 interface Message {
     id: string;
@@ -124,6 +124,15 @@ export default function ChatInterface() {
 
     return (
         <div className="flex h-full bg-white dark:bg-gray-900 relative">
+            {/* Fixed Hamburger Button - Mobile Only (always in same position) */}
+            <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="lg:hidden fixed top-[72px] left-4 z-60 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors bg-white dark:bg-gray-900 shadow-md"
+                aria-label="Toggle sidebar"
+            >
+                <Menu className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+            </button>
+
             {/* Mobile Overlay - solid background to completely hide content behind sidebar */}
             {isSidebarOpen && (
                 <div
@@ -151,19 +160,8 @@ export default function ChatInterface() {
                     bg-gray-50 dark:bg-gray-900
                 `}
             >
-                {/* Spacer to account for NavBar height on mobile */}
-                <div className="lg:hidden h-[60px] shrink-0"></div>
-
-                {/* Hamburger Button - Mobile Only (closes sidebar) */}
-                <div className="lg:hidden px-3 pt-3">
-                    <button
-                        onClick={() => setIsSidebarOpen(false)}
-                        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                        aria-label="Close sidebar"
-                    >
-                        <X className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-                    </button>
-                </div>
+                {/* Spacer to account for NavBar height + Hamburger button on mobile */}
+                <div className="lg:hidden h-[116px] shrink-0"></div>
 
                 {/* New Chat Button */}
                 <div className="px-3 py-3">
@@ -216,19 +214,6 @@ export default function ChatInterface() {
 
             {/* Main Chat Area */}
             <div className={`flex flex-1 flex-col min-w-0 ${isSidebarOpen ? 'hidden lg:flex' : ''}`}>
-                {/* Mobile Header with Menu Button Only - No border */}
-                {!isSidebarOpen && (
-                    <div className="lg:hidden flex items-center p-4 bg-white dark:bg-gray-900">
-                        <button
-                            onClick={() => setIsSidebarOpen(true)}
-                            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                            aria-label="Open sidebar"
-                        >
-                            <Menu className="w-6 h-6 text-gray-600 dark:text-gray-400" />
-                        </button>
-                    </div>
-                )}
-
                 {/* Messages Area */}
                 <div className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
                     <div className="mx-auto max-w-3xl space-y-4 sm:space-y-6">
