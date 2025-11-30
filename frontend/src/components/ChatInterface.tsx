@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { sendChatMessage } from '@/lib/chatService';
+import { Menu, X } from 'lucide-react';
 
 interface Message {
     id: string;
@@ -20,6 +21,7 @@ export default function ChatInterface() {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // TODO: Wire up setConversations for adding/managing chat history
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -58,12 +60,14 @@ export default function ChatInterface() {
         setMessages([]);
         setCurrentConversationId(null);
         setInput('');
+        setIsSidebarOpen(false);
     };
 
     const handleSelectConversation = (conversationId: string) => {
         setCurrentConversationId(conversationId);
         // In a real app, you'd load the messages for this conversation
         setMessages([]);
+        setIsSidebarOpen(false);
     };
 
     const handleSend = async () => {
@@ -119,72 +123,122 @@ export default function ChatInterface() {
     };
 
     return (
-        <div className="flex h-full bg-white dark:bg-gray-900">
-            {/* Sidebar */}
-            <div className="w-64 flex-shrink-0 border-r border-gray-200 bg-gray-50 dark:border-gray-700 dark:bg-gray-800 flex flex-col">
-                <div className="flex h-full flex-col">
-                    {/* New Chat Button */}
-                    <div className="p-3">
-                        <button
-                            onClick={handleNewChat}
-                            className="flex w-full items-center gap-4 rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-colors hover:bg-gray-100 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
-                        >
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth={1.5}
-                                stroke="currentColor"
-                                className="h-8 w-5"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M12 4.5v15m7.5-7.5h-15"
-                                />
-                            </svg>
-                            New Chat
-                        </button>
-                    </div>
+        <div className="flex h-full bg-white dark:bg-gray-900 relative">
+            {/* Mobile Overlay - solid background to completely hide content behind sidebar */}
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-white dark:bg-gray-900 z-40 lg:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
 
-                    {/* Conversations List */}
-                    <div className="flex-1 overflow-y-auto px-2">
-                        <div className="space-y-1">
-                            {conversations.map((conversation) => (
-                                <button
-                                    key={conversation.id}
-                                    onClick={() => handleSelectConversation(conversation.id)}
-                                    className={`w-full rounded-lg px-3 py-2 text-left text-sm transition-colors ${currentConversationId === conversation.id
-                                        ? 'bg-gray-200 dark:bg-gray-700'
-                                        : 'hover:bg-gray-100 dark:hover:bg-gray-700'
-                                        }`}
-                                >
-                                    <div className="truncate font-medium text-gray-900 dark:text-gray-100">
-                                        {conversation.title}
-                                    </div>
-                                    <div className="mt-1 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                                        <span className="truncate">{conversation.lastMessage}</span>
-                                        <span className="ml-2 flex-shrink-0">{formatDate(conversation.timestamp)}</span>
-                                    </div>
-                                </button>
-                            ))}
-                        </div>
+            {/* Sidebar - Desktop permanent, Mobile drawer */}
+            <div
+                className={`
+                    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+                    lg:translate-x-0
+                    fixed lg:relative
+                    top-0 left-0
+                    w-full sm:w-80 lg:w-72
+                    max-w-none
+                    h-full
+                    shrink-0
+                    border-r border-gray-200 dark:border-gray-700
+                    flex flex-col
+                    z-50
+                    transition-transform duration-300 ease-in-out
+                    shadow-2xl lg:shadow-none
+                    bg-gray-50 dark:bg-gray-900
+                `}
+            >
+                {/* Spacer to account for NavBar height on mobile */}
+                <div className="lg:hidden h-[60px] shrink-0"></div>
+
+                {/* Hamburger Button - Mobile Only (closes sidebar) */}
+                <div className="lg:hidden px-3 pt-3">
+                    <button
+                        onClick={() => setIsSidebarOpen(false)}
+                        className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        aria-label="Close sidebar"
+                    >
+                        <X className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+                    </button>
+                </div>
+
+                {/* New Chat Button */}
+                <div className="px-3 py-3">
+                    <button
+                        onClick={handleNewChat}
+                        className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-300 bg-white px-4 py-3 text-sm font-medium text-gray-700 transition-all hover:bg-gray-100 hover:shadow-md dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600"
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={1.5}
+                            stroke="currentColor"
+                            className="h-5 w-5"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M12 4.5v15m7.5-7.5h-15"
+                            />
+                        </svg>
+                        New Chat
+                    </button>
+                </div>
+
+                {/* Conversations List - Scrollable */}
+                <div className="flex-1 overflow-y-auto px-2">
+                    <div className="space-y-1">
+                        {conversations.map((conversation) => (
+                            <button
+                                key={conversation.id}
+                                onClick={() => handleSelectConversation(conversation.id)}
+                                className={`w-full rounded-lg px-3 py-2.5 text-left text-sm transition-all ${currentConversationId === conversation.id
+                                    ? 'bg-gray-200 dark:bg-gray-700 shadow-sm'
+                                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                                    }`}
+                            >
+                                <div className="truncate font-medium text-gray-900 dark:text-gray-100">
+                                    {conversation.title}
+                                </div>
+                                <div className="mt-1 flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                                    <span className="truncate">{conversation.lastMessage}</span>
+                                    <span className="ml-2 shrink-0">{formatDate(conversation.timestamp)}</span>
+                                </div>
+                            </button>
+                        ))}
                     </div>
                 </div>
             </div>
 
             {/* Main Chat Area */}
-            <div className="flex flex-1 flex-col">
+            <div className={`flex flex-1 flex-col min-w-0 ${isSidebarOpen ? 'hidden lg:flex' : ''}`}>
+                {/* Mobile Header with Menu Button Only - No border */}
+                {!isSidebarOpen && (
+                    <div className="lg:hidden flex items-center p-4 bg-white dark:bg-gray-900">
+                        <button
+                            onClick={() => setIsSidebarOpen(true)}
+                            className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                            aria-label="Open sidebar"
+                        >
+                            <Menu className="w-6 h-6 text-gray-600 dark:text-gray-400" />
+                        </button>
+                    </div>
+                )}
+
                 {/* Messages Area */}
-                <div className="flex-1 overflow-y-auto px-4 py-6">
-                    <div className="mx-auto max-w-3xl space-y-6">
+                <div className="flex-1 overflow-y-auto px-3 sm:px-4 md:px-6 py-4 sm:py-6">
+                    <div className="mx-auto max-w-3xl space-y-4 sm:space-y-6">
                         {messages.length === 0 && (
-                            <div className="flex h-full items-center justify-center">
+                            <div className="flex h-full items-center justify-center px-4">
                                 <div className="text-center">
-                                    <h2 className="text-2xl font-semibold text-gray-800 dark:text-gray-200">
+                                    <h2 className="text-2xl sm:text-3xl font-semibold text-gray-800 dark:text-gray-200">
                                         DubAI
                                     </h2>
-                                    <p className="mt-8 text-gray-600 dark:text-gray-400">
+                                    <p className="mt-4 sm:mt-8 text-sm sm:text-base text-gray-600 dark:text-gray-400">
                                         Ask me anything about UW events, activities, and campus life.
                                     </p>
                                 </div>
@@ -197,12 +251,12 @@ export default function ChatInterface() {
                                 className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                             >
                                 <div
-                                    className={`max-w-[80%] rounded-lg px-4 py-3 ${message.role === 'user'
-                                        ? 'bg-blue-600 text-white'
+                                    className={`max-w-[85%] sm:max-w-[80%] rounded-2xl px-4 py-3 shadow-sm ${message.role === 'user'
+                                        ? 'bg-linear-to-r from-purple-600 to-purple-700 text-white'
                                         : 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200'
                                         }`}
                                 >
-                                    <p className="whitespace-pre-wrap break-words">{message.content}</p>
+                                    <p className="whitespace-pre-wrap wrap-break-word text-sm sm:text-base">{message.content}</p>
                                 </div>
                             </div>
                         ))}
@@ -212,31 +266,29 @@ export default function ChatInterface() {
                 </div>
 
                 {/* Input Area */}
-                <div className="border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900">
-                    <div className="mx-auto max-w-3xl px-4 py-4">
-                        <div className="flex items-end gap-2 rounded-lg border border-gray-300 bg-white p-2 shadow-sm dark:border-gray-600 dark:bg-gray-800">
+                <div className="border-t border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900 safe-area-bottom">
+                    <div className="mx-auto max-w-3xl px-3 sm:px-4 md:px-6 py-3 sm:py-4">
+                        <div className="flex items-end gap-2 rounded-xl sm:rounded-2xl border border-gray-300 bg-white p-2 sm:p-3 shadow-sm dark:border-gray-600 dark:bg-gray-800 transition-shadow focus-within:shadow-md focus-within:border-purple-400 dark:focus-within:border-purple-500">
                             <textarea
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={handleKeyPress}
                                 placeholder="Message DubAI..."
                                 rows={1}
-                                className="max-h-32 flex-1 resize-none border-none bg-transparent px-2 py-2 text-gray-900 placeholder-gray-500 focus:outline-none dark:text-gray-100 dark:placeholder-gray-400"
+                                className="max-h-32 flex-1 resize-none border-none bg-transparent px-2 py-2 text-sm sm:text-base text-gray-900 placeholder-gray-500 focus:outline-none dark:text-gray-100 dark:placeholder-gray-400"
                             />
                             <button
                                onClick={handleSend}
-                               disabled={!input.trim() || isLoading} //Disable when loading
-                               className="rounded-lg bg-blue-600 p-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                               disabled={!input.trim() || isLoading}
+                               className="rounded-lg sm:rounded-xl bg-linear-to-r from-purple-600 to-purple-700 p-2.5 sm:p-3 text-white transition-all hover:shadow-lg hover:scale-105 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100"
                                aria-label="Send message"
                             >
                                 {isLoading ? (
-                                    //Spinner (When loading)
                                     <svg className="h-5 w-5 animate-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                         <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                                     </svg>
                                 ) : (
-                                    // Send icon (when not loading)
                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="h-5 w-5">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
                                     </svg>

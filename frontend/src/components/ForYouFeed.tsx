@@ -56,19 +56,19 @@ const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
   }, [user, events, isLoaded]);
 
   return (
-    <div className="space-y-8">
-      <h2 className="text-3xl font-semibold text-gray-900 dark:text-white tracking-tight">For You</h2>
+    <div className="space-y-6 sm:space-y-8">
+      <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white tracking-tight">For You</h2>
 
-      {/* Uniform Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* Responsive Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
         {recommendations.map((item) => (
           <ContentCard key={item.id} item={item} onDelete={deleteEvent} />
         ))}
       </div>
 
       {recommendations.length === 0 && (
-        <div className="text-center py-16">
-          <p className="text-gray-400 dark:text-gray-500 text-lg">No recommendations found. Try adding more interests!</p>
+        <div className="text-center py-12 sm:py-16">
+          <p className="text-gray-400 dark:text-gray-500 text-base sm:text-lg px-4">No recommendations found. Try adding more interests!</p>
         </div>
       )}
     </div>
@@ -92,7 +92,7 @@ const ContentCard: React.FC<{
   return (
     <div
       className={`
-        group relative bg-white dark:bg-gray-800 rounded-2xl p-6
+        group relative bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 md:p-6
         border-l-4 ${colors.border}
         shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]
         hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)]
@@ -107,11 +107,11 @@ const ContentCard: React.FC<{
 
       <div className="relative h-full flex flex-col">
         {/* Header */}
-        <div className="flex justify-between items-start mb-4">
-          <span className={`text-xs font-medium px-3 py-1.5 rounded-full ${colors.bg} dark:opacity-90 ${colors.text}`}>
+        <div className="flex justify-between items-start mb-3 sm:mb-4">
+          <span className={`text-xs font-medium px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full ${colors.bg} dark:opacity-90 ${colors.text}`}>
             {item.type}
           </span>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2">
             {item.date && (
               <span className="text-xs text-gray-400 dark:text-gray-500 font-medium" suppressHydrationWarning>
                 {new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
@@ -131,16 +131,16 @@ const ContentCard: React.FC<{
 
         {/* Content */}
         <div className="flex-1 flex flex-col">
-          <h3 className="font-semibold mb-2 text-gray-900 dark:text-white text-lg">
+          <h3 className="font-semibold mb-2 text-gray-900 dark:text-white text-base sm:text-lg">
             {item.title}
           </h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-3 text-sm line-clamp-2">
+          <p className="text-gray-500 dark:text-gray-400 mb-3 text-xs sm:text-sm line-clamp-2">
             {item.description}
           </p>
           {item.location && (
-            <div className="flex items-center gap-1.5 mb-4">
-              <MapPin className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500" />
-              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium">
+            <div className="flex items-center gap-1.5 mb-3 sm:mb-4">
+              <MapPin className="w-3.5 h-3.5 text-gray-400 dark:text-gray-500 shrink-0" />
+              <span className="text-xs text-gray-500 dark:text-gray-400 font-medium truncate">
                 {item.location}
               </span>
             </div>
@@ -148,7 +148,7 @@ const ContentCard: React.FC<{
         </div>
 
         {/* Tags */}
-        <div className="flex flex-wrap gap-2 mt-auto">
+        <div className="flex flex-wrap gap-1.5 sm:gap-2 mt-auto">
           {item.tags.slice(0, 3).map((tag) => (
             <span
               key={tag}

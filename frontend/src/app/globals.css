@@ -4,6 +4,9 @@
   --color-*: initial;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Custom breakpoint for extra small devices */
+  --breakpoint-xs: 480px;
 }
 
 :root {
@@ -48,6 +51,17 @@
   --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
 }
 
+/* Base Styles */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Prevent horizontal scroll */
+  overflow-x: hidden;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
@@ -57,11 +71,10 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   letter-spacing: -0.01em;
-}
-
-/* Smooth scroll behavior */
-html {
-  scroll-behavior: smooth;
+  /* Prevent horizontal scroll */
+  overflow-x: hidden;
+  /* Better text rendering on mobile */
+  text-rendering: optimizeLegibility;
 }
 
 /* Custom scrollbar */
@@ -83,10 +96,64 @@ html {
   background: var(--scrollbar-thumb-hover);
 }
 
-/* Smooth theme transitions - only for specific properties */
+/* Smooth theme transitions */
 body,
 [class*="bg-"],
 [class*="border-"],
 [class*="text-"] {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Safe area for mobile devices (notches, etc.) */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid rgb(147, 51, 234);
+  outline-offset: 2px;
+}
+
+/* Smooth font scaling */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 1025px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* Prevent layout shift on mobile keyboards */
+@media (max-width: 768px) {
+  body {
+    min-height: -webkit-fill-available;
+  }
+
+  html {
+    height: -webkit-fill-available;
+  }
+}
+
+/* Improve touch targets on mobile */
+@media (max-width: 768px) {
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+  }
 }
