@@ -9,6 +9,8 @@ interface ForYouFeedProps {
   user: UserProfile;
 }
 
+const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
+
 // Type to badge color mapping
 const typeColors: Record<string, { border: string; bg: string; text: string }> = {
   event: { border: 'border-l-purple-500', bg: 'bg-purple-50', text: 'text-purple-700' },
@@ -93,7 +95,7 @@ const ContentCard: React.FC<{
     <div
       className={`
         group relative bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 md:p-6
-        border-l-4 ${colors.border}
+        border-1 ${colors.border}
         shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]
         hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)]
         hover:scale-[1.02]
@@ -107,9 +109,9 @@ const ContentCard: React.FC<{
 
       <div className="relative h-full flex flex-col">
         {/* Header */}
-        <div className="flex justify-between items-start mb-3 sm:mb-4">
-          <span className={`text-xs font-medium px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full ${colors.bg} dark:opacity-90 ${colors.text}`}>
-            {item.type}
+        <div className="flex justify-between items-start mb-2 sm:mb-2">
+          <span className={`text-xs font-medium px-2.5 sm:px-3 py-1 sm:py-1.5 -ml-2.5 rounded-full ${colors.bg} dark:opacity-90 ${colors.text}`}>
+            {capitalize(item.type)}
           </span>
           <div className="flex items-center gap-1.5 sm:gap-2">
             {item.date && (
@@ -154,7 +156,7 @@ const ContentCard: React.FC<{
               key={tag}
               className="text-xs text-gray-400 dark:text-gray-500 font-medium"
             >
-              #{tag}
+              #{capitalize(tag)}
             </span>
           ))}
         </div>

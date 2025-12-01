@@ -49,7 +49,7 @@ export default function Home() {
           <div className="space-y-6 sm:space-y-8 md:space-y-10">
             {/* Profile Card with Campus Map Button */}
             <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-5 sm:p-6 md:p-8 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] border border-white/20 dark:border-gray-700/50">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4 sm:gap-6">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-6">
                 <div className="flex-1 min-w-0">
                   <h2 className="text-lg sm:text-xl font-semibold mb-3 text-gray-900 dark:text-white">Your Profile</h2>
                   <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-6 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
