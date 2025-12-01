@@ -96,12 +96,20 @@ body {
   background: var(--scrollbar-thumb-hover);
 }
 
-/* Smooth theme transitions */
+/* Smooth theme transitions - Slower, smoother dark mode change */
 body,
 [class*="bg-"],
 [class*="border-"],
 [class*="text-"] {
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  transition: background-color 0.5s ease, border-color 0.5s ease, color 0.5s ease, box-shadow 0.5s ease;
+}
+
+/* Disable transitions for all buttons and links - instant theme change */
+a,
+a *,
+button,
+button * {
+  transition: none !important;
 }
 
 /* Safe area for mobile devices (notches, etc.) */

@@ -12,11 +12,11 @@ interface ForYouFeedProps {
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
 // Type to badge color mapping
-const typeColors: Record<string, { border: string; bg: string; text: string }> = {
-  event: { border: 'border-l-purple-500', bg: 'bg-purple-50', text: 'text-purple-700' },
-  club: { border: 'border-l-blue-500', bg: 'bg-blue-50', text: 'text-blue-700' },
-  opportunity: { border: 'border-l-emerald-500', bg: 'bg-emerald-50', text: 'text-emerald-700' },
-  announcement: { border: 'border-l-amber-500', bg: 'bg-amber-50', text: 'text-amber-700' },
+const typeColors: Record<string, { bg: string; text: string }> = {
+  event: { bg: 'bg-purple-50', text: 'text-purple-700' },
+  club: { bg: 'bg-blue-50', text: 'text-blue-700' },
+  opportunity: { bg: 'bg-emerald-50', text: 'text-emerald-700' },
+  announcement: { bg: 'bg-amber-50', text: 'text-amber-700' },
 };
 
 const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
@@ -94,19 +94,14 @@ const ContentCard: React.FC<{
   return (
     <div
       className={`
-        group relative bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 md:p-6
-        border-1 ${colors.border}
+        relative bg-white dark:bg-gray-800 rounded-2xl p-4 sm:p-5 md:p-6
+        border border-gray-200 dark:border-gray-700
         shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)]
         hover:shadow-[0_8px_30px_rgba(0,0,0,0.08)] dark:hover:shadow-[0_8px_30px_rgba(0,0,0,0.5)]
-        hover:scale-[1.02]
-        transition-all duration-300 ease-out
         cursor-pointer overflow-hidden
         h-full
       `}
     >
-      {/* Subtle gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-50/30 dark:from-purple-900/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
       <div className="relative h-full flex flex-col">
         {/* Header */}
         <div className="flex justify-between items-start mb-2 sm:mb-2">

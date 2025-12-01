@@ -60,7 +60,7 @@ export default function Home() {
                 </div>
                 <Link
                   href="/experiments/map"
-                  className="flex items-center justify-center sm:justify-start gap-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 sm:px-5 py-2.5 rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200 shrink-0"
+                  className="flex items-center justify-center sm:justify-start gap-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 sm:px-5 py-2.5 rounded-xl hover:shadow-lg hover:scale-105 shrink-0"
                 >
                   <MapPin className="w-4 h-4" />
                   <span className="text-sm font-medium">Campus Map</span>
