@@ -169,10 +169,11 @@ export default function ChatInterface({ isSidebarOpen, setIsSidebarOpen }: ChatI
                     </Link>
                     <button
                         onClick={() => setIsSidebarOpen(false)}
-                        className="h-8 w-8 rounded-lg hover:bg-[#362955] transition-all flex items-center justify-center"
+                        className="rounded-lg hover:bg-[#362955] transition-all flex items-center justify-center"
+                        style={{ width: '32px', height: '32px', minWidth: '32px', minHeight: '32px' }}
                         aria-label="Close sidebar"
                     >
-                        <X className="w-5 h-5 text-[#8268bc]" strokeWidth={2} />
+                        <X style={{ width: '20px', height: '20px' }} className="text-[#8268bc]" strokeWidth={2} />
                     </button>
                 </div>
 
