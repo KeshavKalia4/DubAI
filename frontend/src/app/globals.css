@@ -1,5 +1,6 @@
 @import "tailwindcss";
 
+/* stylelint-disable-next-line at-rule-no-unknown */
 @theme {
   --color-*: initial;
   --font-sans: var(--font-geist-sans);
@@ -10,45 +11,54 @@
 }
 
 :root {
-  color-scheme: light;
-  /* Light mode colors */
-  --background: #ffffff;
-  --foreground: #171717;
-  --card-bg: rgba(255, 255, 255, 0.8);
-  --card-border: rgba(255, 255, 255, 0.2);
-  --nav-bg: rgba(255, 255, 255, 0.7);
-  --nav-border: #f3f4f6;
-  --gradient-from: #faf5ff;
-  --gradient-via: #ffffff;
-  --gradient-to: #eff6ff;
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
-  --text-tertiary: #9ca3af;
-  --border-color: #e5e7eb;
-  --hover-bg: #f9fafb;
-  --scrollbar-thumb: rgba(156, 163, 175, 0.3);
-  --scrollbar-thumb-hover: rgba(156, 163, 175, 0.5);
-}
-
-.dark {
   color-scheme: dark;
-  /* Dark mode colors */
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --card-bg: rgba(26, 26, 26, 0.8);
-  --card-border: rgba(255, 255, 255, 0.1);
-  --nav-bg: rgba(10, 10, 10, 0.7);
-  --nav-border: #1f2937;
-  --gradient-from: #1a0a2e;
-  --gradient-via: #0a0a0a;
-  --gradient-to: #0a1929;
-  --text-primary: #f9fafb;
-  --text-secondary: #d1d5db;
-  --text-tertiary: #9ca3af;
-  --border-color: #374151;
-  --hover-bg: #1f2937;
-  --scrollbar-thumb: rgba(255, 255, 255, 0.2);
-  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.3);
+  /* Dark Mode Background */
+  --background: #0f0a1a;
+  --foreground: #f5f5f5;
+
+  /* UW Brand Colors - Adjusted for Dark Mode */
+  --uw-purple: #6b4ea8;
+  --uw-purple-light: #8268bc;
+  --uw-purple-lighter: #9982d0;
+  --uw-purple-dark: #5d3a9b;
+  --uw-gold: #d4c79f;
+  --uw-gold-light: #e8ddc4;
+  --uw-gold-lighter: #f0e8d8;
+
+  /* Card & Surface Colors */
+  --card-bg: rgba(30, 20, 50, 0.95);
+  --card-bg-secondary: rgba(40, 25, 60, 0.9);
+  --card-border: rgba(107, 78, 168, 0.2);
+  --card-shadow: rgba(107, 78, 168, 0.15);
+
+  /* Navigation */
+  --nav-bg: rgba(20, 15, 35, 0.85);
+  --nav-border: rgba(107, 78, 168, 0.25);
+
+  /* Gradients */
+  --gradient-from: #1a0f2e;
+  --gradient-via: #0f0a1a;
+  --gradient-to: #1e1528;
+
+  /* Text Colors */
+  --text-primary: #f5f5f5;
+  --text-secondary: #d4d4d4;
+  --text-tertiary: #a3a3a3;
+  --text-accent: #8268bc;
+
+  /* Interactive Elements */
+  --border-color: #2d2d2d;
+  --hover-bg: rgba(107, 78, 168, 0.15);
+  --hover-border: rgba(107, 78, 168, 0.4);
+  --active-bg: rgba(107, 78, 168, 0.25);
+
+  /* Scrollbar */
+  --scrollbar-thumb: rgba(107, 78, 168, 0.3);
+  --scrollbar-thumb-hover: rgba(107, 78, 168, 0.5);
+
+  /* Accents */
+  --accent-purple-bg: rgba(107, 78, 168, 0.15);
+  --accent-gold-bg: rgba(212, 199, 159, 0.15);
 }
 
 /* Base Styles */
@@ -113,7 +123,7 @@ body,
 
 /* Focus styles for accessibility */
 *:focus-visible {
-  outline: 2px solid rgb(147, 51, 234);
+  outline: 2px solid #8268bc;
   outline-offset: 2px;
 }
 
@@ -156,4 +166,50 @@ body,
   textarea {
     min-height: 44px;
   }
+}
+
+/* Custom animations for chat interface */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
 }

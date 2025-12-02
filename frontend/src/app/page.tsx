@@ -14,9 +14,9 @@ export default function Home() {
   // Wait for localStorage to load before rendering content
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-950">
+      <div className="min-h-screen bg-[#0f0a1a]">
         <NavBar />
-        <div className="max-w-4xl mx-auto p-8 text-center text-gray-500 dark:text-gray-400">
+        <div className="max-w-4xl mx-auto p-8 text-center text-gray-400">
           Loading...
         </div>
       </div>
@@ -24,7 +24,7 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
+    <div className="min-h-screen bg-linear-to-br from-[#1a0f2e] via-[#0f0a1a] to-[#1e1528]">
       <NavBar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
         {/* Display reset button only if the profile exists */}
@@ -32,7 +32,7 @@ export default function Home() {
           <div className="flex justify-end mb-4 sm:mb-6">
             <button
               onClick={clearProfile}
-              className='text-xs sm:text-sm text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300 transition-colors px-3 py-1.5 rounded-lg hover:bg-gray-100/50 dark:hover:bg-gray-800/50'
+              className='text-xs sm:text-sm text-[#a3a3a3] hover:text-[#8268bc] transition-all px-4 py-2 rounded-lg hover:bg-[#362955] border border-transparent hover:border-[#8268bc]/30'
             >
               Reset Profile
             </button>
@@ -47,23 +47,38 @@ export default function Home() {
           />
         ) : (
           <div className="space-y-6 sm:space-y-8 md:space-y-10">
-            {/* Profile Card with Campus Map Button */}
-            <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-5 sm:p-6 md:p-8 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] border border-white/20 dark:border-gray-700/50">
-              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-6">
+            {/* Profile Card with Campus Map Button - UW Themed */}
+            <div className="bg-[#1e1432]/95 backdrop-blur-sm p-6 sm:p-7 md:p-8 rounded-2xl shadow-[0_4px_20px_rgba(107,78,168,0.2)] border border-[#362955] relative overflow-hidden">
+              {/* Decorative gradient background */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-linear-to-br from-[#8268bc]/10 to-transparent rounded-full blur-3xl"></div>
+
+              <div className="relative flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 sm:gap-6">
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-lg sm:text-xl font-semibold mb-3 text-gray-900 dark:text-white">Your Profile</h2>
-                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-6 text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                    <span className="truncate">Major: <strong className="text-gray-900 dark:text-gray-200 font-medium">{profile.major}</strong></span>
-                    <span className="truncate">Year: <strong className="text-gray-900 dark:text-gray-200 font-medium">{profile.year}</strong></span>
-                    <span className="truncate">Interests: <strong className="text-gray-900 dark:text-gray-200 font-medium">{profile.tags.map(tag => tag.charAt(0).toUpperCase() + tag.slice(1)).join(', ')}</strong></span>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="w-1 h-8 bg-linear-to-b from-[#8268bc] to-[#d4c79f] rounded-full"></div>
+                    <h2 className="text-xl sm:text-2xl font-bold text-[#f5f5f5]">Your Profile</h2>
+                  </div>
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-6 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[#a3a3a3]">Major:</span>
+                      <span className="font-semibold text-[#8268bc] bg-[#362955] px-3 py-1 rounded-lg">{profile.major}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[#a3a3a3]">Year:</span>
+                      <span className="font-semibold text-[#8268bc] bg-[#362955] px-3 py-1 rounded-lg">{profile.year}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[#a3a3a3]">Interests:</span>
+                      <span className="font-semibold text-[#d4c79f] bg-[#2a1f1a] px-3 py-1 rounded-lg">{profile.tags.map(tag => tag.charAt(0).toUpperCase() + tag.slice(1)).join(', ')}</span>
+                    </div>
                   </div>
                 </div>
                 <Link
                   href="/experiments/map"
-                  className="flex items-center justify-center sm:justify-start gap-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 sm:px-5 py-2.5 rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200 shrink-0"
+                  className="flex items-center justify-center sm:justify-start gap-2 bg-linear-to-r from-[#8268bc] to-[#9982d0] hover:from-[#9982d0] hover:to-[#a896e0] text-white px-5 py-3 rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200 shrink-0 font-semibold"
                 >
-                  <MapPin className="w-4 h-4" />
-                  <span className="text-sm font-medium">Campus Map</span>
+                  <MapPin className="w-5 h-5" />
+                  <span className="text-sm">Campus Map</span>
                 </Link>
               </div>
             </div>
