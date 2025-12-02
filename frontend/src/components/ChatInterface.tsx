@@ -171,7 +171,7 @@ export default function ChatInterface({ isSidebarOpen, setIsSidebarOpen }: ChatI
                 </div>
 
                 {/* New Chat Button - Enhanced UW Styled */}
-                <div className="px-3 py-3">
+                <div className="px-2 py-3">
                     <button
                         onClick={handleNewChat}
                         className="group/btn relative flex w-full items-center justify-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white transition-all hover:scale-[1.02] active:scale-95 overflow-hidden"
@@ -216,14 +216,14 @@ export default function ChatInterface({ isSidebarOpen, setIsSidebarOpen }: ChatI
 
                 {/* Conversations List - Scrollable */}
                 <div className="flex-1 overflow-y-auto px-2">
-                    <div className="space-y-1.5">
+                    <div className="space-y-2">
                         {conversations.map((conversation) => (
                             <button
                                 key={conversation.id}
                                 onClick={() => handleSelectConversation(conversation.id)}
-                                className={`w-full rounded-xl px-3 py-3 text-left text-sm transition-all ${currentConversationId === conversation.id
-                                    ? 'bg-linear-to-r from-[#362955] to-[#2a1f47] shadow-md border-l-4 border-[#8268bc]'
-                                    : 'hover:bg-[#2a1f47] border-l-4 border-transparent hover:border-[#8268bc]/40'
+                                className={`w-full rounded-xl px-4 py-3 text-left text-sm transition-all ${currentConversationId === conversation.id
+                                    ? 'bg-linear-to-br from-[#4B2E83]/60 to-[#5d3a9b]/40 shadow-lg shadow-[#8268bc]/20 border-2 border-[#8268bc]/50'
+                                    : 'hover:bg-[#2a1f47]/50 border-2 border-transparent hover:border-[#8268bc]/20'
                                     }`}
                             >
                                 <div className="truncate font-semibold text-[#f5f5f5]">
