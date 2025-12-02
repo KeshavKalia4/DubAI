@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { MessageCircle, Sparkles, Menu } from 'lucide-react';
+import { MessageCircle, Sparkles, Menu, MapPin } from 'lucide-react';
 
 interface NavBarProps {
     onMenuClick?: () => void;
@@ -14,59 +14,104 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
     };
 
     return (
-        <nav className="sticky top-0 z-50 w-full bg-[#1a0f2e]/85 backdrop-blur-xl border-b border-[#362955] px-4 sm:px-6 md:px-8 py-3 sm:py-4 shadow-sm">
-            <div className="flex items-center justify-between relative">
+        <nav
+            className="sticky top-0 z-50 w-full bg-[#1a0f2e]/85 backdrop-blur-xl shadow-sm"
+            style={{
+                paddingLeft: '24px',
+                paddingRight: '24px',
+                paddingTop: '16px',
+                paddingBottom: '16px',
+                height: '72px',
+                minHeight: '72px',
+                maxHeight: '72px',
+                borderBottom: '1px solid #362955',
+                boxSizing: 'border-box'
+            }}
+        >
+            <div className="flex items-center justify-between relative" style={{ gap: '24px', height: '40px' }}>
                 {/* Left Section - Hamburger on mobile, Logo on desktop */}
-                <div className="flex items-center lg:flex-1">
-                    {/* Mobile Hamburger Menu */}
+                <div className={`flex items-center ${showMenuButton ? 'lg:flex-1' : 'flex-1'}`} style={{ height: '40px' }}>
+                    {/* Mobile Hamburger Menu - Only on Chat page */}
                     {showMenuButton && (
                         <button
                             onClick={onMenuClick}
-                            className="lg:hidden h-10 w-10 rounded-xl hover:bg-[#362955] transition-all bg-transparent flex items-center justify-center"
+                            className="lg:hidden rounded-xl hover:bg-[#362955] transition-all bg-transparent flex items-center justify-center"
+                            style={{ width: '40px', height: '40px' }}
                             aria-label="Toggle sidebar"
                         >
-                            <Menu className="w-6 h-6 text-[#8268bc]" strokeWidth={2} />
+                            <Menu style={{ width: '24px', height: '24px' }} className="text-[#8268bc]" strokeWidth={2} />
                         </button>
                     )}
 
-                    {/* Desktop Logo (hidden on mobile) */}
-                    <Link href="/" className="hidden lg:flex items-center gap-2 group">
-                        <div className="flex items-center justify-center w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-linear-to-br from-[#8268bc] to-[#9982d0] shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-200">
-                            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-white" strokeWidth={2.5} />
+                    {/* Logo - For Chat page: hidden on mobile, For Home page: always visible on left */}
+                    {!showMenuButton && (
+                        <Link href="/" className="flex items-center group" style={{ gap: '8px' }}>
+                            <div className="flex items-center justify-center rounded-xl bg-linear-to-br from-[#8268bc] to-[#9982d0] shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-200" style={{ width: '36px', height: '36px' }}>
+                                <Sparkles style={{ width: '20px', height: '20px' }} className="text-white" strokeWidth={2.5} />
+                            </div>
+                            <span className="font-bold bg-linear-to-r from-[#8268bc] to-[#9982d0] bg-clip-text text-transparent" style={{ fontSize: '24px', lineHeight: '32px' }}>
+                                DubAI
+                            </span>
+                        </Link>
+                    )}
+
+                    {/* Logo - For Chat page: desktop only on left */}
+                    {showMenuButton && (
+                        <Link href="/" className="hidden lg:flex items-center group" style={{ gap: '8px' }}>
+                            <div className="flex items-center justify-center rounded-xl bg-linear-to-br from-[#8268bc] to-[#9982d0] shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-200" style={{ width: '36px', height: '36px' }}>
+                                <Sparkles style={{ width: '20px', height: '20px' }} className="text-white" strokeWidth={2.5} />
+                            </div>
+                            <span className="font-bold bg-linear-to-r from-[#8268bc] to-[#9982d0] bg-clip-text text-transparent" style={{ fontSize: '24px', lineHeight: '32px' }}>
+                                DubAI
+                            </span>
+                        </Link>
+                    )}
+                </div>
+
+                {/* Center Section - Logo on mobile only for Chat page */}
+                {showMenuButton && (
+                    <Link href="/" className="flex lg:hidden items-center group absolute left-1/2 -translate-x-1/2" style={{ gap: '8px' }}>
+                        <div className="flex items-center justify-center rounded-xl bg-linear-to-br from-[#8268bc] to-[#9982d0] shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-200" style={{ width: '36px', height: '36px' }}>
+                            <Sparkles style={{ width: '20px', height: '20px' }} className="text-white" strokeWidth={2.5} />
                         </div>
-                        <span className="text-xl sm:text-2xl font-bold bg-linear-to-r from-[#8268bc] to-[#9982d0] bg-clip-text text-transparent">
+                        <span className="font-bold bg-linear-to-r from-[#8268bc] to-[#9982d0] bg-clip-text text-transparent" style={{ fontSize: '24px', lineHeight: '32px' }}>
                             DubAI
                         </span>
                     </Link>
-                </div>
-
-                {/* Center Section - Logo on mobile only */}
-                <Link href="/" className="flex lg:hidden items-center gap-2 group absolute left-1/2 -translate-x-1/2">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-linear-to-br from-[#8268bc] to-[#9982d0] shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-200">
-                        <Sparkles className="w-4 h-4 text-white" strokeWidth={2.5} />
-                    </div>
-                    <span className="text-xl font-bold bg-linear-to-r from-[#8268bc] to-[#9982d0] bg-clip-text text-transparent">
-                        DubAI
-                    </span>
-                </Link>
+                )}
 
                 {/* Right Section - Navigation Items */}
-                <div className="flex items-center gap-2 sm:gap-3">
-                    {/* Chat Link - Hidden on mobile, visible on desktop */}
+                <div className="flex items-center" style={{ gap: '24px', height: '40px' }}>
+                    {/* Chat Link - For Chat page: hidden on mobile, For Home page: always visible */}
                     <Link
                         href="/chat"
-                        className="hidden lg:flex items-center gap-1.5 sm:gap-2 text-[#d4d4d4] hover:text-[#8268bc] transition-all px-2 sm:px-3 md:px-4 py-2 rounded-xl hover:bg-[#362955] border border-transparent hover:border-[#8268bc]/30"
+                        className={`flex items-center text-[#d4d4d4] hover:text-[#8268bc] transition-colors duration-200 ${
+                            showMenuButton ? 'hidden lg:flex' : ''
+                        }`}
+                        style={{ gap: '8px' }}
                     >
-                        <MessageCircle className="h-4 w-4 sm:h-5 sm:w-5" strokeWidth={2} />
-                        <span className="font-semibold text-sm sm:text-base">Chat</span>
+                        <MessageCircle style={{ width: '20px', height: '20px' }} strokeWidth={2} />
+                        <span className={`font-semibold ${showMenuButton ? '' : 'hidden md:inline'}`} style={{ fontSize: '16px', lineHeight: '24px' }}>Chat</span>
+                    </Link>
+
+                    {/* Campus Map Link - For Chat page: hidden on mobile, For Home page: always visible */}
+                    <Link
+                        href="/experiments/map"
+                        className={`flex items-center text-[#d4d4d4] hover:text-[#8268bc] transition-colors duration-200 ${
+                            showMenuButton ? 'hidden lg:flex' : ''
+                        }`}
+                        style={{ gap: '8px' }}
+                    >
+                        <MapPin style={{ width: '20px', height: '20px' }} strokeWidth={2} />
+                        <span className={`font-semibold ${showMenuButton ? '' : 'hidden md:inline'}`} style={{ fontSize: '16px', lineHeight: '24px' }}>Campus Map</span>
                     </Link>
 
                     {/* Profile Button */}
                     <button
                         onClick={handleProfileClick}
-                        className="relative flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-[#8268bc] to-[#9982d0] hover:from-[#9982d0] hover:to-[#a896e0] shadow-md hover:shadow-lg hover:scale-110 transition-all duration-300 ring-2 ring-[#362955] hover:ring-[#8268bc]/50"
+                        className="relative flex items-center justify-center rounded-full bg-linear-to-br from-[#8268bc] to-[#9982d0] hover:from-[#9982d0] hover:to-[#a896e0] shadow-md hover:shadow-lg hover:scale-110 transition-all duration-300 ring-2 ring-[#362955] hover:ring-[#8268bc]/50"
                         aria-label="Profile"
-                        style={{ aspectRatio: '1/1', minWidth: '2.5rem', minHeight: '2.5rem' }}
+                        style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px' }}
                     >
                         <svg
                             xmlns="http://www.w3.org/2000/svg"
@@ -74,7 +119,8 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
                             viewBox="0 0 24 24"
                             strokeWidth={2.5}
                             stroke="currentColor"
-                            className="h-5 w-5 text-white"
+                            className="text-white"
+                            style={{ width: '20px', height: '20px' }}
                         >
                             <path
                                 strokeLinecap="round"
