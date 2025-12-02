@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { sendChatMessage } from '@/lib/chatService';
-import { Sparkles, User, X } from 'lucide-react';
+import { Sparkles, User, X, MessageCircle, MapPin, MessageSquarePlus } from 'lucide-react';
 
 interface Message {
     id: string;
@@ -156,11 +157,16 @@ export default function ChatInterface({ isSidebarOpen, setIsSidebarOpen }: ChatI
                     backdrop-blur-md
                 `}
             >
-                {/* Close Button - Mobile Only */}
+                {/* Header - Mobile Only */}
                 <div className="lg:hidden flex items-center justify-between px-4 py-4 border-b border-[#362955]">
-                    <span className="text-lg font-bold bg-linear-to-r from-[#8268bc] to-[#9982d0] bg-clip-text text-transparent">
-                        Chat History
-                    </span>
+                    <Link href="/" className="flex items-center group" style={{ gap: '8px' }} onClick={() => setIsSidebarOpen(false)}>
+                        <div className="flex items-center justify-center rounded-xl bg-linear-to-br from-[#8268bc] to-[#9982d0] shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-200" style={{ width: '36px', height: '36px' }}>
+                            <Sparkles style={{ width: '20px', height: '20px' }} className="text-white" strokeWidth={2.5} />
+                        </div>
+                        <span className="font-bold bg-linear-to-r from-[#8268bc] to-[#9982d0] bg-clip-text text-transparent" style={{ fontSize: '24px', lineHeight: '32px' }}>
+                            DubAI
+                        </span>
+                    </Link>
                     <button
                         onClick={() => setIsSidebarOpen(false)}
                         className="h-8 w-8 rounded-lg hover:bg-[#362955] transition-all flex items-center justify-center"
@@ -170,48 +176,43 @@ export default function ChatInterface({ isSidebarOpen, setIsSidebarOpen }: ChatI
                     </button>
                 </div>
 
-                {/* New Chat Button - Enhanced UW Styled */}
-                <div className="px-2 py-3">
-                    <button
-                        onClick={handleNewChat}
-                        className="group/btn relative flex w-full items-center justify-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold text-white transition-all hover:scale-[1.02] active:scale-95 overflow-hidden"
-                    >
-                        {/* Animated gradient background */}
-                        <div className="absolute inset-0 bg-linear-to-r from-[#4B2E83] via-[#5d3a9b] to-[#6b4ea8] animate-gradient-shift"></div>
+                {/* Navigation Section - Mobile Only */}
+                <div className="lg:hidden px-4 py-4 border-b border-[#362955]">
+                    <div className="flex flex-col gap-3">
+                        <Link
+                            href="/"
+                            className="flex items-center gap-3 text-[#d4d4d4] hover:text-[#8268bc] transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-[#2a1f47]/50"
+                            onClick={() => setIsSidebarOpen(false)}
+                        >
+                            <Sparkles style={{ width: '20px', height: '20px' }} strokeWidth={2.5} />
+                            <span className="font-semibold" style={{ fontSize: '16px', lineHeight: '24px' }}>For You</span>
+                        </Link>
+                        <Link
+                            href="/experiments/map"
+                            className="flex items-center gap-3 text-[#d4d4d4] hover:text-[#8268bc] transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-[#2a1f47]/50"
+                            onClick={() => setIsSidebarOpen(false)}
+                        >
+                            <MapPin style={{ width: '20px', height: '20px' }} strokeWidth={2} />
+                            <span className="font-semibold" style={{ fontSize: '16px', lineHeight: '24px' }}>Campus Map</span>
+                        </Link>
+                        <button
+                            onClick={() => {
+                                handleNewChat();
+                                setIsSidebarOpen(false);
+                            }}
+                            className="flex items-center gap-3 text-[#d4d4d4] hover:text-[#8268bc] transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-[#2a1f47]/50"
+                        >
+                            <MessageSquarePlus style={{ width: '20px', height: '20px' }} strokeWidth={2} />
+                            <span className="font-semibold" style={{ fontSize: '16px', lineHeight: '24px' }}>New Chat</span>
+                        </button>
+                    </div>
+                </div>
 
-                        {/* Glow effect layer */}
-                        <div className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300">
-                            <div className="absolute inset-0 bg-linear-to-r from-[#6b4ea8] via-[#8268bc] to-[#9982d0] blur-xl"></div>
-                        </div>
-
-                        {/* Shimmer effect */}
-                        <div className="absolute inset-0 opacity-0 group-hover/btn:opacity-30 transition-opacity duration-500">
-                            <div className="absolute inset-0 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 bg-linear-to-r from-transparent via-white to-transparent skew-x-12"></div>
-                        </div>
-
-                        {/* Border gradient */}
-                        <div className="absolute inset-0 rounded-xl p-[2px] bg-linear-to-r from-[#5d3a9b] via-[#4B2E83] to-[#6b4ea8] opacity-50 group-hover/btn:opacity-100 transition-opacity"></div>
-                        <div className="absolute inset-[2px] rounded-[10px] bg-linear-to-r from-[#4B2E83] via-[#5d3a9b] to-[#6b4ea8] animate-gradient-shift"></div>
-
-                        {/* Content */}
-                        <div className="relative flex items-center gap-3 z-10">
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                strokeWidth={2.5}
-                                stroke="currentColor"
-                                className="h-5 w-5 group-hover/btn:rotate-90 transition-transform duration-300"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    d="M12 4.5v15m7.5-7.5h-15"
-                                />
-                            </svg>
-                            <span className="font-bold tracking-wide">New Chat</span>
-                        </div>
-                    </button>
+                {/* Conversations Title */}
+                <div className="px-4 py-3">
+                    <h2 className="text-lg font-bold bg-linear-to-r from-[#8268bc] to-[#9982d0] bg-clip-text text-transparent">
+                        Conversations
+                    </h2>
                 </div>
 
                 {/* Conversations List - Scrollable */}
@@ -290,7 +291,7 @@ export default function ChatInterface({ isSidebarOpen, setIsSidebarOpen }: ChatI
                                     style={{ animationDelay: `${index * 0.1}s` }}
                                 >
                                     {/* Avatar */}
-                                    <div className={`flex-shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-lg ${
+                                    <div className={`shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-lg ${
                                         message.role === 'user'
                                             ? 'bg-linear-to-br from-[#8268bc] to-[#9982d0] text-white'
                                             : 'bg-linear-to-br from-[#B7A57A] to-[#d4c79f] text-white'

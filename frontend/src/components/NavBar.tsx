@@ -68,18 +68,6 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
                     )}
                 </div>
 
-                {/* Center Section - Logo on mobile only for Chat page */}
-                {showMenuButton && (
-                    <Link href="/" className="flex lg:hidden items-center group absolute left-1/2 -translate-x-1/2" style={{ gap: '8px' }}>
-                        <div className="flex items-center justify-center rounded-xl bg-linear-to-br from-[#8268bc] to-[#9982d0] shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-200" style={{ width: '36px', height: '36px' }}>
-                            <Sparkles style={{ width: '20px', height: '20px' }} className="text-white" strokeWidth={2.5} />
-                        </div>
-                        <span className="font-bold bg-linear-to-r from-[#8268bc] to-[#9982d0] bg-clip-text text-transparent" style={{ fontSize: '24px', lineHeight: '32px' }}>
-                            DubAI
-                        </span>
-                    </Link>
-                )}
-
                 {/* Right Section - Navigation Items */}
                 <div className="flex items-center" style={{ gap: '24px', height: '40px' }}>
                     {/* Chat Link - For Chat page: hidden on mobile, For Home page: always visible */}
