@@ -115,10 +115,10 @@ const ContentCard: React.FC<{
     <div
       className={`
         group relative bg-[#1e1432]/95 rounded-2xl p-4 sm:p-5 md:p-6
-        border-l-4 ${colors.border}
-        border border-[#362955]
-        shadow-[0_2px_12px_rgba(107,78,168,0.15)]
-        hover:shadow-[0_8px_32px_rgba(107,78,168,0.25)]
+        border-2 border-[#8268bc]/30
+        shadow-[0_4px_20px_rgba(107,78,168,0.2)]
+        hover:shadow-[0_12px_40px_rgba(107,78,168,0.35)]
+        hover:border-[#8268bc]/50
         hover:scale-[1.02] hover:-translate-y-1
         transition-all duration-300 ease-out
         cursor-pointer overflow-hidden
