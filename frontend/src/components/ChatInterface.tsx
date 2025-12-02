@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { sendChatMessage } from '@/lib/chatService';
-import { Menu, Sparkles, User } from 'lucide-react';
+import { Sparkles, User, X } from 'lucide-react';
 
 interface Message {
     id: string;
@@ -17,11 +17,15 @@ interface Conversation {
     timestamp: Date;
 }
 
-export default function ChatInterface() {
+interface ChatInterfaceProps {
+    isSidebarOpen: boolean;
+    setIsSidebarOpen: (open: boolean) => void;
+}
+
+export default function ChatInterface({ isSidebarOpen, setIsSidebarOpen }: ChatInterfaceProps) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState('');
     const [isLoading, setIsLoading] = useState(false);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     // TODO: Wire up setConversations for adding/managing chat history
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -124,19 +128,10 @@ export default function ChatInterface() {
 
     return (
         <div className="flex h-full bg-linear-to-br from-[#1a0f2e] via-[#0f0a1a] to-[#1e1528] relative">
-            {/* Fixed Hamburger Button - Mobile Only (always in same position) */}
-            <button
-                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                className="lg:hidden fixed top-[72px] left-4 z-60 p-2.5 rounded-xl hover:bg-[#362955] transition-all bg-[#1e1432]/95 shadow-lg border border-[#362955] hover:border-[#8268bc]/40 backdrop-blur-sm"
-                aria-label="Toggle sidebar"
-            >
-                <Menu className="w-5 h-5 text-[#8268bc]" />
-            </button>
-
-            {/* Mobile Overlay - solid background to completely hide content behind sidebar */}
+            {/* Mobile Overlay - click to close sidebar */}
             {isSidebarOpen && (
                 <div
-                    className="fixed inset-0 bg-[#0f0a1a]/95 backdrop-blur-sm z-40 lg:hidden"
+                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden"
                     onClick={() => setIsSidebarOpen(false)}
                 />
             )}
@@ -148,8 +143,8 @@ export default function ChatInterface() {
                     lg:translate-x-0
                     fixed lg:relative
                     top-0 left-0
-                    w-full sm:w-80 lg:w-72
-                    max-w-none
+                    w-80 lg:w-72
+                    max-w-[85vw]
                     h-full
                     shrink-0
                     border-r border-[#362955]
@@ -161,8 +156,19 @@ export default function ChatInterface() {
                     backdrop-blur-md
                 `}
             >
-                {/* Spacer to account for NavBar height + Hamburger button on mobile */}
-                <div className="lg:hidden h-[116px] shrink-0"></div>
+                {/* Close Button - Mobile Only */}
+                <div className="lg:hidden flex items-center justify-between px-4 py-4 border-b border-[#362955]">
+                    <span className="text-lg font-bold bg-linear-to-r from-[#8268bc] to-[#9982d0] bg-clip-text text-transparent">
+                        Chat History
+                    </span>
+                    <button
+                        onClick={() => setIsSidebarOpen(false)}
+                        className="h-8 w-8 rounded-lg hover:bg-[#362955] transition-all flex items-center justify-center"
+                        aria-label="Close sidebar"
+                    >
+                        <X className="w-5 h-5 text-[#8268bc]" strokeWidth={2} />
+                    </button>
+                </div>
 
                 {/* New Chat Button - Enhanced UW Styled */}
                 <div className="px-3 py-3">
@@ -332,19 +338,20 @@ export default function ChatInterface() {
                 {/* Input Area - UW Themed */}
                 <div className="border-t border-[#362955] bg-[#1a0f2e]/90 backdrop-blur-md safe-area-bottom">
                     <div className="mx-auto max-w-3xl px-3 sm:px-4 md:px-6 py-3 sm:py-4">
-                        <div className="flex items-end gap-2 sm:gap-3 rounded-2xl border-2 border-[#362955] bg-[#1e1432] p-2.5 sm:p-3 shadow-lg transition-all focus-within:shadow-xl focus-within:border-[#8268bc] hover:border-[#8268bc]/50">
+                        <div className="flex items-end gap-2 sm:gap-3 rounded-2xl border-2 border-[#362955] bg-[#1e1432] p-2.5 sm:p-3 shadow-lg transition-all focus-within:shadow-xl hover:border-[#8268bc]/50">
                             <textarea
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
                                 onKeyDown={handleKeyPress}
                                 placeholder="Message DubAI..."
                                 rows={1}
-                                className="max-h-32 flex-1 resize-none border-none bg-transparent px-2 py-2 text-sm sm:text-base text-[#f5f5f5] placeholder-[#a3a3a3] focus:outline-none"
+                                className="max-h-32 flex-1 resize-none border-none bg-transparent px-2 py-2 text-sm sm:text-base text-[#f5f5f5] placeholder-[#a3a3a3] outline-none! focus:outline-none! focus-visible:outline-none!"
+                                style={{ outline: 'none !important', boxShadow: 'none !important' }}
                             />
                             <button
                                onClick={handleSend}
                                disabled={!input.trim() || isLoading}
-                               className="rounded-xl bg-linear-to-r from-[#8268bc] to-[#9982d0] hover:from-[#9982d0] hover:to-[#a896e0] p-2.5 sm:p-3 text-white transition-all hover:shadow-lg hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:from-[#737373] disabled:to-[#737373]"
+                               className="rounded-xl bg-linear-to-r from-[#8268bc] to-[#9982d0] hover:from-[#9982d0] hover:to-[#a896e0] p-3 text-white transition-all hover:shadow-lg hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:scale-100 disabled:from-[#737373] disabled:to-[#737373]"
                                aria-label="Send message"
                             >
                                 {isLoading ? (
