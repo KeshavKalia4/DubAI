@@ -213,3 +213,46 @@ body,
   background-size: 200% 200%;
   animation: gradient-shift 4s ease infinite;
 }
+
+/* Reels Animations */
+@keyframes reels-slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes reels-slide-down {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+.animate-reels-slide-up {
+  animation: reels-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-reels-slide-down {
+  animation: reels-slide-down 0.3s cubic-bezier(0.7, 0, 0.84, 0);
+}
+
+/* Reels Performance Optimizations */
+.reels-container {
+  transform: translateZ(0);
+  will-change: scroll-position;
+  contain: layout style paint;
+}
+
+.reel-card {
+  transform: translateZ(0);
+  contain: layout style paint;
+}

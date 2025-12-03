@@ -1,9 +1,11 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import { MapPin, Trash2, Calendar, Sparkles } from 'lucide-react';
 import { ContentItem, UserProfile } from '../types';
 import { useEvents } from '../hooks/useEvents';
+import { generateReelsOrder } from '@/utils/reelsRecommendations';
+import ReelsView from './ReelsView';
 
 interface ForYouFeedProps {
   user: UserProfile;
@@ -42,6 +44,17 @@ const typeColors: Record<string, { border: string; bg: string; text: string; acc
 const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
   const { events, deleteEvent, isLoaded } = useEvents();
 
+  // Reels state
+  const [reelsState, setReelsState] = useState<{
+    isOpen: boolean;
+    startingEventId: string | null;
+    sortedEvents: ContentItem[];
+  }>({
+    isOpen: false,
+    startingEventId: null,
+    sortedEvents: []
+  });
+
   const recommendations = useMemo(() => {
     if (!isLoaded) return [];
 
@@ -77,6 +90,24 @@ const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
       .map((entry) => entry.item);
   }, [user, events, isLoaded]);
 
+  // Reels handlers
+  const handleOpenReels = useCallback((eventId: string) => {
+    const sortedReels = generateReelsOrder(recommendations, eventId, user);
+    setReelsState({
+      isOpen: true,
+      startingEventId: eventId,
+      sortedEvents: sortedReels
+    });
+  }, [recommendations, user]);
+
+  const handleCloseReels = useCallback(() => {
+    setReelsState({
+      isOpen: false,
+      startingEventId: null,
+      sortedEvents: []
+    });
+  }, []);
+
   return (
     <div className="space-y-8 sm:space-y-10">
       {/* Hero Header Section */}
@@ -91,7 +122,13 @@ const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
       {recommendations.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
           {recommendations.map((item, index) => (
-            <ContentCard key={item.id} item={item} onDelete={deleteEvent} index={index} />
+            <ContentCard
+              key={item.id}
+              item={item}
+              onDelete={deleteEvent}
+              index={index}
+              onOpenReels={handleOpenReels}
+            />
           ))}
         </div>
       ) : (
@@ -106,6 +143,14 @@ const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
           </div>
         </div>
       )}
+
+      {/* Reels View */}
+      {reelsState.isOpen && (
+        <ReelsView
+          events={reelsState.sortedEvents}
+          onClose={handleCloseReels}
+        />
+      )}
     </div>
   );
 };
@@ -114,7 +159,8 @@ const ContentCard: React.FC<{
   item: ContentItem;
   onDelete: (eventId: string) => boolean;
   index: number;
-}> = ({ item, onDelete, index }) => {
+  onOpenReels: (eventId: string) => void;
+}> = ({ item, onDelete, index, onOpenReels }) => {
   const colors = typeColors[item.type] || typeColors.event;
   const isCustomEvent = item.id.startsWith('custom-');
 
@@ -127,6 +173,7 @@ const ContentCard: React.FC<{
 
   return (
     <div
+      onClick={() => onOpenReels(item.id)}
       className={`
         group relative bg-linear-to-br from-[#1e1432]/95 to-[#2a1f47]/80 rounded-2xl p-5 sm:p-6
         border-2 border-[#8268bc]/30
