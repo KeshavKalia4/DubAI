@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { MapPin } from 'lucide-react';
+import { MapPin, Settings } from 'lucide-react';
 import NavBar from '@/components/NavBar';
 import OnboardingInformation from '@/components/OnboardingInformation';
 import ForYouFeed from '@/components/ForYouFeed';
@@ -14,9 +14,9 @@ export default function Home() {
   // Wait for localStorage to load before rendering content
   if (!isLoaded) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-[#0f0a1a]">
         <NavBar />
-        <div className="max-w-4xl mx-auto p-8 text-center text-gray-500">
+        <div className="max-w-4xl mx-auto p-8 text-center text-gray-400">
           Loading...
         </div>
       </div>
@@ -24,54 +24,63 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-linear-to-br from-[#1a0f2e] via-[#0f0a1a] to-[#1e1528]">
       <NavBar />
-      <div className="max-w-4xl mx-auto p-8">
-        {/* Display reset button only if the profile exists */}
-        {profile && (
-          <div className="flex justify-end mb-4">
-            <button
-              onClick={clearProfile}
-              className='text-sm text-gray-500 hover:text-gray-700 underline'
-            >
-              Reset Profile
-            </button>
-          </div>
-        )}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
+          {/* Conditional: No profile -> onboarding, has profile -> feed */}
+          {!profile ? (
+            <OnboardingInformation
+              organizationId={defaultOrgId}
+              onComplete={(newProfile) => setProfile(newProfile)}
+            />
+          ) : (
+          <div className="space-y-6 sm:space-y-8 md:space-y-10">
+            {/* Profile Card with Campus Map Button - UW Themed */}
+            <div className="bg-linear-to-br from-[#1e1432]/95 to-[#2a1f47]/90 backdrop-blur-md p-6 sm:p-8 md:p-10 rounded-2xl shadow-[0_8px_32px_rgba(107,78,168,0.3)] border-2 border-[#8268bc]/30 relative overflow-hidden hover:border-[#8268bc]/50 transition-all duration-300">
+              <div className="relative">
+                {/* Header */}
+                <div className="mb-6 flex items-center justify-between">
+                  <h2 className="text-2xl sm:text-3xl font-bold bg-linear-to-r from-[#8268bc] to-[#9982d0] bg-clip-text text-transparent">
+                    Your Profile
+                  </h2>
+                  <button
+                    onClick={clearProfile}
+                    className="group flex items-center justify-center h-10 w-10 rounded-xl bg-[#2a1f47]/60 hover:bg-[#362955] border border-[#8268bc]/20 hover:border-[#8268bc]/40 transition-all duration-200"
+                    aria-label="Reset Profile"
+                  >
+                    <Settings className="w-5 h-5 text-[#8268bc] group-hover:rotate-90 transition-transform duration-300" />
+                  </button>
+                </div>
 
-        {/* Conditional: No profile -> onboarding, has profile -> feed */}
-        {!profile ? (
-          <OnboardingInformation
-            organizationId={defaultOrgId}
-            onComplete={(newProfile) => setProfile(newProfile)}
-          />
-        ) : (
-          <div className="space-y-8">
-            {/* Profile Card with Campus Map Button */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h2 className="text-lg font-semibold mb-2 text-gray-900">Your Profile</h2>
-                  <div className="flex gap-4 text-sm text-gray-600">
-                    <span>Major: <strong className="text-gray-900">{profile.major}</strong></span>
-                    <span>Year: <strong className="text-gray-900">{profile.year}</strong></span>
-                    <span>Interests: <strong className="text-gray-900">{profile.tags.map(tag => tag.charAt(0).toUpperCase() + tag.slice(1)).join(', ')}</strong></span>
+                {/* Content */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {/* Major Card */}
+                  <div className="bg-[#2a1f47]/60 backdrop-blur-sm border border-[#8268bc]/20 rounded-xl p-4 hover:border-[#8268bc]/40 transition-all duration-200">
+                    <div className="text-xs text-[#a3a3a3] uppercase tracking-wider mb-2 font-semibold">Major</div>
+                    <div className="text-base sm:text-lg font-bold text-[#8268bc]">{profile.major}</div>
+                  </div>
+
+                  {/* Year Card */}
+                  <div className="bg-[#2a1f47]/60 backdrop-blur-sm border border-[#8268bc]/20 rounded-xl p-4 hover:border-[#8268bc]/40 transition-all duration-200">
+                    <div className="text-xs text-[#a3a3a3] uppercase tracking-wider mb-2 font-semibold">Year</div>
+                    <div className="text-base sm:text-lg font-bold text-[#9982d0]">{profile.year}</div>
+                  </div>
+
+                  {/* Interests Card */}
+                  <div className="bg-[#2a1f47]/60 backdrop-blur-sm border border-[#d4c79f]/20 rounded-xl p-4 hover:border-[#d4c79f]/40 transition-all duration-200 sm:col-span-2 lg:col-span-1">
+                    <div className="text-xs text-[#a3a3a3] uppercase tracking-wider mb-2 font-semibold">Interests</div>
+                    <div className="text-sm sm:text-base font-bold text-[#d4c79f] truncate">{profile.tags.map(tag => tag.charAt(0).toUpperCase() + tag.slice(1)).join(', ')}</div>
                   </div>
                 </div>
-                <Link
-                  href="/experiments/map"
-                  className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700 transition-colors"
-                >
-                  <MapPin className="w-4 h-4" />
-                  <span className="text-sm font-medium">Campus Map</span>
-                </Link>
               </div>
             </div>
 
             {/* For You Feed */}
             <ForYouFeed user={profile} />
           </div>
-        )}
+          )}
+        </div>
       </div>
     </div>
   );

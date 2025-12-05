@@ -50,3 +50,27 @@ export interface Tag {
   label: string;
   category: 'topic' | 'identity' | 'career' | 'major';
 }
+
+export type RsvpStatus = 'going' | 'interested' | 'not_going' | null;
+
+export interface RSVP {
+  contentId: string;
+  userId: string;
+  status: RsvpStatus;
+  timestamp?: string;
+}
+
+// Toast Types
+export type ToastType = 'success' | 'error' | 'info';
+
+export interface ToastAction {
+  label: string;
+  onClick: () => void;  // ← Function with no params, no return
+}
+
+export interface Toast {
+  id: string;
+  message: string;
+  type: ToastType;
+  action?: ToastAction;  // ← Optional action button
+}

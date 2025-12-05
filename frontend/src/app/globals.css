@@ -1,26 +1,258 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+/* stylelint-disable-next-line at-rule-no-unknown */
+@theme {
+  --color-*: initial;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  /* Custom breakpoint for extra small devices */
+  --breakpoint-xs: 480px;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+:root {
+  color-scheme: dark;
+  /* Dark Mode Background */
+  --background: #0f0a1a;
+  --foreground: #f5f5f5;
+
+  /* UW Brand Colors - Adjusted for Dark Mode */
+  --uw-purple: #6b4ea8;
+  --uw-purple-light: #8268bc;
+  --uw-purple-lighter: #9982d0;
+  --uw-purple-dark: #5d3a9b;
+  --uw-gold: #d4c79f;
+  --uw-gold-light: #e8ddc4;
+  --uw-gold-lighter: #f0e8d8;
+
+  /* Card & Surface Colors */
+  --card-bg: rgba(30, 20, 50, 0.95);
+  --card-bg-secondary: rgba(40, 25, 60, 0.9);
+  --card-border: rgba(107, 78, 168, 0.2);
+  --card-shadow: rgba(107, 78, 168, 0.15);
+
+  /* Navigation */
+  --nav-bg: rgba(20, 15, 35, 0.85);
+  --nav-border: rgba(107, 78, 168, 0.25);
+
+  /* Gradients */
+  --gradient-from: #1a0f2e;
+  --gradient-via: #0f0a1a;
+  --gradient-to: #1e1528;
+
+  /* Text Colors */
+  --text-primary: #f5f5f5;
+  --text-secondary: #d4d4d4;
+  --text-tertiary: #a3a3a3;
+  --text-accent: #8268bc;
+
+  /* Interactive Elements */
+  --border-color: #2d2d2d;
+  --hover-bg: rgba(107, 78, 168, 0.15);
+  --hover-border: rgba(107, 78, 168, 0.4);
+  --active-bg: rgba(107, 78, 168, 0.25);
+
+  /* Scrollbar */
+  --scrollbar-thumb: rgba(107, 78, 168, 0.3);
+  --scrollbar-thumb-hover: rgba(107, 78, 168, 0.5);
+
+  /* Accents */
+  --accent-purple-bg: rgba(107, 78, 168, 0.15);
+  --accent-gold-bg: rgba(212, 199, 159, 0.15);
+}
+
+/* Base Styles */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Prevent horizontal scroll */
+  overflow-x: hidden;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
+  /* Prevent horizontal scroll */
+  overflow-x: hidden;
+  /* Better text rendering on mobile */
+  text-rendering: optimizeLegibility;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* Smooth theme transitions */
+body,
+[class*="bg-"],
+[class*="border-"],
+[class*="text-"] {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Safe area for mobile devices (notches, etc.) */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-area-bottom {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+  outline: 2px solid #8268bc;
+  outline-offset: 2px;
+}
+
+/* Smooth font scaling */
+@media (max-width: 640px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  html {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 1025px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+/* Prevent layout shift on mobile keyboards */
+@media (max-width: 768px) {
+  body {
+    min-height: -webkit-fill-available;
+  }
+
+  html {
+    height: -webkit-fill-available;
+  }
+}
+
+/* Improve touch targets on mobile */
+@media (max-width: 768px) {
+  button,
+  a,
+  input,
+  select,
+  textarea {
+    min-height: 44px;
+  }
+}
+
+/* Custom animations for chat interface */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 4s ease infinite;
+}
+
+/* Reels Animations */
+@keyframes reels-slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes reels-slide-down {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
+
+.animate-reels-slide-up {
+  animation: reels-slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.animate-reels-slide-down {
+  animation: reels-slide-down 0.3s cubic-bezier(0.7, 0, 0.84, 0);
+}
+
+/* Reels Performance Optimizations */
+.reels-container {
+  transform: translateZ(0);
+  will-change: scroll-position;
+  contain: layout style paint;
+}
+
+.reel-card {
+  transform: translateZ(0);
+  contain: layout style paint;
 }

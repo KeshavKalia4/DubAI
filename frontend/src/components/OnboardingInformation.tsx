@@ -49,18 +49,18 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
   };
 
   return (
-    <div className="max-w-md mx-auto bg-white p-8 rounded-xl shadow-lg border border-gray-200">
-      <div className="mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Welcome to {org.name}</h2>
-        <p className="text-gray-500">Let&apos;s personalize your experience.</p>
+    <div className="max-w-2xl mx-auto bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 sm:p-8 md:p-10 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] border border-white/20 dark:border-gray-700/50">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white tracking-tight mb-2">Welcome to {org.name}</h2>
+        <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg">Let&apos;s personalize your experience.</p>
       </div>
 
       {step === 1 && (
-        <div className="space-y-4">
+        <div className="space-y-5 sm:space-y-6">
           <label className="block">
-            <span className="text-gray-900 font-medium">What is your Major?</span>
+            <span className="text-gray-900 dark:text-gray-200 font-medium text-sm mb-2 block">What is your Major?</span>
             <select
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 border text-gray-900 bg-white"
+              className="block w-full rounded-xl border border-gray-200 dark:border-gray-600 shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] focus:border-purple-400 focus:ring-2 focus:ring-purple-100 dark:focus:ring-purple-900 focus:ring-opacity-50 p-3 text-sm sm:text-base text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 transition-all"
               value={major}
               onChange={(e) => setMajor(e.target.value)}
             >
@@ -73,9 +73,9 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
             </select>
           </label>
           <label className="block">
-            <span className="text-gray-900 font-medium">What year are you?</span>
+            <span className="text-gray-900 dark:text-gray-200 font-medium text-sm mb-2 block">What year are you?</span>
             <select
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 p-2 border text-gray-900 bg-white"
+              className="block w-full rounded-xl border border-gray-200 dark:border-gray-600 shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] focus:border-purple-400 focus:ring-2 focus:ring-purple-100 dark:focus:ring-purple-900 focus:ring-opacity-50 p-3 text-sm sm:text-base text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 transition-all"
               value={year}
               onChange={(e) => setYear(e.target.value)}
             >
@@ -91,17 +91,17 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
       )}
 
       {step === 2 && (
-        <div className="space-y-4">
-          <span className="text-gray-700 font-medium">What are you interested in?</span>
-          <div className="flex flex-wrap gap-2">
+        <div className="space-y-4 sm:space-y-5">
+          <span className="text-gray-900 dark:text-gray-200 font-medium text-sm block">What are you interested in?</span>
+          <div className="flex flex-wrap gap-2 sm:gap-2.5">
             {availableTags.map((tag) => (
               <button
                 key={tag.id}
                 onClick={() => toggleTag(tag.id)}
-                className={`px-3 py-1 rounded-full text-sm border transition-colors ${
+                className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium border-2 transition-all duration-200 ${
                   selectedTags.includes(tag.id)
-                    ? 'bg-indigo-600 text-white border-indigo-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
+                    ? 'bg-purple-600 text-white border-purple-600 shadow-md scale-105'
+                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/30'
                 }`}
               >
                 {tag.label}
@@ -111,11 +111,11 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
         </div>
       )}
 
-      <div className="mt-8 flex justify-end">
+      <div className="mt-8 sm:mt-10 flex justify-end">
         <button
           onClick={handleNext}
           disabled={step === 1 && (!major || !year)}
-          className="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200 font-medium text-sm sm:text-base"
         >
           {step === 2 ? 'Finish' : 'Next'}
         </button>

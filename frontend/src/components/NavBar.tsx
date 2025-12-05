@@ -1,42 +1,124 @@
 'use client';
 
 import Link from 'next/link';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, Sparkles, Menu, MapPin } from 'lucide-react';
 
-export default function NavBar() {
+interface NavBarProps {
+    onMenuClick?: () => void;
+    showMenuButton?: boolean;
+}
+
+export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarProps) {
     const handleProfileClick = () => {
         console.log('profile');
     };
 
     return (
-        <nav className="flex w-full items-center justify-between bg-[#1A1A2E] px-6 py-4">
-            <Link href="/" className="text-xl font-semibold text-white hover:text-purple-300 transition-colors">
-                DubAI
-            </Link>
-            <Link href="/chat" className="flex items-center gap-2 text-white hover:text-purple-300 transition-colors">
-                <MessageCircle className="h-5 w-5" />
-                <span> Chat </span>
-            </Link>
-            <button
-                onClick={handleProfileClick}
-                className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-500 hover:bg-purple-600 transition-colors"
-                aria-label="Profile"
-            >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="h-6 w-6 text-white"
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"
-                    />
-                </svg>
-            </button>
+        <nav
+            className="sticky top-0 z-50 w-full bg-[#1a0f2e]/85 backdrop-blur-xl shadow-sm"
+            style={{
+                paddingLeft: '24px',
+                paddingRight: '24px',
+                paddingTop: '16px',
+                paddingBottom: '16px',
+                height: '72px',
+                minHeight: '72px',
+                maxHeight: '72px',
+                borderBottom: '1px solid #362955',
+                boxSizing: 'border-box'
+            }}
+        >
+            <div className="flex items-center justify-between relative" style={{ gap: '24px', height: '40px' }}>
+                {/* Left Section - Hamburger on mobile, Logo on desktop */}
+                <div className={`flex items-center ${showMenuButton ? 'lg:flex-1' : 'flex-1'}`} style={{ height: '40px' }}>
+                    {/* Mobile Hamburger Menu - Only on Chat page */}
+                    {showMenuButton && (
+                        <button
+                            onClick={onMenuClick}
+                            className="lg:hidden rounded-xl hover:bg-[#362955] transition-all bg-transparent flex items-center justify-center"
+                            style={{ width: '40px', height: '40px' }}
+                            aria-label="Toggle sidebar"
+                        >
+                            <Menu style={{ width: '24px', height: '24px' }} className="text-[#8268bc]" strokeWidth={2} />
+                        </button>
+                    )}
+
+                    {/* Logo - For Chat page: hidden on mobile, For Home page: always visible on left */}
+                    {!showMenuButton && (
+                        <Link href="/" className="flex items-center group" style={{ gap: '8px' }}>
+                            <div className="flex items-center justify-center rounded-xl bg-linear-to-br from-[#8268bc] to-[#9982d0] shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-200" style={{ width: '36px', height: '36px' }}>
+                                <Sparkles style={{ width: '20px', height: '20px' }} className="text-white" strokeWidth={2.5} />
+                            </div>
+                            <span className="font-bold bg-linear-to-r from-[#8268bc] to-[#9982d0] bg-clip-text text-transparent" style={{ fontSize: '24px', lineHeight: '32px' }}>
+                                DubAI
+                            </span>
+                        </Link>
+                    )}
+
+                    {/* Logo - For Chat page: desktop only on left */}
+                    {showMenuButton && (
+                        <Link href="/" className="hidden lg:flex items-center group" style={{ gap: '8px' }}>
+                            <div className="flex items-center justify-center rounded-xl bg-linear-to-br from-[#8268bc] to-[#9982d0] shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-200" style={{ width: '36px', height: '36px' }}>
+                                <Sparkles style={{ width: '20px', height: '20px' }} className="text-white" strokeWidth={2.5} />
+                            </div>
+                            <span className="font-bold bg-linear-to-r from-[#8268bc] to-[#9982d0] bg-clip-text text-transparent" style={{ fontSize: '24px', lineHeight: '32px' }}>
+                                DubAI
+                            </span>
+                        </Link>
+                    )}
+                </div>
+
+                {/* Right Section - Navigation Items */}
+                <div className="flex items-center" style={{ gap: '24px', height: '40px' }}>
+                    {/* Chat Link - For Chat page: hidden on mobile, For Home page: always visible */}
+                    <Link
+                        href="/chat"
+                        className={`flex items-center text-[#d4d4d4] hover:text-[#8268bc] transition-colors duration-200 ${
+                            showMenuButton ? 'hidden lg:flex' : ''
+                        }`}
+                        style={{ gap: '8px' }}
+                    >
+                        <MessageCircle style={{ width: '20px', height: '20px' }} strokeWidth={2} />
+                        <span className={`font-semibold ${showMenuButton ? '' : 'hidden md:inline'}`} style={{ fontSize: '16px', lineHeight: '24px' }}>Chat</span>
+                    </Link>
+
+                    {/* Campus Map Link - For Chat page: hidden on mobile, For Home page: always visible */}
+                    <Link
+                        href="/experiments/map"
+                        className={`flex items-center text-[#d4d4d4] hover:text-[#8268bc] transition-colors duration-200 ${
+                            showMenuButton ? 'hidden lg:flex' : ''
+                        }`}
+                        style={{ gap: '8px' }}
+                    >
+                        <MapPin style={{ width: '20px', height: '20px' }} strokeWidth={2} />
+                        <span className={`font-semibold ${showMenuButton ? '' : 'hidden md:inline'}`} style={{ fontSize: '16px', lineHeight: '24px' }}>Campus Map</span>
+                    </Link>
+
+                    {/* Profile Button */}
+                    <button
+                        onClick={handleProfileClick}
+                        className="relative flex items-center justify-center rounded-full bg-linear-to-br from-[#8268bc] to-[#9982d0] hover:from-[#9982d0] hover:to-[#a896e0] shadow-md hover:shadow-lg hover:scale-110 transition-all duration-300 ring-2 ring-[#362955] hover:ring-[#8268bc]/50"
+                        aria-label="Profile"
+                        style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px' }}
+                    >
+                        <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={2.5}
+                            stroke="currentColor"
+                            className="text-white"
+                            style={{ width: '20px', height: '20px' }}
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                        </svg>
+                    </button>
+                </div>
+            </div>
         </nav>
     );
 }
