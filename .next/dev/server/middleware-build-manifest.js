@@ -1,0 +1,26 @@
+globalThis.__BUILD_MANIFEST = {
+  "pages": {
+    "/_app": []
+  },
+  "devFiles": [],
+  "polyfillFiles": [
+    "static/chunks/fe964_next_dist_build_polyfills_polyfill-nomodule.js"
+  ],
+  "lowPriorityFiles": [],
+  "rootMainFiles": [
+    "static/chunks/[turbopack]_browser_dev_hmr-client_hmr-client_ts_3ed48169._.js",
+    "static/chunks/fe964_next_dist_compiled_react-dom_5fe5daff._.js",
+    "static/chunks/fe964_next_dist_compiled_react-server-dom-turbopack_a98a1944._.js",
+    "static/chunks/fe964_next_dist_compiled_next-devtools_index_9fd01dc0.js",
+    "static/chunks/fe964_next_dist_compiled_c0a211e4._.js",
+    "static/chunks/fe964_next_dist_client_0a38a439._.js",
+    "static/chunks/fe964_next_dist_f8f13781._.js",
+    "static/chunks/fe964_@swc_helpers_cjs_5ea674be._.js",
+    "static/chunks/Kash codes_dubai_a0ff3932._.js",
+    "static/chunks/turbopack-Kash codes_dubai_2e797c78._.js"
+  ]
+};
+globalThis.__BUILD_MANIFEST.lowPriorityFiles = [
+"/static/" + process.env.__NEXT_BUILD_ID + "/_buildManifest.js",
+"/static/" + process.env.__NEXT_BUILD_ID + "/_ssgManifest.js"
+];
