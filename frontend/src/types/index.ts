@@ -74,3 +74,45 @@ export interface Toast {
   type: ToastType;
   action?: ToastAction;  // ← Optional action button
 }
+
+// Auth Types
+
+/**
+ * User roles in the system
+ * - user: Regular student browsing events
+ * - contributor: Can submit events (after approval)
+ * - admin: Can approve contributors (future)
+ */
+export type UserRole = 'user' | 'contributor' | 'admin';
+
+/**
+ * Authentication state
+ * Tracks whether user is logged in and basic identity
+ */
+export interface AuthState {
+  isAuth: boolean;
+  id: string | null;
+  email: string | null;
+  role: UserRole;
+}
+
+/**
+ * Contributor request status
+ */
+export type ContributorStatus = 'none' | 'pending' | 'approved' | 'rejected';
+
+/**
+ * A contributor's access request
+ * Stored until admin approves/rejects
+ */
+export interface ContributorRequest {
+  id: string;
+  email: string;
+  name: string;
+  reason: string;
+  status: ContributorStatus;
+  requestedAt: string;
+  reviewedAt?: string;
+  reviewedBy?: string;
+}
+
