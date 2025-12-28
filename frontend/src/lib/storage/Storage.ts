@@ -1,14 +1,7 @@
 /**
  * Storage Interface
- * 
- * Abstraction layer for data persistence. All storage implementations
- * must follow this contract.
- * 
- * 
- * @example
- * // Usage in hooks:
- * const user = await storage.get<UserProfile>('user');
- * await storage.set('user', updatedUser);
+ * Abstraction layer for data persistence.
+ * Swap implementations without changing consuming code.
  */
 export interface Storage {
   /**
@@ -22,18 +15,21 @@ export interface Storage {
    * Store data with a key
    * @param key - Unique identifier for the data
    * @param value - Data to store (will be serialized)
+   * @returns Resolves when storage is complete
    */
   set<T>(key: string, value: T): Promise<void>;
 
   /**
    * Remove a single item by key
    * @param key - Unique identifier of data to remove
+   * @returns Resolves when removal is complete
    */
   remove(key: string): Promise<void>;
 
   /**
-   * Clear ALL stored data - use with caution!
-   * Typically used for logout or resetting app state
+   * Clear all stored data
+   * @returns Resolves when clear is complete
+   * @throws May throw if storage is unavailable
    */
   clear(): Promise<void>;
 }
