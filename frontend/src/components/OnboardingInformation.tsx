@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { getOrganizationById } from '../config/organizations';
-import { availableTags } from '../data/mockData';
+import { availableTags } from '../data/tags';
 import { UserProfile } from '../types';
 
 interface OnboardingInformationProps {

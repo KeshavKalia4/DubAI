@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import { Users, MapPin, X, Navigation, Clock } from 'lucide-react';
@@ -257,11 +258,12 @@ export default function InteractiveMapInterface({ items }: InteractiveMapInterfa
           </button>
 
           {selectedItem.imageUrl && (
-            <div className="h-32 w-full overflow-hidden">
-              <img
+            <div className="h-32 w-full overflow-hidden relative">
+              <Image
                 src={selectedItem.imageUrl}
                 alt={selectedItem.title}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
               />
             </div>
           )}

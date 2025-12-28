@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { storage } from '@/lib/storage';
-import { AuthState, UserRole } from '@/types';
+import { AuthState } from '@/types';
 
 const AUTH_KEY = 'dubai-auth';
 
@@ -22,17 +22,15 @@ export function useAuth() {
   useEffect(() => {
     (async () => {
     const saved = await storage.get<AuthState>(AUTH_KEY);
-
     if (saved) {
         setAuthState(saved);
     }
-
     setIsLoaded(true);
     })();
   }, []);
 
   // Login function
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string) => {
     // Validate email ends with .edu
     const validEmail = email.endsWith(".edu");
 
@@ -53,8 +51,7 @@ export function useAuth() {
 
 
   // Signup function  
-  const signup = useCallback(async (name: string, email: string, password: string) => {
-    // YOUR CODE:
+  const signup = useCallback(async (name: string, email: string) => {
     const validEmail = email.endsWith(".edu");
 
     if (!validEmail) {
@@ -78,9 +75,13 @@ export function useAuth() {
     };
   }, []);
 
-  // Logout function
+  /**
+   * Logout the current user
+   * @returns void
+   * @behavior Clears all storage and resets auth state
+   */
   const logout = useCallback(async () => {
-    storage.clear();
+    await storage.clear();
     setAuthState(DEFAULT_AUTH);
   }, []);
 

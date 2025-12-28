@@ -1,4 +1,4 @@
-import { ContentItem, UserProfile } from '@/types';
+import { ContentItem } from '@/types';
 
 /**
  * Generate sorted reels order starting with clicked event
@@ -6,8 +6,7 @@ import { ContentItem, UserProfile } from '@/types';
  */
 export function generateReelsOrder(
   allEvents: ContentItem[],
-  clickedEventId: string,
-  user: UserProfile
+  clickedEventId: string
 ): ContentItem[] {
   const clickedEvent = allEvents.find(e => e.id === clickedEventId);
   if (!clickedEvent) return allEvents;

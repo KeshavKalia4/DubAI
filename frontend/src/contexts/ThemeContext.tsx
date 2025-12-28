@@ -13,28 +13,19 @@ interface ThemeContextType {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('light');
-  const [mounted, setMounted] = useState(false);
+  const [theme, setThemeState] = useState<Theme>(() => {
+    // SSR-safe initial value
+    if (typeof window === 'undefined') return 'light';
 
-  // Initialize theme from localStorage or system preference
-  useEffect(() => {
     const storedTheme = localStorage.getItem('theme') as Theme | null;
+    if (storedTheme === 'light' || storedTheme === 'dark') return storedTheme;
 
-    if (storedTheme) {
-      setThemeState(storedTheme);
-    } else {
-      // Detect system preference
-      const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      setThemeState(systemPrefersDark ? 'dark' : 'light');
-    }
+    const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return systemPrefersDark ? 'dark' : 'light';
+  });
 
-    setMounted(true);
-  }, []);
-
-  // Apply theme to document and localStorage
+  // Apply theme to document and persist
   useEffect(() => {
-    if (!mounted) return;
-
     const root = document.documentElement;
 
     // Remove both classes first
@@ -44,7 +35,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     // Persist to localStorage
     localStorage.setItem('theme', theme);
-  }, [theme, mounted]);
+  }, [theme]);
 
   // Listen for system preference changes
   useEffect(() => {
@@ -69,11 +60,6 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const setTheme = (newTheme: Theme) => {
     setThemeState(newTheme);
   };
-
-  // Prevent flash of unstyled content
-  if (!mounted) {
-    return <>{children}</>;
-  }
 
   return (
     <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>

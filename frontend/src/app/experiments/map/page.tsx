@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 import NavBar from '@/components/NavBar';
-import { mockContent } from '@/data/mockData';
+import { uwEvents } from '@/data/uwEvents';
 
 // Dynamically import the map component to avoid SSR issues with Leaflet
 const InteractiveMapInterface = dynamic(
@@ -22,7 +22,7 @@ const InteractiveMapInterface = dynamic(
 
 export default function MapExperimentPage() {
   // Filter to UW Seattle items that have coordinates
-  const mapItems = mockContent.filter(
+  const mapItems = uwEvents.filter(
     item => item.organizationId === 'uw-seattle' && item.coordinates
   );
 

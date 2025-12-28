@@ -30,7 +30,7 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
           text: event.description,
           url: window.location.href,
         });
-      } catch (err) {
+      } catch {
         console.log('Share cancelled');
       }
     } else {

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { sendChatMessage } from '@/lib/chatService';
-import { Sparkles, User, X, MessageCircle, MapPin, MessageSquarePlus } from 'lucide-react';
+import { Sparkles, User, X, MapPin, MessageSquarePlus } from 'lucide-react';
 
 interface Message {
     id: string;

@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { ContentItem } from '@/types';
-import { mockContent } from '@/data/mockData';
+import { uwEvents } from '@/data/uwEvents';
 
 export async function GET() {
-    const contentItems: ContentItem[] = mockContent;
+    const contentItems: ContentItem[] = uwEvents;
     return NextResponse.json(contentItems);
 }

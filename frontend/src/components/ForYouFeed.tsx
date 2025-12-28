@@ -92,13 +92,13 @@ const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
 
   // Reels handlers
   const handleOpenReels = useCallback((eventId: string) => {
-    const sortedReels = generateReelsOrder(recommendations, eventId, user);
+    const sortedReels = generateReelsOrder(recommendations, eventId);
     setReelsState({
       isOpen: true,
       startingEventId: eventId,
       sortedEvents: sortedReels
     });
-  }, [recommendations, user]);
+  }, [recommendations]);
 
   const handleCloseReels = useCallback(() => {
     setReelsState({

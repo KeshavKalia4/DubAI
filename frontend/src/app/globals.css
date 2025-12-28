@@ -157,10 +157,18 @@ body,
   }
 }
 
-/* Improve touch targets on mobile */
+/* Touch target utilities - opt-in for accessibility */
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
 @media (max-width: 768px) {
-  button,
-  a,
+  .touch-target-mobile {
+    min-height: 44px;
+  }
+
+  /* Only apply to form inputs, not all buttons */
   input,
   select,
   textarea {

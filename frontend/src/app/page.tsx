@@ -1,7 +1,6 @@
 'use client';
 
-import Link from 'next/link';
-import { MapPin, Settings } from 'lucide-react';
+import { Settings } from 'lucide-react';
 import NavBar from '@/components/NavBar';
 import OnboardingInformation from '@/components/OnboardingInformation';
 import ForYouFeed from '@/components/ForYouFeed';
