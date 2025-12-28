@@ -1,27 +1,107 @@
 'use client';
 
-import React from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useAnimationFrame } from 'framer-motion';
 import { Users, MapPin } from 'lucide-react';
 import { ContentItem } from '@/types';
-import { TraversalPath, depthConfig } from './traversalPaths';
+import { BouncingCardConfig, depthConfig } from './traversalPaths';
 import { cn } from '@/lib/utils';
 
 interface TraversingCardProps {
   event: ContentItem;
-  path: TraversalPath;
+  config: BouncingCardConfig;
   reducedMotion?: boolean;
 }
 
 export function TraversingCard({
   event,
-  path,
+  config,
   reducedMotion = false,
 }: TraversingCardProps) {
-  const depth = depthConfig[path.depth];
+  const depth = depthConfig[config.depth];
   const baseWidth = 160;
   const baseHeight = 110;
+  const cardWidth = baseWidth * depth.scale;
+  const cardHeight = baseHeight * depth.scale;
+
+  // Track viewport size for boundary calculations
+  const [viewport, setViewport] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    const updateViewport = () => {
+      setViewport({ width: window.innerWidth, height: window.innerHeight });
+    };
+    updateViewport();
+    window.addEventListener('resize', updateViewport);
+    return () => window.removeEventListener('resize', updateViewport);
+  }, []);
+
+  // Motion values for position (in pixels)
+  const x = useMotionValue((config.initialX / 100) * viewport.width);
+  const y = useMotionValue((config.initialY / 100) * viewport.height);
+
+  // Velocity ref (mutable, doesn't trigger re-renders)
+  // Velocity is in percentage points per second, converted to pixels
+  const velocityRef = useRef({
+    vx: config.velocityX,
+    vy: config.velocityY,
+  });
+
+  // Padding from edges (in pixels)
+  const padding = 20;
+
+  // Physics-based animation loop
+  useAnimationFrame((_, delta) => {
+    if (reducedMotion || viewport.width === 0) return;
+
+    const vx = velocityRef.current.vx;
+    const vy = velocityRef.current.vy;
+
+    // Convert percentage velocity to pixel velocity
+    const pxVelocityX = (vx / 100) * viewport.width;
+    const pxVelocityY = (vy / 100) * viewport.height;
+
+    // Calculate new position (delta is in ms, normalize to seconds)
+    const deltaSeconds = delta / 1000;
+    let newX = x.get() + pxVelocityX * deltaSeconds;
+    let newY = y.get() + pxVelocityY * deltaSeconds;
+
+    // Calculate bounds
+    const minX = padding;
+    const maxX = viewport.width - cardWidth - padding;
+    const minY = padding;
+    const maxY = viewport.height - cardHeight - padding;
+
+    // Bounce off left/right edges
+    if (newX <= minX) {
+      velocityRef.current.vx = Math.abs(vx);
+      newX = minX;
+    } else if (newX >= maxX) {
+      velocityRef.current.vx = -Math.abs(vx);
+      newX = maxX;
+    }
+
+    // Bounce off top/bottom edges
+    if (newY <= minY) {
+      velocityRef.current.vy = Math.abs(vy);
+      newY = minY;
+    } else if (newY >= maxY) {
+      velocityRef.current.vy = -Math.abs(vy);
+      newY = maxY;
+    }
+
+    x.set(newX);
+    y.set(newY);
+  });
+
+  // Update position when viewport changes
+  useEffect(() => {
+    if (viewport.width > 0) {
+      x.set((config.initialX / 100) * viewport.width);
+      y.set((config.initialY / 100) * viewport.height);
+    }
+  }, [viewport.width, viewport.height, config.initialX, config.initialY, x, y]);
 
   // Static position for reduced motion
   if (reducedMotion) {
@@ -35,19 +115,23 @@ export function TraversingCard({
           'shadow-xl shadow-purple-900/20'
         )}
         style={{
-          width: baseWidth * depth.scale,
-          height: baseHeight * depth.scale,
+          width: cardWidth,
+          height: cardHeight,
           opacity: depth.opacity,
           zIndex: depth.zIndex,
-          left: '50%',
-          top: '50%',
-          transform: 'translate(-50%, -50%)',
+          left: `${config.initialX}%`,
+          top: `${config.initialY}%`,
         }}
         aria-hidden="true"
       >
         <CardContent event={event} />
       </div>
     );
+  }
+
+  // Don't render until viewport is measured
+  if (viewport.width === 0) {
+    return null;
   }
 
   return (
@@ -60,47 +144,13 @@ export function TraversingCard({
         'shadow-xl shadow-purple-900/20'
       )}
       style={{
-        width: baseWidth * depth.scale,
-        height: baseHeight * depth.scale,
-        zIndex: depth.zIndex,
-        willChange: 'transform',
-      }}
-      initial={{
-        x: path.x[0],
-        y: path.y[0],
-        opacity: 0,
-        rotate: 0,
-      }}
-      animate={{
-        x: path.x,
-        y: path.y,
+        width: cardWidth,
+        height: cardHeight,
         opacity: depth.opacity,
-        rotate: [0, 3, -2, 4, -3, 2, 0],
-      }}
-      transition={{
-        x: {
-          duration: path.duration,
-          repeat: Infinity,
-          ease: path.ease,
-          delay: path.delay,
-        },
-        y: {
-          duration: path.duration,
-          repeat: Infinity,
-          ease: path.ease,
-          delay: path.delay,
-        },
-        opacity: {
-          duration: 2,
-          delay: path.delay,
-        },
-        rotate: {
-          duration: path.duration * 0.7,
-          repeat: Infinity,
-          repeatType: 'reverse',
-          ease: 'easeInOut',
-          delay: path.delay,
-        },
+        zIndex: depth.zIndex,
+        left: x,
+        top: y,
+        willChange: 'left, top',
       }}
       aria-hidden="true"
     >

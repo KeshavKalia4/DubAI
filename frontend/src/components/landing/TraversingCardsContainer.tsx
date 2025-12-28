@@ -3,11 +3,11 @@
 import React, { useState, useEffect } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import { TraversingCard } from './TraversingCard';
-import { traversalPaths, mobileTraversalPaths } from './traversalPaths';
+import { bouncingCardConfigs, mobileBouncingCardConfigs } from './traversalPaths';
 import { ContentItem } from '@/types';
 
 interface CardAssignment {
-  path: (typeof traversalPaths)[number];
+  config: (typeof bouncingCardConfigs)[number];
   event: ContentItem;
 }
 
@@ -35,12 +35,12 @@ export function TraversingCardsContainer({ events }: TraversingCardsContainerPro
   useEffect(() => {
     if (!mounted) return;
 
-    const activePaths = isMobile ? mobileTraversalPaths : traversalPaths;
+    const activeConfigs = isMobile ? mobileBouncingCardConfigs : bouncingCardConfigs;
     const eventsWithImages = events.filter((e) => e.imageUrl);
     const shuffled = [...eventsWithImages].sort(() => Math.random() - 0.5);
 
-    const assignments = activePaths.map((path, index) => ({
-      path,
+    const assignments = activeConfigs.map((config, index) => ({
+      config,
       event: shuffled[index % shuffled.length],
     }));
 
@@ -60,11 +60,11 @@ export function TraversingCardsContainer({ events }: TraversingCardsContainerPro
       aria-hidden="true"
       style={{ zIndex: 1 }}
     >
-      {cardAssignments.map(({ path, event }) => (
+      {cardAssignments.map(({ config, event }) => (
         <TraversingCard
-          key={path.id}
+          key={config.id}
           event={event}
-          path={path}
+          config={config}
           reducedMotion={prefersReducedMotion ?? false}
         />
       ))}
