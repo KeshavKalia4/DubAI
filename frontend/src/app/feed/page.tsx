@@ -38,16 +38,19 @@ export default function FeedPage() {
       <NavBar />
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
-          {/* Conditional: No profile -> onboarding, has profile -> feed */}
-          {!profile ? (
+          {/* Conditional: No profile or incomplete profile -> onboarding, complete profile -> feed */}
+          {!profile || !profile.tags || profile.tags.length === 0 ? (
             <OnboardingInformation
               organizationId={defaultOrgId}
+              initialName={profile?.name}
+              initialEmail={profile?.email}
               onComplete={(newProfile) => {
-                // Merge auth data with profile
+                // Merge existing partial profile with new data
                 const completeProfile = {
+                  ...profile, // Include any existing partial data
                   ...newProfile,
-                  id: auth.id || newProfile.id,
-                  email: auth.email || newProfile.email,
+                  id: auth.id || profile?.id || newProfile.id,
+                  email: auth.email || profile?.email || newProfile.email,
                 };
                 setProfile(completeProfile);
               }}

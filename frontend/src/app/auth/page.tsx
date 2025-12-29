@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, Suspense } from 'react';
+import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Mail, User, ArrowLeft } from 'lucide-react';
@@ -32,13 +32,6 @@ function AuthForm() {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // For contributor mode, redirect to contributor page
-  useEffect(() => {
-    if (mode === 'contributor') {
-      router.push('/contributor');
-    }
-  }, [mode, router]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
@@ -63,8 +56,12 @@ function AuthForm() {
         await signup(name.trim(), email);
       }
 
-      // Redirect to feed (which will show onboarding if needed)
-      router.push('/feed');
+      // Redirect based on mode: contributor goes to /contributor, user goes to /feed
+      if (mode === 'contributor') {
+        router.push('/contributor');
+      } else {
+        router.push('/feed');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong');
     } finally {

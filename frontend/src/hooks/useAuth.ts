@@ -2,10 +2,11 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { storage } from '@/lib/storage';
-import { AuthState } from '@/types';
+import { AuthState, UserProfile } from '@/types';
 import { isValidEduEmail } from '@/lib/emailUtils';
 
 const AUTH_KEY = 'dubai-auth';
+const PROFILE_KEY = 'dubai-user-profile';
 
 // Default state when not logged in
 const DEFAULT_AUTH: AuthState = {
@@ -37,15 +38,14 @@ export function useAuth() {
         throw new Error('Must be an .edu email')
     }
 
-    const newAuth: AuthState = {
-        isAuth: true,
-        id: crypto.randomUUID(),
-        email: email,
-        role: 'user',
-    };
+    // Check if account exists
+    const existingAuth = await storage.get<AuthState>(AUTH_KEY);
+    if (!existingAuth || existingAuth.email !== email) {
+        throw new Error('Account not found. Please sign up first.');
+    }
 
-    await storage.set(AUTH_KEY, newAuth);
-    setAuthState(newAuth);
+    // Set auth state from existing account
+    setAuthState(existingAuth);
   }, []);
 
 
@@ -55,15 +55,35 @@ export function useAuth() {
         throw new Error('Must be an .edu email')
     }
 
+    // Check if account already exists
+    const existingAuth = await storage.get<AuthState>(AUTH_KEY);
+    if (existingAuth && existingAuth.email === email) {
+        throw new Error('Account already exists. Please sign in instead.');
+    }
+
     const newAuth: AuthState = {
         isAuth: true,
         id: crypto.randomUUID(),
         email: email,
         role: 'user',
-    }; 
+    };
 
+    // Store auth state
     await storage.set(AUTH_KEY, newAuth);
     setAuthState(newAuth);
+
+    // Create initial profile with name and email
+    const organizationId = email.endsWith('@uw.edu') ? 'uw-seattle' : 'uw-seattle';
+    const initialProfile: Partial<UserProfile> = {
+        id: newAuth.id!,
+        name: name,
+        email: email,
+        organizationId: organizationId,
+        tags: [],
+    };
+
+    // Store initial profile
+    await storage.set(PROFILE_KEY, initialProfile);
 
     return {
         userId: newAuth.id,

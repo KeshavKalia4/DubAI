@@ -14,6 +14,8 @@ import { Mail, User } from 'lucide-react';
 interface OnboardingInformationProps {
   organizationId: string;
   onComplete: (profile: UserProfile) => void;
+  initialName?: string;
+  initialEmail?: string;
 }
 
 /**
@@ -38,12 +40,15 @@ const StepProgress = ({ currentStep, totalSteps }: { currentStep: number; totalS
 const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
   organizationId,
   onComplete,
+  initialName,
+  initialEmail,
 }) => {
   const shouldReduceMotion = useReducedMotion();
   const org = getOrganizationById(organizationId);
+  // Always start at step 1, pre-fill name/email if provided
   const [step, setStep] = useState(1);
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
+  const [name, setName] = useState(initialName || '');
+  const [email, setEmail] = useState(initialEmail || '');
   const [major, setMajor] = useState('');
   const [year, setYear] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
