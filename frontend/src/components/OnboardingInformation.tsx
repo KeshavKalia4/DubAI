@@ -1,36 +1,69 @@
 'use client';
 
 import React, { useState } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { ArrowRight, ArrowLeft, Heart } from 'lucide-react';
 import { getOrganizationById } from '../config/organizations';
-import { availableTags } from '../data/tags';
 import { UserProfile } from '../types';
+import { Button } from '@/components/ui/Button';
+import { Select, SelectOption } from '@/components/ui/Select';
+import { InterestGrid } from '@/components/ui/InterestGrid';
+import { Input } from '@/components/ui/Input';
+import { Mail, User } from 'lucide-react';
 
 interface OnboardingInformationProps {
   organizationId: string;
   onComplete: (profile: UserProfile) => void;
 }
 
+/**
+ * StepProgress Component
+ * Animated progress bar showing current step in onboarding
+ */
+const StepProgress = ({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) => {
+  const progress = (currentStep / totalSteps) * 100;
+
+  return (
+    <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mb-6">
+      <motion.div
+        className="h-full bg-gradient-to-r from-[var(--uw-purple)] to-[var(--uw-purple-light)] rounded-full"
+        initial={{ width: '0%' }}
+        animate={{ width: `${progress}%` }}
+        transition={{ duration: 0.5, ease: 'easeInOut' }}
+      />
+    </div>
+  );
+};
+
 const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
   organizationId,
   onComplete,
 }) => {
+  const shouldReduceMotion = useReducedMotion();
   const org = getOrganizationById(organizationId);
   const [step, setStep] = useState(1);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
   const [major, setMajor] = useState('');
   const [year, setYear] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   if (!org) return <div>Organization not found</div>;
 
+  // Transition config respecting reduced motion preference
+  const transitionConfig = shouldReduceMotion
+    ? { duration: 0 }
+    : { duration: 0.3 };
+
   const handleNext = () => {
-    if (step < 2) {
+    if (step < 3) {
       setStep(step + 1);
     } else {
-      // Complete
+      // Complete onboarding
       const profile: UserProfile = {
         id: crypto.randomUUID(),
-        name: 'Demo User',
-        email: 'demo@' + org.domains[0],
+        name,
+        email,
         organizationId: org.id,
         major,
         year,
@@ -40,87 +73,150 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
     }
   };
 
-  const toggleTag = (tagId: string) => {
-    if (selectedTags.includes(tagId)) {
-      setSelectedTags(selectedTags.filter((t) => t !== tagId));
-    } else {
-      setSelectedTags([...selectedTags, tagId]);
-    }
-  };
+  // Convert organization config to SelectOption format
+  const majorOptions: SelectOption[] = org.onboardingConfig.majors.map(m => ({
+    value: m,
+    label: m,
+  }));
+
+  const yearOptions: SelectOption[] = org.onboardingConfig.years.map(y => ({
+    value: y,
+    label: y,
+  }));
+
+  // Validation for proceeding to next step
+  const canProceed = step === 1
+    ? Boolean(name && email)
+    : step === 2
+    ? Boolean(major && year)
+    : selectedTags.length > 0;
 
   return (
-    <div className="max-w-2xl mx-auto bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-6 sm:p-8 md:p-10 rounded-2xl shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] border border-white/20 dark:border-gray-700/50">
-      <div className="mb-6 sm:mb-8">
-        <h2 className="text-2xl sm:text-3xl font-semibold text-gray-900 dark:text-white tracking-tight mb-2">Welcome to {org.name}</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-base sm:text-lg">Let&apos;s personalize your experience.</p>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: shouldReduceMotion ? 0 : 0.5 }}
+      className="max-w-2xl mx-auto bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl p-8 shadow-xl"
+    >
+      {/* Header with Progress Indicator */}
+      <div className="mb-8">
+        <StepProgress currentStep={step} totalSteps={3} />
+        <h2 className="text-3xl font-bold bg-gradient-to-r from-[var(--uw-purple-light)] to-[var(--uw-gold)] bg-clip-text text-transparent mb-2">
+          Welcome to {org.name}
+        </h2>
+        <p className="text-[var(--text-secondary)] text-lg">
+          Let&apos;s personalize your experience
+        </p>
       </div>
 
-      {step === 1 && (
-        <div className="space-y-5 sm:space-y-6">
-          <label className="block">
-            <span className="text-gray-900 dark:text-gray-200 font-medium text-sm mb-2 block">What is your Major?</span>
-            <select
-              className="block w-full rounded-xl border border-gray-200 dark:border-gray-600 shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] focus:border-purple-400 focus:ring-2 focus:ring-purple-100 dark:focus:ring-purple-900 focus:ring-opacity-50 p-3 text-sm sm:text-base text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 transition-all"
-              value={major}
-              onChange={(e) => setMajor(e.target.value)}
+      {/* Step Content with Animations */}
+      <div className="min-h-[320px]">
+        <AnimatePresence mode="wait">
+          {/* Step 1: Personal Information */}
+          {step === 1 && (
+            <motion.div
+              key="step-1"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={transitionConfig}
+              className="space-y-6"
             >
-              <option value="">Select a Major</option>
-              {org.onboardingConfig.majors.map((m) => (
-                <option key={m} value={m}>
-                  {m}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="block">
-            <span className="text-gray-900 dark:text-gray-200 font-medium text-sm mb-2 block">What year are you?</span>
-            <select
-              className="block w-full rounded-xl border border-gray-200 dark:border-gray-600 shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] focus:border-purple-400 focus:ring-2 focus:ring-purple-100 dark:focus:ring-purple-900 focus:ring-opacity-50 p-3 text-sm sm:text-base text-gray-900 dark:text-gray-100 bg-white dark:bg-gray-700 transition-all"
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
+              <Input
+                label="Full Name"
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter your full name"
+                leftIcon={<User className="w-5 h-5" />}
+              />
+
+              <Input
+                label="Email Address"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your.email@uw.edu"
+                leftIcon={<Mail className="w-5 h-5" />}
+              />
+            </motion.div>
+          )}
+
+          {/* Step 2: Academic Information */}
+          {step === 2 && (
+            <motion.div
+              key="step-2"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={transitionConfig}
+              className="space-y-6"
             >
-              <option value="">Select Year</option>
-              {org.onboardingConfig.years.map((y) => (
-                <option key={y} value={y}>
-                  {y}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-      )}
+              <Select
+                label="What is your Major?"
+                options={majorOptions}
+                value={major}
+                onChange={(e) => setMajor(e.target.value)}
+                placeholder="Select a Major"
+              />
 
-      {step === 2 && (
-        <div className="space-y-4 sm:space-y-5">
-          <span className="text-gray-900 dark:text-gray-200 font-medium text-sm block">What are you interested in?</span>
-          <div className="flex flex-wrap gap-2 sm:gap-2.5">
-            {availableTags.map((tag) => (
-              <button
-                key={tag.id}
-                onClick={() => toggleTag(tag.id)}
-                className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium border-2 transition-all duration-200 ${
-                  selectedTags.includes(tag.id)
-                    ? 'bg-purple-600 text-white border-purple-600 shadow-md scale-105'
-                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/30'
-                }`}
-              >
-                {tag.label}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+              <Select
+                label="What year are you?"
+                options={yearOptions}
+                value={year}
+                onChange={(e) => setYear(e.target.value)}
+                placeholder="Select Year"
+              />
+            </motion.div>
+          )}
 
-      <div className="mt-8 sm:mt-10 flex justify-end">
-        <button
+          {/* Step 3: Interests */}
+          {step === 3 && (
+            <motion.div
+              key="step-3"
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -20 }}
+              transition={transitionConfig}
+            >
+              <InterestGrid
+                label="What are you interested in?"
+                selectedTags={selectedTags}
+                onChange={setSelectedTags}
+                hint="Select the topics you're most interested in to personalize your feed"
+                showCount={true}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+
+      {/* Navigation Buttons */}
+      <div className="mt-8 flex items-center justify-between">
+        {/* Back Button (only show on step 2) */}
+        {step > 1 && (
+          <Button
+            variant="ghost"
+            onClick={() => setStep(step - 1)}
+            leftIcon={<ArrowLeft className="w-4 h-4" />}
+          >
+            Back
+          </Button>
+        )}
+
+        <div className="flex-1" /> {/* Spacer */}
+
+        {/* Next/Finish Button */}
+        <Button
+          variant="primary"
           onClick={handleNext}
-          disabled={step === 1 && (!major || !year)}
-          className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200 font-medium text-sm sm:text-base"
+          disabled={!canProceed}
+          rightIcon={step < 3 ? <ArrowRight className="w-4 h-4" /> : <Heart className="w-4 h-4" />}
         >
-          {step === 2 ? 'Finish' : 'Next'}
-        </button>
+          {step === 3 ? 'Get Started' : 'Next'}
+        </Button>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
