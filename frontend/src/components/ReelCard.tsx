@@ -2,10 +2,10 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { MapPin, Calendar, Users, Share2, Check, Star, X as XIcon } from 'lucide-react';
+import { Calendar, Users, Share2, Check, Star, X as XIcon } from 'lucide-react';
 import { ContentItem, RsvpStatus } from '@/types';
 import { useRsvp } from '@/hooks/useRsvp';
-import { MapButton } from './MapButton';
+import { LocationButton } from './LocationButton';
 
 interface ReelCardProps {
   event: ContentItem;
@@ -94,17 +94,6 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
         }}
       />
 
-      {/* Map Button - Top Left */}
-      {event.coordinates && (
-        <div className="absolute top-4 left-4 z-[4]">
-          <MapButton
-            event={event}
-            variant="full"
-            className="shadow-lg"
-          />
-        </div>
-      )}
-
       {/* Content */}
       <div className="absolute inset-0 z-[3] flex flex-col justify-end p-4 sm:p-6 pb-8 sm:pb-12">
         {/* Event Info */}
@@ -122,10 +111,12 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
           {/* Metadata Row */}
           <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-[#d4d4d4]">
             {event.location && (
-              <div className="flex items-center gap-1.5 bg-[#2a1f47]/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-[#8268bc]/20">
-                <MapPin className="w-4 h-4 text-[#8268bc]" />
-                <span className="font-medium">{event.location}</span>
-              </div>
+              <LocationButton
+                eventId={event.id}
+                coordinates={event.coordinates}
+                location={event.location}
+                variant="compact"
+              />
             )}
             {event.date && (
               <div className="flex items-center gap-1.5 bg-[#2a1f47]/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-[#8268bc]/20">
