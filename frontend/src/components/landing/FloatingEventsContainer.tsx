@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { useReducedMotion } from 'framer-motion';
 import { FloatingEventCard } from './FloatingEventCard';
 import { ContentItem } from '@/types';
+import { useMounted } from '@/hooks/useMounted';
 
 interface FloatingEventsContainerProps {
   events: ContentItem[];
@@ -30,14 +31,12 @@ export function FloatingEventsContainer({ events }: FloatingEventsContainerProps
   const prefersReducedMotion = useReducedMotion();
   const [isMobile, setIsMobile] = useState(false);
   const [selectedEvents, setSelectedEvents] = useState<ContentItem[]>([]);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
 
-  // Check viewport size and initialize on mount (client-only)
+  // Check viewport size
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
@@ -48,6 +47,7 @@ export function FloatingEventsContainer({ events }: FloatingEventsContainerProps
 
     const withImages = events.filter((e) => e.imageUrl);
     const shuffled = [...withImages].sort(() => Math.random() - 0.5);
+    
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelectedEvents(shuffled.slice(0, 6));
   }, [events, mounted]);

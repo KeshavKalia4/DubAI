@@ -5,6 +5,7 @@ import { useReducedMotion } from 'framer-motion';
 import { TraversingCard } from './TraversingCard';
 import { bouncingCardConfigs, mobileBouncingCardConfigs } from './traversalPaths';
 import { ContentItem } from '@/types';
+import { useMounted } from '@/hooks/useMounted';
 
 interface CardAssignment {
   config: (typeof bouncingCardConfigs)[number];
@@ -19,14 +20,12 @@ export function TraversingCardsContainer({ events }: TraversingCardsContainerPro
   const prefersReducedMotion = useReducedMotion();
   const [isMobile, setIsMobile] = useState(false);
   const [cardAssignments, setCardAssignments] = useState<CardAssignment[]>([]);
-  const [mounted, setMounted] = useState(false);
+  const mounted = useMounted();
 
-  // Check viewport size and initialize on mount (client-only)
+  // Check viewport size
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true);
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);

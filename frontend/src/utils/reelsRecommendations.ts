@@ -3,6 +3,10 @@ import { ContentItem } from '@/types';
 /**
  * Generate sorted reels order starting with clicked event
  * Priority: Tag Similarity > Location Proximity > Date Proximity
+ * 
+ * @param allEvents - List of all available events
+ * @param clickedEventId - ID of the event that was clicked to open reels
+ * @returns Sorted list of events with the clicked event first
  */
 export function generateReelsOrder(
   allEvents: ContentItem[],
