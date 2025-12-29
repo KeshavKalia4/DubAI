@@ -17,7 +17,7 @@ export function useEvents() {
   const [events, setEvents] = useState<ContentItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  /** Load custom events from storage on mount */
+  /** Load custom events from storage and preview event from sessionStorage on mount */
   useEffect(() => {
     void (async () => {
       let customEvents: ContentItem[] = [];
@@ -25,7 +25,25 @@ export function useEvents() {
         const saved = await storage.get<ContentItem[]>(KEY);
         customEvents = Array.isArray(saved) ? saved : [];
       } finally {
-        setEvents([...uwEvents, ...customEvents]);
+        // Load preview event from sessionStorage
+        let previewEvent: ContentItem | null = null;
+        try {
+          const previewJson = sessionStorage.getItem('previewEvent');
+          if (previewJson) {
+            previewEvent = JSON.parse(previewJson);
+          }
+        } catch (err) {
+          console.error('Failed to load preview event:', err);
+        }
+
+        // Combine all events: mock + custom + preview (if exists)
+        const allEvents = [
+          ...uwEvents,
+          ...customEvents,
+          ...(previewEvent ? [previewEvent] : [])
+        ];
+
+        setEvents(allEvents);
         setIsLoaded(true);
       }
     })();
@@ -53,7 +71,11 @@ export function useEvents() {
         const customEvents = Array.isArray(saved) ? saved : [];
         const updatedCustomEvents = [...customEvents, newEvent];
         await storage.set(KEY, updatedCustomEvents);
-        setEvents([...uwEvents, ...updatedCustomEvents]);
+
+        // Preserve preview event from sessionStorage
+        const previewJson = sessionStorage.getItem('previewEvent');
+        const previewEvent = previewJson ? JSON.parse(previewJson) : null;
+        setEvents([...uwEvents, ...updatedCustomEvents, ...(previewEvent ? [previewEvent] : [])]);
       } catch (err) {
         console.error('Failed to save event:', err);
         setEvents(prevEvents);
@@ -64,13 +86,21 @@ export function useEvents() {
   };
 
   /**
-   * Delete a custom event (optimistic update)
+   * Delete a custom or preview event (optimistic update)
    * @param eventId - ID of the event to delete
-   * @returns false if not a custom event, true otherwise
+   * @returns false if not a custom/preview event, true otherwise
    * @behavior Updates UI immediately, persists async, reverts on failure
    * @exception Logs error and reverts state if storage fails
    */
   const deleteEvent = (eventId: string) => {
+    // Handle preview events - just clear sessionStorage
+    if (eventId.startsWith('preview-')) {
+      sessionStorage.removeItem('previewEvent');
+      setEvents(events.filter(event => event.id !== eventId));
+      return true;
+    }
+
+    // Handle custom events - persist to localStorage
     if (!eventId.startsWith('custom-')) {
       return false;
     }
@@ -84,7 +114,11 @@ export function useEvents() {
         const customEvents = Array.isArray(saved) ? saved : [];
         const updatedCustomEvents = customEvents.filter(event => event.id !== eventId);
         await storage.set(KEY, updatedCustomEvents);
-        setEvents([...uwEvents, ...updatedCustomEvents]);
+
+        // Preserve preview event from sessionStorage
+        const previewJson = sessionStorage.getItem('previewEvent');
+        const previewEvent = previewJson ? JSON.parse(previewJson) : null;
+        setEvents([...uwEvents, ...updatedCustomEvents, ...(previewEvent ? [previewEvent] : [])]);
       } catch (err) {
         console.error('Failed to delete event:', err);
         setEvents(prevEvents);

@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { MapPin, Calendar, Users, Share2, Check, Star, X as XIcon } from 'lucide-react';
 import { ContentItem, RsvpStatus } from '@/types';
 import { useRsvp } from '@/hooks/useRsvp';
+import { MapButton } from './MapButton';
 
 interface ReelCardProps {
   event: ContentItem;
@@ -92,6 +93,17 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
           )`
         }}
       />
+
+      {/* Map Button - Top Left */}
+      {event.coordinates && (
+        <div className="absolute top-4 left-4 z-[4]">
+          <MapButton
+            event={event}
+            variant="full"
+            className="shadow-lg"
+          />
+        </div>
+      )}
 
       {/* Content */}
       <div className="absolute inset-0 z-[3] flex flex-col justify-end p-4 sm:p-6 pb-8 sm:pb-12">

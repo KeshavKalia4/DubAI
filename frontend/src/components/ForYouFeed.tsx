@@ -6,6 +6,7 @@ import { ContentItem, UserProfile } from '../types';
 import { useEvents } from '../hooks/useEvents';
 import { generateReelsOrder } from '@/utils/reelsRecommendations';
 import ReelsView from './ReelsView';
+import { MapButton } from './MapButton';
 
 interface ForYouFeedProps {
   user: UserProfile;
@@ -163,6 +164,16 @@ const ContentCard: React.FC<{
 }> = ({ item, onDelete, index, onOpenReels }) => {
   const colors = typeColors[item.type] || typeColors.event;
   const isCustomEvent = item.id.startsWith('custom-');
+  const isPreview = item.id.startsWith('preview-');
+
+  // Check if event was created recently (within last 5 minutes)
+  const isRecentlyCreated = () => {
+    if (!item.id.startsWith('custom-')) return false;
+    const timestamp = parseInt(item.id.replace('custom-', ''));
+    const now = Date.now();
+    const fiveMinutesAgo = now - (5 * 60 * 1000);
+    return timestamp > fiveMinutesAgo;
+  };
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -173,7 +184,16 @@ const ContentCard: React.FC<{
 
   return (
     <div
+      role="button"
+      tabIndex={0}
       onClick={() => onOpenReels(item.id)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onOpenReels(item.id);
+        }
+      }}
+      aria-label={`Open details for ${item.title}`}
       className={`
         group relative bg-linear-to-br from-[#1e1432]/95 to-[#2a1f47]/80 rounded-2xl p-5 sm:p-6
         border-2 border-[#8268bc]/30
@@ -186,6 +206,7 @@ const ContentCard: React.FC<{
         h-full
         backdrop-blur-md
         animate-fade-in
+        focus:outline-none focus:ring-2 focus:ring-[#8268bc]/60 focus:ring-offset-2 focus:ring-offset-[#1a0f2e]
       `}
       style={{
         animationDelay: `${index * 0.1}s`,
@@ -193,17 +214,35 @@ const ContentCard: React.FC<{
       }}
     >
       <div className="relative h-full flex flex-col">
-        {/* Header with Type Badge and Date */}
+        {/* Header with Badges and Date */}
         <div className="flex justify-between items-start mb-4">
-          <span className={`
-            text-xs font-bold px-4 py-2 rounded-lg
-            ${colors.bg} ${colors.text}
-            border-2 border-current/30
-            shadow-md
-            backdrop-blur-sm
-          `}>
-            {capitalize(item.type)}
-          </span>
+          <div className="flex items-center gap-2 flex-wrap">
+            {/* Preview Badge - for events NOT yet submitted */}
+            {isPreview && (
+              <span className="text-xs font-bold px-3 py-1.5 rounded-lg bg-blue-500/20 text-blue-300 border-2 border-blue-500/30 shadow-md backdrop-blur-sm">
+                PREVIEW
+              </span>
+            )}
+
+            {/* New Badge - for recently created custom events */}
+            {!isPreview && isRecentlyCreated() && (
+              <span className="text-xs font-bold px-3 py-1.5 rounded-lg bg-green-500/20 text-green-300 border-2 border-green-500/30 shadow-md backdrop-blur-sm">
+                NEW
+              </span>
+            )}
+
+            {/* Type Badge */}
+            <span className={`
+              text-xs font-bold px-4 py-2 rounded-lg
+              ${colors.bg} ${colors.text}
+              border-2 border-current/30
+              shadow-md
+              backdrop-blur-sm
+            `}>
+              {capitalize(item.type)}
+            </span>
+          </div>
+
           <div className="flex items-center gap-2">
             {item.date && (
               <span className="flex items-center gap-1.5 text-xs text-[#d4d4d4] font-bold bg-[#2a1f47]/80 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-[#8268bc]/20" suppressHydrationWarning>
@@ -211,7 +250,7 @@ const ContentCard: React.FC<{
                 {new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </span>
             )}
-            {isCustomEvent && (
+            {(isCustomEvent || isPreview) && (
               <button
                 onClick={handleDelete}
                 className="p-2 rounded-lg bg-[#2a1f47]/60 hover:bg-red-900/30 text-gray-400 hover:text-red-400 transition-all border border-transparent hover:border-red-400/30"
@@ -233,7 +272,13 @@ const ContentCard: React.FC<{
           </p>
           {item.location && (
             <div className="flex items-center gap-2.5 bg-[#2a1f47]/60 backdrop-blur-sm px-4 py-2.5 rounded-xl border border-[#8268bc]/10 group-hover:border-[#8268bc]/30 transition-all">
-              <MapPin className="w-4 h-4 text-[#8268bc] shrink-0" />
+              {item.coordinates ? (
+                <MapButton event={item} variant="compact" />
+              ) : (
+                <div className="flex items-center gap-1.5">
+                  <MapPin className="w-4 h-4 text-[#8268bc] shrink-0" />
+                </div>
+              )}
               <span className="text-sm text-[#d4d4d4] font-medium truncate">
                 {item.location}
               </span>

@@ -72,22 +72,24 @@ export function useRsvp() {
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    // Optimistic update
+    // Optimistic update - capture previous state and new state
     const prevStatus = rsvps[contentId] || null;
-    setRsvps(prev => ({ ...prev, [contentId]: status }));
+    let newState: Record<string, RsvpStatus> = {};
 
+    setRsvps(prev => {
+      newState = { ...prev, [contentId]: status };
+      return newState;
+    });
+
+    // Persist the new state to storage (using the state we just set, no race condition)
     try {
-      const saved = await storage.get<Record<string, RsvpStatus>>(KEY);
-      const currentRsvps = (saved && typeof saved === 'object' && !Array.isArray(saved)) ? saved : {};
-      
-      const updatedRsvps = { ...currentRsvps, [contentId]: status };
-      await storage.set(KEY, updatedRsvps);
-
+      await storage.set(KEY, newState);
     } catch (error: unknown) {
       if (error instanceof Error && error.name === 'AbortError') {
         return;
       }
       console.error('Failed to save RSVP:', error);
+      // Revert on storage failure
       setRsvps(prev => ({ ...prev, [contentId]: prevStatus }));
     }
   }, [rsvps]);

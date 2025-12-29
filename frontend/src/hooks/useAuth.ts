@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { storage } from '@/lib/storage';
 import { AuthState } from '@/types';
+import { isValidEduEmail } from '@/lib/emailUtils';
 
 const AUTH_KEY = 'dubai-auth';
 
@@ -32,9 +33,7 @@ export function useAuth() {
   // Login function
   const login = useCallback(async (email: string) => {
     // Validate email ends with .edu
-    const validEmail = email.endsWith(".edu");
-
-    if (!validEmail) {
+    if (!isValidEduEmail(email)) {
         throw new Error('Must be an .edu email')
     }
 
@@ -50,11 +49,9 @@ export function useAuth() {
   }, []);
 
 
-  // Signup function  
+  // Signup function
   const signup = useCallback(async (name: string, email: string) => {
-    const validEmail = email.endsWith(".edu");
-
-    if (!validEmail) {
+    if (!isValidEduEmail(email)) {
         throw new Error('Must be an .edu email')
     }
 
