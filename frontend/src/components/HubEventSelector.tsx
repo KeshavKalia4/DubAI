@@ -10,14 +10,12 @@ interface HubEventSelectorProps {
   hub: LocationHub;
   onSelectEvent: (event: ContentItem) => void;
   onClose: () => void;
-  theme: 'light' | 'dark';
 }
 
 export default function HubEventSelector({
   hub,
   onSelectEvent,
-  onClose,
-  theme
+  onClose
 }: HubEventSelectorProps) {
   return (
     <div

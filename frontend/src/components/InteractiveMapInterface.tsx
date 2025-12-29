@@ -50,13 +50,9 @@ const DEFAULT_ZOOM = 16;
 
 export default function InteractiveMapInterface({ items }: InteractiveMapInterfaceProps) {
   const { theme } = useTheme();
-  const [selectedHub, setSelectedHub] = useState<LocationHub | null>(null);
-  const [selectedItem, setSelectedItem] = useState<ContentItem | null>(null);
   const [activeFilter, setActiveFilter] = useState<'all' | 'event' | 'club'>('all');
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
   const [isLocating, setIsLocating] = useState(false);
-  const [mapCenter, setMapCenter] = useState<[number, number]>(UW_CENTER);
-  const [mapZoom, setMapZoom] = useState(DEFAULT_ZOOM);
 
   const filteredItems = activeFilter === 'all'
     ? items.filter(item => item.coordinates)
@@ -68,32 +64,83 @@ export default function InteractiveMapInterface({ items }: InteractiveMapInterfa
     [filteredItems]
   );
 
-  // Handle navigation from cards (via sessionStorage)
+  // Initialize all states from sessionStorage in one go to avoid cascading renders
+  const [selectedHub, setSelectedHub] = useState<LocationHub | null>(() => {
+    try {
+      const stored = sessionStorage.getItem('mapSelectedEvent');
+      if (stored) {
+        const { id } = JSON.parse(stored);
+        const event = items.find(e => e.id === id);
+        if (event) {
+          const tempHubs = groupEventsByLocation(filteredItems);
+          return tempHubs.find(h => h.events.some(e => e.id === id)) || null;
+        }
+      }
+    } catch (error) {
+      console.error('Error reading mapSelectedEvent:', error);
+    }
+    return null;
+  });
+
+  const [selectedItem, setSelectedItem] = useState<ContentItem | null>(() => {
+    try {
+      const stored = sessionStorage.getItem('mapSelectedEvent');
+      if (stored) {
+        const { id } = JSON.parse(stored);
+        const event = items.find(e => e.id === id);
+        if (event) {
+          const tempHubs = groupEventsByLocation(filteredItems);
+          const hub = tempHubs.find(h => h.events.some(e => e.id === id));
+          if (hub && hub.count === 1) {
+            return event;
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error reading mapSelectedEvent:', error);
+    }
+    return null;
+  });
+
+  // Initialize map center and zoom from sessionStorage if available
+  const [mapCenter, setMapCenter] = useState<[number, number]>(() => {
+    try {
+      const stored = sessionStorage.getItem('mapSelectedEvent');
+      if (stored) {
+        const { coordinates } = JSON.parse(stored);
+        if (coordinates) {
+          return [coordinates.lat, coordinates.lng];
+        }
+      }
+    } catch (error) {
+      console.error('Error reading mapSelectedEvent:', error);
+    }
+    return UW_CENTER;
+  });
+
+  const [mapZoom, setMapZoom] = useState(() => {
+    try {
+      const stored = sessionStorage.getItem('mapSelectedEvent');
+      if (stored) {
+        return 17;
+      }
+    } catch (error) {
+      console.error('Error reading mapSelectedEvent:', error);
+    }
+    return DEFAULT_ZOOM;
+  });
+
+  // Clean up sessionStorage after initial read
   useEffect(() => {
     try {
       const stored = sessionStorage.getItem('mapSelectedEvent');
       if (stored) {
-        const { id, coordinates } = JSON.parse(stored);
-        const event = items.find(e => e.id === id);
-        if (event && coordinates) {
-          setMapCenter([coordinates.lat, coordinates.lng]);
-          setMapZoom(17);
-          // Find hub containing this event
-          const hub = hubs.find(h => h.events.some(e => e.id === id));
-          if (hub) {
-            setSelectedHub(hub);
-            if (hub.count === 1) {
-              setSelectedItem(event);
-            }
-          }
-        }
         sessionStorage.removeItem('mapSelectedEvent');
       }
     } catch (error) {
-      console.error('Error reading mapSelectedEvent:', error);
-      sessionStorage.removeItem('mapSelectedEvent');
+      console.error('Error cleaning mapSelectedEvent:', error);
     }
-  }, [items, hubs]);
+  }, []);
 
   const handleLocateUser = () => {
     setIsLocating(true);
@@ -255,7 +302,6 @@ export default function InteractiveMapInterface({ items }: InteractiveMapInterfa
           hub={selectedHub}
           onSelectEvent={(event) => setSelectedItem(event)}
           onClose={() => setSelectedHub(null)}
-          theme={theme}
         />
       )}
 

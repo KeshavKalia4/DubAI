@@ -36,7 +36,8 @@ export const TextArea = React.forwardRef<HTMLTextAreaElement, TextAreaProps>(
     ref
   ) => {
     // Generate a unique ID if not provided
-    const textareaId = id || React.useId();
+    const generatedId = React.useId();
+    const textareaId = id || generatedId;
 
     return (
       <div className={cn('space-y-2', fullWidth && 'w-full')}>

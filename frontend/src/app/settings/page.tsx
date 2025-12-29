@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Mail, User, GraduationCap, Calendar, LogOut } from 'lucide-react';
+import { ArrowLeft, Mail, User, GraduationCap, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -103,7 +103,7 @@ export default function SettingsPage() {
     try {
       await logout();
       router.push('/');
-    } catch (err) {
+    } catch {
       setError('Failed to logout');
     }
   };

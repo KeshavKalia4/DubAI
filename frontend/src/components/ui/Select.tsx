@@ -47,7 +47,8 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     ref
   ) => {
     // Generate a unique ID if not provided
-    const selectId = id || React.useId();
+    const generatedId = React.useId();
+    const selectId = id || generatedId;
 
     return (
       <div className={cn('space-y-2', fullWidth && 'w-full')}>

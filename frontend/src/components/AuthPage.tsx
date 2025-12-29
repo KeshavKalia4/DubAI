@@ -236,7 +236,7 @@ export function AuthPage({ mode }: AuthPageProps) {
           >
             {isLogin ? (
               <>
-                Don't have an account?{' '}
+                Don&apos;t have an account?{' '}
                 <span className="text-[var(--uw-gold)] font-medium">Sign up</span>
               </>
             ) : (

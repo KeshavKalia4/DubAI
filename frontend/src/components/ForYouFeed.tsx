@@ -45,6 +45,10 @@ const typeColors: Record<string, { border: string; bg: string; text: string; acc
 const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
   const { events, deleteEvent, isLoaded } = useEvents();
 
+  // Capture current time once per component mount for "recently created" checks
+  // eslint-disable-next-line react-hooks/purity
+  const currentTime = useMemo(() => Date.now(), []);
+
   // Reels state
   const [reelsState, setReelsState] = useState<{
     isOpen: boolean;
@@ -129,6 +133,7 @@ const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
               onDelete={deleteEvent}
               index={index}
               onOpenReels={handleOpenReels}
+              currentTime={currentTime}
             />
           ))}
         </div>
@@ -161,19 +166,19 @@ const ContentCard: React.FC<{
   onDelete: (eventId: string) => boolean;
   index: number;
   onOpenReels: (eventId: string) => void;
-}> = ({ item, onDelete, index, onOpenReels }) => {
+  currentTime: number;
+}> = ({ item, onDelete, index, onOpenReels, currentTime }) => {
   const colors = typeColors[item.type] || typeColors.event;
   const isCustomEvent = item.id.startsWith('custom-');
   const isPreview = item.id.startsWith('preview-');
 
   // Check if event was created recently (within last 5 minutes)
-  const isRecentlyCreated = () => {
+  const isRecentlyCreated = useMemo(() => {
     if (!item.id.startsWith('custom-')) return false;
     const timestamp = parseInt(item.id.replace('custom-', ''));
-    const now = Date.now();
-    const fiveMinutesAgo = now - (5 * 60 * 1000);
+    const fiveMinutesAgo = currentTime - (5 * 60 * 1000);
     return timestamp > fiveMinutesAgo;
-  };
+  }, [item.id, currentTime]);
 
   const handleDelete = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -225,7 +230,7 @@ const ContentCard: React.FC<{
             )}
 
             {/* New Badge - for recently created custom events */}
-            {!isPreview && isRecentlyCreated() && (
+            {!isPreview && isRecentlyCreated && (
               <span className="text-xs font-bold px-3 py-1.5 rounded-lg bg-green-500/20 text-green-300 border-2 border-green-500/30 shadow-md backdrop-blur-sm">
                 NEW
               </span>
