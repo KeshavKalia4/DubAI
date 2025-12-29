@@ -216,3 +216,20 @@ export interface RsvpSummary {
   /** Number of users marked as not going */
   notGoing: number;
 }
+
+/**
+ * LocationHub
+ * Represents a group of events/clubs at the same location on the map.
+ */
+export interface LocationHub {
+  /** Unique identifier (based on coordinates) */
+  id: string;
+  /** GPS coordinates for this hub */
+  coordinates: { lat: number; lng: number };
+  /** Human-readable location name */
+  location: string;
+  /** All events/clubs at this location */
+  events: ContentItem[];
+  /** Number of items in this hub */
+  count: number;
+}
