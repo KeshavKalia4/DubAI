@@ -15,6 +15,8 @@ import { ContentType, ContentItem } from '@/types';
 import { useUserProfile } from '@/hooks/useUserProfile';
 import { useRouter } from 'next/navigation';
 import { getCoordinates } from '@/data/locations';
+import { useToast } from '@/hooks/useToast';
+import { validateEventForm } from '@/utils/formValidation';
 
 /**
  * Contributor Page
@@ -34,6 +36,7 @@ export default function ContributorPage() {
   const router = useRouter();
   const { addEvent } = useEvents();
   const { profile } = useUserProfile();
+  const { toast } = useToast();
 
   // Get current date/time in the format required for datetime-local input
   const getCurrentDateTime = () => {
@@ -62,30 +65,11 @@ export default function ContributorPage() {
     e.preventDefault();
     setError(null);
 
-    // Validate required fields
-    if (!formData.title.trim()) {
-      setError('Please enter an event title');
+    // Validate form data
+    const validation = validateEventForm(formData, 'submit');
+    if (!validation.isValid) {
+      setError(validation.error);
       return;
-    }
-
-    if (!formData.description.trim()) {
-      setError('Please enter a description');
-      return;
-    }
-
-    if (formData.tags.length === 0) {
-      setError('Please select at least one tag');
-      return;
-    }
-
-    // Validate date is not in the past
-    if (formData.date) {
-      const selectedDate = new Date(formData.date);
-      const now = new Date();
-      if (selectedDate < now) {
-        setError('Event date cannot be in the past');
-        return;
-      }
     }
 
     setIsSubmitting(true);
@@ -103,8 +87,18 @@ export default function ContributorPage() {
         coordinates: getCoordinates(formData.location) || undefined,
       });
 
-      // Navigate to feed to see the newly created event
-      router.push('/feed');
+      // Show success toast
+      toast.success('Event submitted for admin review!');
+
+      // Clear the form
+      setFormData({
+        title: '',
+        description: '',
+        type: 'event' as ContentType,
+        tags: [] as string[],
+        date: getCurrentDateTime(),
+        location: '',
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create event');
     } finally {
@@ -113,30 +107,11 @@ export default function ContributorPage() {
   };
 
   const handlePreview = () => {
-    // Validate required fields first
-    if (!formData.title.trim()) {
-      setError('Please enter an event title before previewing');
+    // Validate form data
+    const validation = validateEventForm(formData, 'preview');
+    if (!validation.isValid) {
+      setError(validation.error);
       return;
-    }
-
-    if (!formData.description.trim()) {
-      setError('Please enter a description before previewing');
-      return;
-    }
-
-    if (formData.tags.length === 0) {
-      setError('Please select at least one tag before previewing');
-      return;
-    }
-
-    // Validate date is not in the past
-    if (formData.date) {
-      const selectedDate = new Date(formData.date);
-      const now = new Date();
-      if (selectedDate < now) {
-        setError('Event date cannot be in the past');
-        return;
-      }
     }
 
     // Create preview event object
@@ -156,9 +131,11 @@ export default function ContributorPage() {
     // Save to sessionStorage
     sessionStorage.setItem('previewEvent', JSON.stringify(previewEvent));
 
-    // Navigate to feed
+    // Show toast and navigate directly to feed
+    toast.info('Taking you to preview...');
     router.push('/feed');
   };
+
 
   return (
     <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[var(--background)] p-6">

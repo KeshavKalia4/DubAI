@@ -10,6 +10,7 @@ import { useState, useEffect } from 'react';
 import { ContentItem } from '../types';
 import { uwEvents } from '../data/uwEvents';
 import { storage } from '@/lib/storage';
+import { loadPreviewEvent, deletePreviewEvent } from '@/utils/previewStorage';
 
 const KEY = 'customEvents';
 
@@ -26,15 +27,7 @@ export function useEvents() {
         customEvents = Array.isArray(saved) ? saved : [];
       } finally {
         // Load preview event from sessionStorage
-        let previewEvent: ContentItem | null = null;
-        try {
-          const previewJson = sessionStorage.getItem('previewEvent');
-          if (previewJson) {
-            previewEvent = JSON.parse(previewJson);
-          }
-        } catch (err) {
-          console.error('Failed to load preview event:', err);
-        }
+        const previewEvent = loadPreviewEvent();
 
         // Combine all events: mock + custom + preview (if exists)
         const allEvents = [
@@ -73,8 +66,7 @@ export function useEvents() {
         await storage.set(KEY, updatedCustomEvents);
 
         // Preserve preview event from sessionStorage
-        const previewJson = sessionStorage.getItem('previewEvent');
-        const previewEvent = previewJson ? JSON.parse(previewJson) : null;
+        const previewEvent = loadPreviewEvent();
         setEvents([...uwEvents, ...updatedCustomEvents, ...(previewEvent ? [previewEvent] : [])]);
       } catch (err) {
         console.error('Failed to save event:', err);
@@ -95,7 +87,7 @@ export function useEvents() {
   const deleteEvent = (eventId: string) => {
     // Handle preview events - just clear sessionStorage
     if (eventId.startsWith('preview-')) {
-      sessionStorage.removeItem('previewEvent');
+      deletePreviewEvent();
       setEvents(events.filter(event => event.id !== eventId));
       return true;
     }
@@ -116,8 +108,7 @@ export function useEvents() {
         await storage.set(KEY, updatedCustomEvents);
 
         // Preserve preview event from sessionStorage
-        const previewJson = sessionStorage.getItem('previewEvent');
-        const previewEvent = previewJson ? JSON.parse(previewJson) : null;
+        const previewEvent = loadPreviewEvent();
         setEvents([...uwEvents, ...updatedCustomEvents, ...(previewEvent ? [previewEvent] : [])]);
       } catch (err) {
         console.error('Failed to delete event:', err);
@@ -128,5 +119,36 @@ export function useEvents() {
     return true;
   };
 
-  return { events, addEvent, deleteEvent, isLoaded };
+  /**
+   * Convert a preview event to a permanent custom event
+   * @param previewId - ID of the preview event to finalize
+   * @returns The new custom event, or null if preview not found
+   * @behavior Converts preview to custom event, clears sessionStorage, updates UI
+   * @exception Logs error and returns null if operation fails
+   */
+  const finalizePreview = (previewId: string): ContentItem | null => {
+    // Get preview from sessionStorage
+    const previewEvent = loadPreviewEvent();
+    if (!previewEvent || previewEvent.id !== previewId) return null;
+
+    try {
+      // Create permanent event (reuse addEvent logic)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, ...eventData } = previewEvent;
+      const newEvent = addEvent(eventData);
+
+      // Clear preview from sessionStorage
+      deletePreviewEvent();
+
+      // Update UI state to remove preview (addEvent already added the new permanent one)
+      setEvents(events.filter(e => e.id !== previewId));
+
+      return newEvent;
+    } catch (err) {
+      console.error('Failed to finalize preview:', err);
+      return null;
+    }
+  };
+
+  return { events, addEvent, deleteEvent, finalizePreview, isLoaded };
 }
