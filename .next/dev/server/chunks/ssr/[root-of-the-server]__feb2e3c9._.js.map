@@ -1,6 +1,0 @@
-{
-  "version": 3,
-  "sources": [],
-  "sections": [
-    {"offset": {"line": 18, "column": 0}, "map": {"version":3,"sources":["file:///Users/keshavkalia/Desktop/Kash%20codes/dubai/src/app/contributor/page.tsx"],"sourcesContent":["//Endpoint for contributor page\n\nexport default function ContributorPage() {\n    return (\n        <div>\n            <h1>Contributor Page</h1>\n        </div>\n    );\n}"],"names":[],"mappings":"AAAA,+BAA+B;;;;;;;AAEhB,SAAS;IACpB,qBACI,sQAAC;kBACG,cAAA,sQAAC;sBAAG;;;;;;;;;;;AAGhB"}}]
-}
