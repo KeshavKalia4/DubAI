@@ -55,3 +55,6 @@ env/
 # scrapy
 .scrapy/
 backend/crawler/output/
+venv/
+CRUD/venv/
+.env
