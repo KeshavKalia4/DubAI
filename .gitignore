@@ -58,3 +58,4 @@ backend/crawler/output/
 venv/
 CRUD/venv/
 .env
+.next/
