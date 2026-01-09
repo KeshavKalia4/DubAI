@@ -1,14 +1,15 @@
 import json
+from pathlib import Path
 
-from generate import generate
+from rag.generate import generate
+
+BASE_DIR = Path(__file__).resolve().parent
+PROCESSED_PATH = BASE_DIR / "data" / "processed" / "events_embedded.json"
 
 
 def main():
     # Load your mock events with embeddings
-    # NOTE: This path assumes you run this file from the backend/src directory:
-    #   cd backend/src
-    #   python test_rag.py
-    with open("data/processed/events_embedded.json", "r") as f:
+    with PROCESSED_PATH.open("r", encoding="utf-8") as f:
         events = json.load(f)
 
     # Use a small subset and drop the embedding field (not needed for the LLM)
@@ -35,6 +36,5 @@ def main():
 
 
 if __name__ == "__main__":
+    # Run from backend directory: python -m rag.test_rag
     main()
-
-
