@@ -124,18 +124,18 @@ class ChatService:
             return None
     
     @staticmethod
-    def get_conversation_messages(conversation_id: str) -> List[Dict]:
+    def get_conversation_messages(conversation_id: str) -> Optional[List[Dict]]:
         """Get messages from a conversation"""
         try:
             conv = ChatService.get_conversation(conversation_id)
             if not conv or not conv.get('title'):
-                return []
+                return None
             
             data = json.loads(conv['title'])
             return data.get('messages', [])
         except Exception as e:
             print(f"Error getting conversation messages: {e}")
-            return []
+            return None
     
     @staticmethod
     def get_user_conversations(user_netid: str) -> List[Dict]:
