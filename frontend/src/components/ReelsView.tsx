@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { X } from 'lucide-react';
 import { ContentItem } from '@/types';
 import ReelCard from './ReelCard';
@@ -13,12 +13,12 @@ interface ReelsViewProps {
 const ReelsView: React.FC<ReelsViewProps> = ({ events, onClose }) => {
   const [isClosing, setIsClosing] = useState(false);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsClosing(true);
     setTimeout(() => {
       onClose();
     }, 300); // Match animation duration
-  };
+  }, [onClose]);
 
   // ESC key to close
   useEffect(() => {
@@ -30,7 +30,7 @@ const ReelsView: React.FC<ReelsViewProps> = ({ events, onClose }) => {
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [handleClose]);
 
   // Prevent body scroll when reels open
   useEffect(() => {

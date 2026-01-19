@@ -9,10 +9,6 @@ interface NavBarProps {
 }
 
 export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarProps) {
-    const handleProfileClick = () => {
-        console.log('profile');
-    };
-
     return (
         <nav
             className="sticky top-0 z-50 w-full bg-[#1a0f2e]/85 backdrop-blur-xl shadow-sm"
@@ -45,7 +41,7 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
 
                     {/* Logo - For Chat page: hidden on mobile, For Home page: always visible on left */}
                     {!showMenuButton && (
-                        <Link href="/" className="flex items-center group" style={{ gap: '8px' }}>
+                        <Link href="/feed" className="flex items-center group" style={{ gap: '8px' }}>
                             <div className="flex items-center justify-center rounded-xl bg-linear-to-br from-[#8268bc] to-[#9982d0] shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-200" style={{ width: '36px', height: '36px' }}>
                                 <Sparkles style={{ width: '20px', height: '20px' }} className="text-white" strokeWidth={2.5} />
                             </div>
@@ -57,7 +53,7 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
 
                     {/* Logo - For Chat page: desktop only on left */}
                     {showMenuButton && (
-                        <Link href="/" className="hidden lg:flex items-center group" style={{ gap: '8px' }}>
+                        <Link href="/feed" className="hidden lg:flex items-center group" style={{ gap: '8px' }}>
                             <div className="flex items-center justify-center rounded-xl bg-linear-to-br from-[#8268bc] to-[#9982d0] shadow-lg group-hover:shadow-xl group-hover:scale-105 transition-all duration-200" style={{ width: '36px', height: '36px' }}>
                                 <Sparkles style={{ width: '20px', height: '20px' }} className="text-white" strokeWidth={2.5} />
                             </div>
@@ -94,9 +90,9 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
                         <span className={`font-semibold ${showMenuButton ? '' : 'hidden md:inline'}`} style={{ fontSize: '16px', lineHeight: '24px' }}>Campus Map</span>
                     </Link>
 
-                    {/* Profile Button */}
-                    <button
-                        onClick={handleProfileClick}
+                    {/* Profile Link */}
+                    <Link
+                        href="/settings"
                         className="relative flex items-center justify-center rounded-full bg-linear-to-br from-[#8268bc] to-[#9982d0] hover:from-[#9982d0] hover:to-[#a896e0] shadow-md hover:shadow-lg hover:scale-110 transition-all duration-300 ring-2 ring-[#362955] hover:ring-[#8268bc]/50"
                         aria-label="Profile"
                         style={{ width: '40px', height: '40px', minWidth: '40px', minHeight: '40px' }}
@@ -116,7 +112,7 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
                                 d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
                             />
                         </svg>
-                    </button>
+                    </Link>
                 </div>
             </div>
         </nav>

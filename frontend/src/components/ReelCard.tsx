@@ -2,9 +2,10 @@
 
 import React from 'react';
 import Image from 'next/image';
-import { MapPin, Calendar, Users, Share2, Check, Star, X as XIcon } from 'lucide-react';
+import { Calendar, Users, Share2, Check, Star, X as XIcon } from 'lucide-react';
 import { ContentItem, RsvpStatus } from '@/types';
 import { useRsvp } from '@/hooks/useRsvp';
+import { LocationButton } from './LocationButton';
 
 interface ReelCardProps {
   event: ContentItem;
@@ -30,7 +31,7 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
           text: event.description,
           url: window.location.href,
         });
-      } catch (err) {
+      } catch {
         console.log('Share cancelled');
       }
     } else {
@@ -110,10 +111,12 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
           {/* Metadata Row */}
           <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-[#d4d4d4]">
             {event.location && (
-              <div className="flex items-center gap-1.5 bg-[#2a1f47]/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-[#8268bc]/20">
-                <MapPin className="w-4 h-4 text-[#8268bc]" />
-                <span className="font-medium">{event.location}</span>
-              </div>
+              <LocationButton
+                eventId={event.id}
+                coordinates={event.coordinates}
+                location={event.location}
+                variant="compact"
+              />
             )}
             {event.date && (
               <div className="flex items-center gap-1.5 bg-[#2a1f47]/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-[#8268bc]/20">

@@ -1,62 +1,154 @@
 'use client';
 
+/**
+ * useEvents Hook
+ * Manages event state, persistence, and CRUD operations.
+ * Combines mock events with user-created custom events.
+ */
+
 import { useState, useEffect } from 'react';
 import { ContentItem } from '../types';
-import { mockContent } from '../data/mockData';
+import { uwEvents } from '../data/uwEvents';
+import { storage } from '@/lib/storage';
+import { loadPreviewEvent, deletePreviewEvent } from '@/utils/previewStorage';
+
+const KEY = 'customEvents';
 
 export function useEvents() {
   const [events, setEvents] = useState<ContentItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  /** Load custom events from storage and preview event from sessionStorage on mount */
   useEffect(() => {
-    // Load custom events from localStorage
-    const stored = localStorage.getItem('customEvents');
-    const customEvents: ContentItem[] = stored ? JSON.parse(stored) : [];
+    void (async () => {
+      let customEvents: ContentItem[] = [];
+      try {
+        const saved = await storage.get<ContentItem[]>(KEY);
+        customEvents = Array.isArray(saved) ? saved : [];
+      } finally {
+        // Load preview event from sessionStorage
+        const previewEvent = loadPreviewEvent();
 
-    // Combine mock data with custom events
-    setEvents([...mockContent, ...customEvents]);
-    setIsLoaded(true);
+        // Combine all events: mock + custom + preview (if exists)
+        const allEvents = [
+          ...uwEvents,
+          ...customEvents,
+          ...(previewEvent ? [previewEvent] : [])
+        ];
+
+        setEvents(allEvents);
+        setIsLoaded(true);
+      }
+    })();
   }, []);
 
+  /**
+   * Add a new custom event (optimistic update)
+   * @param event - Event data without ID
+   * @returns The created event with generated ID
+   * @behavior Updates UI immediately, persists async, reverts on failure
+   * @exception Logs error and reverts state if storage fails
+   */
   const addEvent = (event: Omit<ContentItem, 'id'>) => {
     const newEvent: ContentItem = {
       ...event,
       id: `custom-${Date.now()}`,
     };
 
-    // Get current custom events
-    const stored = localStorage.getItem('customEvents');
-    const customEvents: ContentItem[] = stored ? JSON.parse(stored) : [];
+    const prevEvents = events;
+    setEvents([...prevEvents, newEvent]);
 
-    // Add new event
-    const updatedCustomEvents = [...customEvents, newEvent];
-    localStorage.setItem('customEvents', JSON.stringify(updatedCustomEvents));
+    void (async () => {
+      try {
+        const saved = await storage.get<ContentItem[]>(KEY);
+        const customEvents = Array.isArray(saved) ? saved : [];
+        const updatedCustomEvents = [...customEvents, newEvent];
+        await storage.set(KEY, updatedCustomEvents);
 
-    // Update state
-    setEvents([...mockContent, ...updatedCustomEvents]);
+        // Preserve preview event from sessionStorage
+        const previewEvent = loadPreviewEvent();
+        setEvents([...uwEvents, ...updatedCustomEvents, ...(previewEvent ? [previewEvent] : [])]);
+      } catch (err) {
+        console.error('Failed to save event:', err);
+        setEvents(prevEvents);
+      }
+    })();
 
     return newEvent;
   };
 
+  /**
+   * Delete a custom or preview event (optimistic update)
+   * @param eventId - ID of the event to delete
+   * @returns false if not a custom/preview event, true otherwise
+   * @behavior Updates UI immediately, persists async, reverts on failure
+   * @exception Logs error and reverts state if storage fails
+   */
   const deleteEvent = (eventId: string) => {
-    // Only allow deleting custom events
+    // Handle preview events - just clear sessionStorage
+    if (eventId.startsWith('preview-')) {
+      deletePreviewEvent();
+      setEvents(events.filter(event => event.id !== eventId));
+      return true;
+    }
+
+    // Handle custom events - persist to localStorage
     if (!eventId.startsWith('custom-')) {
       return false;
     }
 
-    // Get current custom events
-    const stored = localStorage.getItem('customEvents');
-    const customEvents: ContentItem[] = stored ? JSON.parse(stored) : [];
+    const prevEvents = events;
+    setEvents(prevEvents.filter(event => event.id !== eventId));
 
-    // Remove the event
-    const updatedCustomEvents = customEvents.filter(event => event.id !== eventId);
-    localStorage.setItem('customEvents', JSON.stringify(updatedCustomEvents));
+    void (async () => {
+      try {
+        const saved = await storage.get<ContentItem[]>(KEY);
+        const customEvents = Array.isArray(saved) ? saved : [];
+        const updatedCustomEvents = customEvents.filter(event => event.id !== eventId);
+        await storage.set(KEY, updatedCustomEvents);
 
-    // Update state
-    setEvents([...mockContent, ...updatedCustomEvents]);
+        // Preserve preview event from sessionStorage
+        const previewEvent = loadPreviewEvent();
+        setEvents([...uwEvents, ...updatedCustomEvents, ...(previewEvent ? [previewEvent] : [])]);
+      } catch (err) {
+        console.error('Failed to delete event:', err);
+        setEvents(prevEvents);
+      }
+    })();
 
     return true;
   };
 
-  return { events, addEvent, deleteEvent, isLoaded };
+  /**
+   * Convert a preview event to a permanent custom event
+   * @param previewId - ID of the preview event to finalize
+   * @returns The new custom event, or null if preview not found
+   * @behavior Converts preview to custom event, clears sessionStorage, updates UI
+   * @exception Logs error and returns null if operation fails
+   */
+  const finalizePreview = (previewId: string): ContentItem | null => {
+    // Get preview from sessionStorage
+    const previewEvent = loadPreviewEvent();
+    if (!previewEvent || previewEvent.id !== previewId) return null;
+
+    try {
+      // Create permanent event (reuse addEvent logic)
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, ...eventData } = previewEvent;
+      const newEvent = addEvent(eventData);
+
+      // Clear preview from sessionStorage
+      deletePreviewEvent();
+
+      // Update UI state to remove preview (addEvent already added the new permanent one)
+      setEvents(events.filter(e => e.id !== previewId));
+
+      return newEvent;
+    } catch (err) {
+      console.error('Failed to finalize preview:', err);
+      return null;
+    }
+  };
+
+  return { events, addEvent, deleteEvent, finalizePreview, isLoaded };
 }
