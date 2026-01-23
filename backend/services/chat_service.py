@@ -22,7 +22,7 @@ class ChatService:
         ]
         """
         try:
-            from tag_service import TagService
+            from services.tag_service import TagService
             
             # Check existing conversation count
             existing = supabase.table('conversations') \
@@ -63,7 +63,7 @@ class ChatService:
         Append new messages to an existing conversation
         """
         try:
-            from tag_service import TagService
+            from services.tag_service import TagService
             
             # Get existing conversation
             conv = ChatService.get_conversation(conversation_id)

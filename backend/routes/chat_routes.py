@@ -1,7 +1,16 @@
 from flask import Blueprint, request, jsonify
 from services.chat_service import ChatService
+from services.event_service import EventService
+from openai import OpenAI
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 chat_bp = Blueprint('chats', __name__)
+
+# Initialize OpenAI client
+openai_client = OpenAI(api_key=os.getenv('OPENAI_API_KEY'))
 
 # Create a new conversation
 @chat_bp.route('/', methods=['POST'])
@@ -102,3 +111,95 @@ def clear_user_conversations(user_netid):
         return jsonify({'success': True}), 200
     except Exception:
         return jsonify({'error': 'Internal server error'}), 500
+
+
+# AI Chat endpoint - generates response using events context
+@chat_bp.route('/ai', methods=['POST'])
+def ai_chat():
+    """
+    AI-powered chat endpoint that answers questions about campus events.
+    Uses upcoming events as context for generating responses.
+    """
+    try:
+        data = request.json or {}
+        message = data.get('message')
+        user_netid = data.get('user_netid')
+
+        if not message:
+            return jsonify({'error': 'message is required'}), 400
+
+        # Fetch upcoming events for context
+        events = EventService.get_upcoming_events(limit=20)
+
+        # Format events as context
+        if events:
+            events_context = "\n\n".join([
+                f"Event: {e.get('title', 'Untitled')}\n"
+                f"Organization: {e.get('rsos', {}).get('name', 'Unknown') if e.get('rsos') else 'Unknown'}\n"
+                f"Date/Time: {e.get('date_time', 'TBD')}\n"
+                f"Location: {e.get('location', 'TBD')}\n"
+                f"Description: {e.get('description', 'No description')}\n"
+                f"Tags: {', '.join(e.get('tags', [])) if e.get('tags') else 'None'}"
+                for e in events
+            ])
+        else:
+            events_context = "No upcoming events found."
+
+        # Get conversation history if user is logged in
+        conversation_history = ""
+        if user_netid:
+            try:
+                conversation_history = ChatService.get_conversation_context(user_netid)
+            except:
+                pass
+
+        # Build the system prompt
+        system_prompt = """You are a helpful campus events assistant for University of Washington students.
+You help students discover events, clubs, and activities on campus based on their interests.
+Be friendly, concise, and helpful. When recommending events, include relevant details like date, time, location, and why it might interest the student.
+If asked about events happening "this week" or "today", use the dates from the events provided.
+Always be encouraging about getting involved on campus!"""
+
+        # Build messages for OpenAI
+        messages = [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"""Here are the upcoming campus events:
+
+{events_context}
+
+{f"Previous conversation context:{chr(10)}{conversation_history}" if conversation_history else ""}
+
+Student's question: {message}"""}
+        ]
+
+        # Call OpenAI
+        response = openai_client.chat.completions.create(
+            model="gpt-4o-mini",
+            max_tokens=500,
+            temperature=0.7,
+            messages=messages
+        )
+
+        ai_response = response.choices[0].message.content
+
+        # Save to conversation history if user is logged in
+        if user_netid:
+            try:
+                ChatService.create_conversation(
+                    user_netid=user_netid,
+                    messages=[
+                        {"role": "user", "content": message},
+                        {"role": "assistant", "content": ai_response}
+                    ]
+                )
+            except Exception as e:
+                print(f"Failed to save conversation: {e}")
+
+        return jsonify({
+            'response': ai_response,
+            'events_count': len(events) if events else 0
+        }), 200
+
+    except Exception as e:
+        print(f"AI Chat error: {e}")
+        return jsonify({'error': f'Failed to generate response: {str(e)}'}), 500

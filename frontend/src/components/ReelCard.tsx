@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
 import { MapPin, Calendar, Users, Share2, Check, Star, X as XIcon } from 'lucide-react';
 import { ContentItem, RsvpStatus } from '@/types';
 import { useRsvp } from '@/hooks/useRsvp';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface ReelCardProps {
   event: ContentItem;
@@ -12,14 +13,30 @@ interface ReelCardProps {
 }
 
 const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
-  const { getRsvpStatus, setRsvp, getRsvpSummary } = useRsvp();
+  const { profile } = useUserProfile();
+  const { getRsvpStatus, setRsvp, getRsvpSummary, loadEventRsvp, isRsvpLoading } = useRsvp({
+    userNetid: profile?.id,
+  });
+
+  // Load RSVP data when card mounts or event changes
+  useEffect(() => {
+    if (event.id && profile?.id) {
+      loadEventRsvp(event.id);
+    }
+  }, [event.id, profile?.id, loadEventRsvp]);
 
   const currentStatus = getRsvpStatus(event.id);
   const summary = getRsvpSummary(event.id, event.attendees?.count);
+  const isLoading = isRsvpLoading(event.id);
 
-  const handleRsvpClick = (status: RsvpStatus) => {
+  const handleRsvpClick = async (status: RsvpStatus) => {
     const newStatus = currentStatus === status ? null : status;
-    setRsvp(event.id, newStatus);
+    try {
+      await setRsvp(event.id, newStatus);
+    } catch (error) {
+      // Error is logged in useRsvp, could add toast notification here
+      console.error('RSVP failed:', error);
+    }
   };
 
   const handleShare = async () => {
@@ -42,11 +59,14 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
 
   const getRsvpButtonStyle = (buttonStatus: RsvpStatus) => {
     const isActive = currentStatus === buttonStatus;
+    const isButtonLoading = isLoading && currentStatus !== buttonStatus;
+
     return `
       px-6 py-3 rounded-xl font-bold text-sm
       transition-all duration-200
       border-2
       hover:scale-105 active:scale-95
+      ${isButtonLoading ? 'opacity-50 cursor-wait' : ''}
       ${isActive
         ? 'bg-[#8268bc] text-white border-[#8268bc] shadow-lg shadow-[#8268bc]/50'
         : 'bg-[#2a1f47]/80 backdrop-blur-sm text-[#8268bc] border-[#8268bc]/30 hover:border-[#8268bc]/60'
@@ -147,6 +167,7 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
           <div className="grid grid-cols-2 gap-2 sm:gap-3 mt-4">
             <button
               onClick={() => handleRsvpClick('going')}
+              disabled={isLoading}
               className={getRsvpButtonStyle('going')}
             >
               <div className="flex items-center justify-center gap-2">
@@ -157,6 +178,7 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
 
             <button
               onClick={() => handleRsvpClick('interested')}
+              disabled={isLoading}
               className={getRsvpButtonStyle('interested')}
             >
               <div className="flex items-center justify-center gap-2">
@@ -167,6 +189,7 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
 
             <button
               onClick={() => handleRsvpClick('not_going')}
+              disabled={isLoading}
               className={getRsvpButtonStyle('not_going')}
             >
               <div className="flex items-center justify-center gap-2">

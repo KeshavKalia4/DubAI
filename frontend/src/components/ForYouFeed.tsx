@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo, useState, useCallback } from 'react';
-import { MapPin, Trash2, Calendar, Sparkles } from 'lucide-react';
+import { MapPin, Trash2, Calendar, Sparkles, Loader2, AlertCircle, Users } from 'lucide-react';
 import { ContentItem, UserProfile } from '../types';
 import { useEvents } from '../hooks/useEvents';
 import { generateReelsOrder } from '@/utils/reelsRecommendations';
@@ -42,7 +42,8 @@ const typeColors: Record<string, { border: string; bg: string; text: string; acc
 };
 
 const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
-  const { events, deleteEvent, isLoaded } = useEvents();
+  // Pass user.id to useEvents for personalized feed from API
+  const { events, deleteEvent, isLoaded, isLoading, error } = useEvents({ userNetid: user.id });
 
   // Reels state
   const [reelsState, setReelsState] = useState<{
@@ -58,13 +59,14 @@ const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
   const recommendations = useMemo(() => {
     if (!isLoaded) return [];
 
-    // 1. Filter by Organization
-    const orgContent = events.filter(
-      (item) => item.organizationId === user.organizationId
-    );
+    // Skip organization filter for now - show all events
+    // TODO: Re-enable organization filtering when backend supports it
+    // const orgContent = events.filter(
+    //   (item) => item.organizationId === user.organizationId
+    // );
 
     // 2. Score Content
-    const scoredContent = orgContent.map((item) => {
+    const scoredContent = events.map((item) => {
       let score = 0;
 
       // Exact tag matches
@@ -118,8 +120,36 @@ const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
         <p className="text-sm sm:text-base text-[#a3a3a3]">Personalized recommendations based on your interests</p>
       </div>
 
+      {/* Loading State */}
+      {isLoading && (
+        <div className="flex flex-col items-center justify-center py-20 sm:py-24">
+          <div className="relative">
+            <div className="absolute inset-0 bg-[#8268bc]/20 rounded-full blur-3xl"></div>
+            <div className="relative bg-[#2a1f47]/80 backdrop-blur-sm border-2 border-[#8268bc]/30 rounded-3xl p-12">
+              <Loader2 className="w-16 h-16 text-[#8268bc] mx-auto mb-4 animate-spin" />
+              <p className="text-[#d4d4d4] text-lg sm:text-xl font-semibold">Loading events...</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Error State */}
+      {error && !isLoading && (
+        <div className="flex flex-col items-center justify-center py-20 sm:py-24">
+          <div className="relative">
+            <div className="absolute inset-0 bg-red-500/10 rounded-full blur-3xl"></div>
+            <div className="relative bg-[#2a1f47]/80 backdrop-blur-sm border-2 border-red-500/30 rounded-3xl p-12">
+              <AlertCircle className="w-16 h-16 text-red-400 mx-auto mb-4" />
+              <p className="text-[#d4d4d4] text-lg sm:text-xl font-semibold mb-2">Failed to load events</p>
+              <p className="text-[#a3a3a3] text-sm sm:text-base">{error}</p>
+              <p className="text-[#a3a3a3] text-sm mt-2">Showing cached content instead</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Content Grid */}
-      {recommendations.length > 0 ? (
+      {!isLoading && recommendations.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
           {recommendations.map((item, index) => (
             <ContentCard
@@ -131,7 +161,7 @@ const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
             />
           ))}
         </div>
-      ) : (
+      ) : !isLoading && !error && (
         <div className="text-center py-20 sm:py-24">
           <div className="relative inline-block">
             <div className="absolute inset-0 bg-[#8268bc]/20 rounded-full blur-3xl"></div>
@@ -228,6 +258,12 @@ const ContentCard: React.FC<{
           <h3 className="font-bold text-[#f5f5f5] text-lg sm:text-xl leading-tight group-hover:text-white transition-colors">
             {item.title}
           </h3>
+          {item.rsoName && (
+            <div className="flex items-center gap-2 text-[#8268bc]">
+              <Users className="w-4 h-4 shrink-0" />
+              <span className="text-sm font-medium">{item.rsoName}</span>
+            </div>
+          )}
           <p className="text-[#d4d4d4] text-sm leading-relaxed line-clamp-3 group-hover:text-[#e0e0e0] transition-colors">
             {item.description}
           </p>

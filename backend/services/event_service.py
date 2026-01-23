@@ -72,7 +72,7 @@ class EventService:
     def get_personalized_feed(user_netid: str, limit: int = 20) -> List[Dict]:
         """Get personalized event recommendations for user"""
         try:
-            from tag_service import TagService
+            from services.tag_service import TagService
             
             # Get user's positive tags
             user_tags = TagService.get_user_tags(user_netid, include_negative=False)
@@ -230,7 +230,7 @@ class EventService:
     def rsvp_event(user_netid: str, event_id: str) -> Dict:
         """User RSVPs to an event"""
         try:
-            from tag_service import TagService
+            from services.tag_service import TagService
             
             # Insert or update interaction
             result = supabase.table('user_event_interactions').upsert({
@@ -257,7 +257,7 @@ class EventService:
     def maybe_event(user_netid: str, event_id: str) -> Dict:
         """User marks event as 'maybe'"""
         try:
-            from tag_service import TagService
+            from services.tag_service import TagService
             
             result = supabase.table('user_event_interactions').upsert({
                 'user_netid': user_netid,
@@ -280,7 +280,7 @@ class EventService:
     def decline_event(user_netid: str, event_id: str) -> Dict:
         """User declines an event"""
         try:
-            from tag_service import TagService
+            from services.tag_service import TagService
             
             result = supabase.table('user_event_interactions').upsert({
                 'user_netid': user_netid,

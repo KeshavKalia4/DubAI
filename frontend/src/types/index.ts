@@ -36,6 +36,7 @@ export interface ContentItem {
   date?: string; // ISO string for events
   location?: string;
   imageUrl?: string;
+  rsoName?: string; // RSO/organization name from backend
 
   // Enhanced Features
   coordinates?: { lat: number; lng: number };
@@ -73,4 +74,128 @@ export interface Toast {
   message: string;
   type: ToastType;
   action?: ToastAction;  // ← Optional action button
+}
+
+// ============================================
+// Backend Response Types
+// ============================================
+
+/**
+ * User response from backend user_service.py
+ */
+export interface BackendUser {
+  id: string;
+  netid: string;
+  name: string;
+  email: string;
+  major?: string | null;
+  year?: string | null;
+  created_at: string;
+  last_active?: string | null;
+  onboarded: boolean;
+  tags?: BackendUserTag[];
+}
+
+/**
+ * Response from /users/{netid}/exists endpoint
+ */
+export interface BackendUserExistsResponse {
+  exists: boolean;
+  onboarded?: boolean;
+}
+
+/**
+ * Event response from backend event_service.py
+ */
+export interface BackendEvent {
+  id: string;
+  rso_id: string;
+  title: string;
+  description: string;
+  date_time: string;
+  location: string;
+  tags: string[];
+  created_at: string;
+  updated_at?: string | null;
+  rso_name?: string;
+  rsvp_count?: number;
+  rsvp?: number | string;
+  maybe_count?: number;
+  rsos?: {
+    name: string;
+    is_verified: boolean;
+  };
+}
+
+/**
+ * Event interaction record from backend
+ */
+export interface BackendEventInteraction {
+  id: string;
+  user_netid: string;
+  event_id: string;
+  interaction_type: 'rsvp' | 'maybe' | 'declined';
+  created_at: string;
+}
+
+/**
+ * User's status for a specific event
+ */
+export interface BackendEventStatus {
+  status: 'rsvp' | 'maybe' | 'declined' | null;
+}
+
+/**
+ * Conversation from backend chat_service.py
+ */
+export interface BackendConversation {
+  id: string;
+  user_netid: string;
+  messages: BackendMessage[];
+  detected_tags?: string[];
+  created_at: string;
+  updated_at?: string | null;
+}
+
+/**
+ * Single message in a conversation
+ */
+export interface BackendMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp?: string;
+}
+
+/**
+ * User tag with confidence score from backend tag_service.py
+ */
+export interface BackendUserTag {
+  id: string;
+  user_netid: string;
+  tag_name: string;
+  confidence: number;
+  source: 'onboarding' | 'chat' | 'event_rsvp' | 'event_decline' | 'manual';
+  created_at: string;
+  updated_at?: string | null;
+}
+
+/**
+ * Tag suggestion for onboarding
+ */
+export interface TagSuggestion {
+  id: string;
+  name: string;
+  category: string;
+  display_name?: string;
+}
+
+/**
+ * RSO (Registered Student Organization) from backend
+ */
+export interface BackendRso {
+  id: string;
+  name: string;
+  description?: string;
+  tags?: string[];
+  created_at: string;
 }

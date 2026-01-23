@@ -6,8 +6,9 @@
  * Where: Can be used in any component that needs RSVP functionality
  */
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { RsvpStatus } from '@/types';
+import { eventsApi, followsApi, ApiError } from '@/lib/api';
 
 /**
  * Type for RSVP summary data (returned from API)
@@ -20,64 +21,106 @@ interface RsvpSummary {
 }
 
 /**
- * Custom hook for managing RSVPs
- *
- * Architecture:
- * - State stored in-memory (could be upgraded to localStorage for persistence)
- * - Optimistic updates for instant UI feedback
- * - Abort controller to prevent race conditions
- * - Returns stable references (useCallback) to prevent unnecessary re-renders
+ * Maps frontend RsvpStatus to backend interaction type
  */
-export function useRsvp() {
+function mapStatusToInteractionType(status: RsvpStatus): 'rsvp' | 'maybe' | 'declined' | null {
+  switch (status) {
+    case 'going':
+      return 'rsvp';
+    case 'interested':
+      return 'maybe';
+    case 'not_going':
+      return 'declined';
+    default:
+      return null;
+  }
+}
+
+/**
+ * Maps backend interaction type to frontend RsvpStatus
+ */
+function mapInteractionTypeToStatus(type: 'rsvp' | 'maybe' | 'declined' | null): RsvpStatus {
+  switch (type) {
+    case 'rsvp':
+      return 'going';
+    case 'maybe':
+      return 'interested';
+    case 'declined':
+      return 'not_going';
+    default:
+      return null;
+  }
+}
+
+interface UseRsvpOptions {
+  userNetid?: string;
+}
+
+/**
+ * Custom hook for managing RSVPs with API integration
+ */
+export function useRsvp(options: UseRsvpOptions = {}) {
+  const { userNetid } = options;
+
   /**
    * STATE 1: User's RSVP statuses
    * Map of contentId → RsvpStatus
-   *
-   * Why Map structure?
-   * - Fast O(1) lookup by contentId
-   * - Easy to update single item
-   * - TypeScript-friendly
-   *
-   * Example: { "event-123": "going", "event-456": "interested" }
    */
   const [rsvps, setRsvps] = useState<Record<string, RsvpStatus>>({});
 
   /**
    * STATE 2: RSVP summaries (counts per event)
    * Map of contentId → RsvpSummary
-   *
-   * Why separate from rsvps?
-   * - User's status vs. aggregate counts are different concerns
-   * - Summaries come from API, user status is local
-   *
-   * Example: { "event-123": { going: 15, interested: 8, notGoing: 2 } }
    */
   const [summaries, setSummaries] = useState<Record<string, RsvpSummary>>({});
 
   /**
+   * STATE 3: Loading states per event
+   */
+  const [loading, setLoading] = useState<Record<string, boolean>>({});
+
+  /**
    * REF: AbortController for cancelling in-flight requests
-   *
-   * Why useRef instead of useState?
-   * - Ref doesn't trigger re-renders when changed
-   * - We just need to store the controller, not display it
-   * - Persists across renders (unlike local variables)
-   *
-   * Why AbortController?
-   * - Prevents race conditions (user clicks multiple times fast)
-   * - Cancels outdated requests to save bandwidth
-   * - Native browser API, no extra libraries
    */
   const abortControllerRef = useRef<AbortController | null>(null);
 
   /**
+   * Fetch user's RSVP status for an event from the API
+   */
+  const fetchEventStatus = useCallback(async (eventId: string) => {
+    if (!userNetid) return;
+
+    try {
+      const response = await eventsApi.getUserEventStatus(eventId, userNetid);
+      const status = mapInteractionTypeToStatus(response.status);
+      setRsvps(prev => ({ ...prev, [eventId]: status }));
+    } catch (error) {
+      // Silently fail - use local state
+      console.error('Failed to fetch event status:', error);
+    }
+  }, [userNetid]);
+
+  /**
+   * Fetch RSVP count for an event
+   */
+  const fetchEventRsvpCount = useCallback(async (eventId: string) => {
+    try {
+      const response = await followsApi.getEventRsvpCount(eventId);
+      setSummaries(prev => ({
+        ...prev,
+        [eventId]: {
+          going: response.count,
+          interested: prev[eventId]?.interested || 0,
+          notGoing: prev[eventId]?.notGoing || 0,
+        },
+      }));
+    } catch (error) {
+      console.error('Failed to fetch RSVP count:', error);
+    }
+  }, []);
+
+  /**
    * Get RSVP status for a specific content item
-   *
-   * @param contentId - ID of event/club/announcement
-   * @returns User's RSVP status or null if not RSVP'd
-   *
-   * Why function instead of direct state access?
-   * - Abstraction: Components don't need to know internal structure
-   * - Future-proof: We can change storage without breaking components
    */
   const getRsvpStatus = useCallback((contentId: string): RsvpStatus => {
     return rsvps[contentId] || null;
@@ -85,15 +128,6 @@ export function useRsvp() {
 
   /**
    * Get RSVP summary for a specific content item
-   *
-   * @param contentId - ID of event/club/announcement
-   * @param fallbackCount - Default count if no data (e.g., from ContentItem.attendees.count)
-   * @returns Summary with going/interested/notGoing counts
-   *
-   * Why fallbackCount parameter?
-   * - ContentItem already has attendees.count from backend
-   * - Use that until we fetch real RSVP summary
-   * - Prevents showing "0 attending" when we know there are attendees
    */
   const getRsvpSummary = useCallback((
     contentId: string,
@@ -105,7 +139,7 @@ export function useRsvp() {
       return summary;
     }
 
-    // Fallback: distribute count evenly (rough estimate until real data loads)
+    // Fallback: use provided count
     if (fallbackCount) {
       return {
         going: fallbackCount,
@@ -123,96 +157,127 @@ export function useRsvp() {
   }, [summaries]);
 
   /**
-   * Set/update user's RSVP status
-   *
-   * @param contentId - ID of event/club/announcement
-   * @param status - New RSVP status (or null to remove)
-   *
-   * Architecture decisions:
-   * 1. Optimistic update (update UI immediately)
-   * 2. Cancel previous request if still in-flight
-   * 3. Call API in background
-   * 4. Revert on error
-   *
-   * Why useCallback?
-   * - Returns same function reference across renders
-   * - Prevents child components from re-rendering unnecessarily
-   * - Required when passing functions to dependencies arrays
+   * Check if an RSVP operation is loading
+   */
+  const isRsvpLoading = useCallback((contentId: string): boolean => {
+    return loading[contentId] || false;
+  }, [loading]);
+
+  /**
+   * Set/update user's RSVP status with API sync
    */
   const setRsvp = useCallback(async (
     contentId: string,
     status: RsvpStatus
   ) => {
-    // STEP 1: Cancel any in-flight request for this content
-    // Why? Prevents race conditions if user changes mind quickly
+    // STEP 1: Cancel any in-flight request
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
     }
 
-    // STEP 2: Create new AbortController for this request
+    // STEP 2: Create new AbortController
     const controller = new AbortController();
     abortControllerRef.current = controller;
 
-    // STEP 3: Optimistic update - change UI immediately
-    // Why? Better UX - feels instant, no waiting for API
+    // STEP 3: Optimistic update
     const previousStatus = rsvps[contentId] || null;
     setRsvps(prev => ({
       ...prev,
       [contentId]: status,
     }));
 
-    // STEP 4: Call API in background
-    // Note: In real implementation, this would be actual API call
-    // For now, this is a placeholder showing the pattern
-    try {
-      // TODO: Replace with actual API call
-      // const response = await fetch('/api/rsvp', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ contentId, status }),
-      //   signal: controller.signal,  // ← Enables abort!
-      // });
+    // Update summary counts optimistically
+    setSummaries(prev => {
+      const current = prev[contentId] || { going: 0, interested: 0, notGoing: 0 };
+      const updated = { ...current };
 
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Decrement previous status count
+      if (previousStatus === 'going') updated.going = Math.max(0, updated.going - 1);
+      if (previousStatus === 'interested') updated.interested = Math.max(0, updated.interested - 1);
+      if (previousStatus === 'not_going') updated.notGoing = Math.max(0, updated.notGoing - 1);
 
-      // TODO: Update summary with real data from API
-      // const data = await response.json();
-      // setSummaries(prev => ({
-      //   ...prev,
-      //   [contentId]: data.summary,
-      // }));
+      // Increment new status count
+      if (status === 'going') updated.going += 1;
+      if (status === 'interested') updated.interested += 1;
+      if (status === 'not_going') updated.notGoing += 1;
 
-    } catch (error: any) {
-      // Handle abort separately (not an error, just cancelled)
-      if (error.name === 'AbortError') {
-        console.log('RSVP request cancelled (user changed mind)');
-        return;
+      return { ...prev, [contentId]: updated };
+    });
+
+    // STEP 4: Call API if user is logged in
+    if (userNetid) {
+      setLoading(prev => ({ ...prev, [contentId]: true }));
+
+      try {
+        if (status === null) {
+          // Cancel RSVP
+          await eventsApi.cancelRsvp(contentId, userNetid);
+        } else if (status === 'going') {
+          await eventsApi.rsvp(contentId, userNetid);
+        } else if (status === 'interested') {
+          await eventsApi.maybe(contentId, userNetid);
+        } else if (status === 'not_going') {
+          await eventsApi.decline(contentId, userNetid);
+        }
+
+        // Refresh the count from API after successful update
+        await fetchEventRsvpCount(contentId);
+      } catch (error) {
+        // Handle abort separately
+        if (error instanceof Error && error.name === 'AbortError') {
+          console.log('RSVP request cancelled');
+          return;
+        }
+
+        // Revert optimistic update on error
+        console.error('Failed to save RSVP:', error);
+        setRsvps(prev => ({
+          ...prev,
+          [contentId]: previousStatus,
+        }));
+
+        // Revert summary counts
+        setSummaries(prev => {
+          const current = prev[contentId] || { going: 0, interested: 0, notGoing: 0 };
+          const reverted = { ...current };
+
+          // Undo the optimistic changes
+          if (status === 'going') reverted.going = Math.max(0, reverted.going - 1);
+          if (status === 'interested') reverted.interested = Math.max(0, reverted.interested - 1);
+          if (status === 'not_going') reverted.notGoing = Math.max(0, reverted.notGoing - 1);
+
+          if (previousStatus === 'going') reverted.going += 1;
+          if (previousStatus === 'interested') reverted.interested += 1;
+          if (previousStatus === 'not_going') reverted.notGoing += 1;
+
+          return { ...prev, [contentId]: reverted };
+        });
+
+        // Re-throw for component error handling if needed
+        if (error instanceof ApiError) {
+          throw error;
+        }
+      } finally {
+        setLoading(prev => ({ ...prev, [contentId]: false }));
       }
-
-      // Real error - revert optimistic update
-      console.error('Failed to save RSVP:', error);
-      setRsvps(prev => ({
-        ...prev,
-        [contentId]: previousStatus,
-      }));
-
-      // TODO: Show error toast to user
-      // toast.error('Failed to save RSVP. Please try again.');
     }
-  }, [rsvps]);
+  }, [rsvps, userNetid, fetchEventRsvpCount]);
 
   /**
-   * Return API for components
-   *
-   * Why return object instead of array?
-   * - Named exports are clearer: `const { setRsvp } = useRsvp()`
-   * - vs array: `const [???, setRsvp] = useRsvp()` - what's the first item?
-   * - Object is self-documenting
+   * Load initial RSVP status for an event
    */
+  const loadEventRsvp = useCallback(async (eventId: string) => {
+    await Promise.all([
+      fetchEventStatus(eventId),
+      fetchEventRsvpCount(eventId),
+    ]);
+  }, [fetchEventStatus, fetchEventRsvpCount]);
+
   return {
     getRsvpStatus,
     setRsvp,
     getRsvpSummary,
+    isRsvpLoading,
+    loadEventRsvp,
   };
 }

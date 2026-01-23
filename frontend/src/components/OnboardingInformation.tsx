@@ -1,9 +1,10 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { getOrganizationById } from '../config/organizations';
 import { availableTags } from '../data/mockData';
-import { UserProfile } from '../types';
+import { UserProfile, TagSuggestion } from '../types';
+import { tagsApi } from '@/lib/api';
 
 interface OnboardingInformationProps {
   organizationId: string;
@@ -19,6 +20,34 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
   const [major, setMajor] = useState('');
   const [year, setYear] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [tags, setTags] = useState(availableTags);
+  const [isLoadingTags, setIsLoadingTags] = useState(false);
+
+  // Fetch tag suggestions from API on mount
+  useEffect(() => {
+    async function fetchTags() {
+      setIsLoadingTags(true);
+      try {
+        const suggestions = await tagsApi.getSuggestions();
+        if (suggestions.length > 0) {
+          // Transform API tags to the format expected by the component
+          const formattedTags = suggestions.map((tag: TagSuggestion) => ({
+            id: tag.name,
+            label: tag.display_name || tag.name,
+            category: tag.category as 'topic' | 'identity' | 'career' | 'major',
+          }));
+          setTags(formattedTags);
+        }
+      } catch (error) {
+        console.error('Failed to fetch tag suggestions, using defaults:', error);
+        // Keep using availableTags as fallback
+      } finally {
+        setIsLoadingTags(false);
+      }
+    }
+
+    fetchTags();
+  }, []);
 
   if (!org) return <div>Organization not found</div>;
 
@@ -93,21 +122,27 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
       {step === 2 && (
         <div className="space-y-4 sm:space-y-5">
           <span className="text-gray-900 dark:text-gray-200 font-medium text-sm block">What are you interested in?</span>
-          <div className="flex flex-wrap gap-2 sm:gap-2.5">
-            {availableTags.map((tag) => (
-              <button
-                key={tag.id}
-                onClick={() => toggleTag(tag.id)}
-                className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium border-2 transition-all duration-200 ${
-                  selectedTags.includes(tag.id)
-                    ? 'bg-purple-600 text-white border-purple-600 shadow-md scale-105'
-                    : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/30'
-                }`}
-              >
-                {tag.label}
-              </button>
-            ))}
-          </div>
+          {isLoadingTags ? (
+            <div className="flex items-center justify-center py-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600"></div>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-2 sm:gap-2.5">
+              {tags.map((tag) => (
+                <button
+                  key={tag.id}
+                  onClick={() => toggleTag(tag.id)}
+                  className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium border-2 transition-all duration-200 ${
+                    selectedTags.includes(tag.id)
+                      ? 'bg-purple-600 text-white border-purple-600 shadow-md scale-105'
+                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/30'
+                  }`}
+                >
+                  {tag.label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
