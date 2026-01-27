@@ -1,8 +1,8 @@
 'use client';
-// Frosted glass UI - v2
+
 import React, { useEffect } from 'react';
 import Image from 'next/image';
-import { MapPin, Calendar, Users, Share2, Check, Star, X as XIcon } from 'lucide-react';
+import { MapPin, Calendar, Users, Share2, Check, Star, X as XIcon, ExternalLink } from 'lucide-react';
 import { ContentItem, RsvpStatus } from '@/types';
 import { useRsvp } from '@/hooks/useRsvp';
 import { useAuth } from '@/contexts/AuthContext';
@@ -10,19 +10,20 @@ import { useAuth } from '@/contexts/AuthContext';
 interface ReelCardProps {
   event: ContentItem;
   index: number;
+  isActive?: boolean;
 }
 
-const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
+const ReelCard: React.FC<ReelCardProps> = ({ event, index, isActive = true }) => {
   const { netid } = useAuth();
   const { getRsvpStatus, setRsvp, getRsvpSummary, loadEventRsvp, isRsvpLoading } = useRsvp({
     userNetid: netid || undefined,
   });
 
   useEffect(() => {
-    if (event.id && netid) {
+    if (event.id && netid && isActive) {
       loadEventRsvp(event.id);
     }
-  }, [event.id, netid, loadEventRsvp]);
+  }, [event.id, netid, loadEventRsvp, isActive]);
 
   const currentStatus = getRsvpStatus(event.id);
   const summary = getRsvpSummary(event.id, event.attendees?.count);
@@ -66,101 +67,110 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
     const isButtonLoading = isLoading && currentStatus !== buttonStatus;
 
     if (isActive && buttonStatus === 'going') {
-      return `px-6 py-3 rounded-xl font-semibold text-sm bg-green-500 text-white shadow-lg transition-all ${isButtonLoading ? 'opacity-50' : ''}`;
+      return `flex-1 py-3 rounded-xl font-semibold text-sm bg-green-500 text-white shadow-lg transition-all ${isButtonLoading ? 'opacity-50' : ''}`;
     }
     if (isActive) {
-      return `px-6 py-3 rounded-xl font-semibold text-sm bg-white text-gray-800 shadow-lg transition-all ${isButtonLoading ? 'opacity-50' : ''}`;
+      return `flex-1 py-3 rounded-xl font-semibold text-sm bg-purple-600 text-white shadow-lg transition-all ${isButtonLoading ? 'opacity-50' : ''}`;
     }
-    return `px-6 py-3 rounded-xl font-semibold text-sm bg-white/15 backdrop-blur-sm text-white border border-white/20 hover:bg-white/25 transition-all ${isButtonLoading ? 'opacity-50' : ''}`;
+    return `flex-1 py-3 rounded-xl font-semibold text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all ${isButtonLoading ? 'opacity-50' : ''}`;
+  };
+
+  // Format date
+  const formatDate = () => {
+    if (!event.date) return null;
+    const dateStr = event.date.replace(' ', 'T');
+    const parts = dateStr.split('T');
+    const datePart = parts[0];
+    const timePart = parts[1]?.split('+')[0]?.split('-')[0];
+    const [, month, day] = datePart.split('-').map(Number);
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    let timeStr = '';
+    if (timePart) {
+      const timeParts = timePart.split(':');
+      const hour = parseInt(timeParts[0], 10);
+      const minute = parseInt(timeParts[1], 10) || 0;
+      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const hour12 = hour % 12 || 12;
+      timeStr = ` · ${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`;
+    }
+    return `${months[month - 1]} ${day}${timeStr}`;
   };
 
   return (
-    <div
-      className="relative w-full h-screen h-[100dvh] overflow-hidden"
-      style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
-    >
-      {/* Background Image */}
-      <div className="absolute inset-0 z-[1]">
+    <div className="h-full w-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+      {/* Image Section */}
+      <div className="relative h-48 sm:h-56 flex-shrink-0">
         <Image
           src={event.imageUrl || '/placeholder.svg'}
           alt={event.title}
           fill
-          sizes="100vw"
+          sizes="(max-width: 768px) 100vw, 400px"
           className="object-cover"
           priority={index === 0}
-          loading={index === 0 ? 'eager' : 'lazy'}
           unoptimized
         />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+
+        {/* Tags overlay */}
+        <div className="absolute bottom-3 left-3 flex flex-wrap gap-1.5">
+          {event.tags.slice(0, 3).map((tag) => (
+            <span
+              key={tag}
+              className="text-xs font-medium px-2.5 py-1 rounded-full bg-white/20 backdrop-blur-sm text-white border border-white/30"
+            >
+              #{tag}
+            </span>
+          ))}
+        </div>
       </div>
 
-      {/* Simple dark overlay for readability */}
-      <div className="absolute inset-0 z-[2] bg-black/50" />
+      {/* Content Section */}
+      <div className="flex-1 p-5 flex flex-col overflow-y-auto">
+        {/* Title */}
+        <h2 className="text-xl font-bold text-gray-900 leading-tight mb-2 line-clamp-2">
+          {event.title}
+        </h2>
 
-      {/* Content */}
-      <div className="absolute inset-0 z-[3] flex flex-col justify-end p-4 sm:p-6 pb-8 sm:pb-12">
-        <div className="bg-black/50 backdrop-blur-md rounded-2xl p-5 sm:p-6 border border-white/10 space-y-4 shadow-2xl">
-          {/* Title */}
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight line-clamp-2">
-            {event.title}
-          </h1>
+        {/* Description */}
+        <p className="text-sm text-gray-600 mb-4 line-clamp-3">
+          {event.description}
+        </p>
 
-          {/* Description */}
-          <p className="text-sm sm:text-base text-white/90 line-clamp-2">
-            {event.description}
-          </p>
-
-          {/* Metadata */}
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            {event.location && (
-              <div className="flex items-center gap-2 bg-white/15 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20">
-                <MapPin className="w-4 h-4 text-white/80" />
-                <span className="font-medium text-white text-sm">{event.location}</span>
-              </div>
-            )}
-            {event.date && (
-              <div className="flex items-center gap-2 bg-white/15 backdrop-blur-sm px-4 py-2 rounded-full border border-white/20">
-                <Calendar className="w-4 h-4 text-white" />
-                <span className="font-medium text-white">
-                  {(() => {
-                    const dateStr = event.date.replace(' ', 'T');
-                    const parts = dateStr.split('T');
-                    const datePart = parts[0];
-                    const timePart = parts[1]?.split('+')[0]?.split('-')[0];
-                    const [, month, day] = datePart.split('-').map(Number);
-                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-                    let timeStr = '';
-                    if (timePart) {
-                      const timeParts = timePart.split(':');
-                      const hour = parseInt(timeParts[0], 10);
-                      const minute = parseInt(timeParts[1], 10) || 0;
-                      const ampm = hour >= 12 ? 'PM' : 'AM';
-                      const hour12 = hour % 12 || 12;
-                      timeStr = `, ${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`;
-                    }
-                    return `${months[month - 1]} ${day}${timeStr}`;
-                  })()}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {/* Attendees */}
-          <div className="flex items-center gap-2 text-white">
-            <Users className="w-5 h-5" />
-            <span className="font-semibold">{summary.going} attending</span>
+        {/* Meta Info */}
+        <div className="space-y-2 mb-4">
+          {event.location && (
+            <div className="flex items-center gap-2 text-gray-600">
+              <MapPin className="w-4 h-4 text-purple-600 flex-shrink-0" />
+              <span className="text-sm truncate">{event.location}</span>
+            </div>
+          )}
+          {event.date && (
+            <div className="flex items-center gap-2 text-gray-600">
+              <Calendar className="w-4 h-4 text-purple-600 flex-shrink-0" />
+              <span className="text-sm">{formatDate()}</span>
+            </div>
+          )}
+          <div className="flex items-center gap-2 text-gray-600">
+            <Users className="w-4 h-4 text-purple-600 flex-shrink-0" />
+            <span className="text-sm font-medium">{summary.going} attending</span>
             {summary.interested > 0 && (
-              <span className="text-white/70">· {summary.interested} interested</span>
+              <span className="text-gray-400">· {summary.interested} interested</span>
             )}
           </div>
+        </div>
 
-          {/* RSVP Buttons */}
-          <div className="grid grid-cols-2 gap-2 sm:gap-3 mt-4">
+        {/* Spacer */}
+        <div className="flex-1" />
+
+        {/* RSVP Buttons */}
+        <div className="space-y-3 mt-auto">
+          <div className="flex gap-2">
             <button
               onClick={() => handleRsvpClick('going')}
               disabled={isLoading}
               className={getRsvpButtonStyle('going')}
             >
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-1.5">
                 <Check className="w-4 h-4" />
                 <span>Going</span>
               </div>
@@ -171,18 +181,20 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
               disabled={isLoading}
               className={getRsvpButtonStyle('interested')}
             >
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-1.5">
                 <Star className="w-4 h-4" />
                 <span>Interested</span>
               </div>
             </button>
+          </div>
 
+          <div className="flex gap-2">
             <button
               onClick={() => handleRsvpClick('not_going')}
               disabled={isLoading}
               className={getRsvpButtonStyle('not_going')}
             >
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-1.5">
                 <XIcon className="w-4 h-4" />
                 <span>Not Going</span>
               </div>
@@ -190,26 +202,29 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
 
             <button
               onClick={handleShare}
-              className="px-6 py-3 rounded-xl font-semibold text-sm bg-white/15 backdrop-blur-sm text-white border border-white/20 hover:bg-white/25 transition-all"
+              className="flex-1 py-3 rounded-xl font-semibold text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all"
             >
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-1.5">
                 <Share2 className="w-4 h-4" />
                 <span>Share</span>
               </div>
             </button>
           </div>
 
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2 pt-2">
-            {event.tags.slice(0, 4).map((tag) => (
-              <span
-                key={tag}
-                className="text-xs font-semibold px-3 py-1.5 rounded-full bg-white/10 text-white"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
+          {/* Event Link */}
+          {event.link && (
+            <a
+              href={event.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full py-3 rounded-xl font-semibold text-sm bg-purple-600 text-white text-center hover:bg-purple-700 transition-all"
+            >
+              <div className="flex items-center justify-center gap-1.5">
+                <ExternalLink className="w-4 h-4" />
+                <span>View Event</span>
+              </div>
+            </a>
+          )}
         </div>
       </div>
     </div>
