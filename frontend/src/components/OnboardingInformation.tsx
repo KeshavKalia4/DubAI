@@ -144,20 +144,20 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
             </div>
           ) : (
-            <div className="flex flex-wrap gap-2 sm:gap-2.5">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               {tags.map((tag) => {
                 const isSelected = selectedTags.includes(tag.id);
                 return (
                   <button
                     key={tag.id}
                     onClick={() => toggleTag(tag.id)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium border-2 transition-all duration-200 ${
+                    className={`px-4 py-2.5 rounded-full text-sm font-semibold border-2 transition-all duration-300 transform active:scale-95 ${
                       isSelected
-                        ? 'bg-white text-purple-600 border-white scale-105 shadow-lg'
-                        : 'bg-transparent text-white border-white/40 hover:border-white hover:bg-white/10'
+                        ? 'bg-white text-purple-700 border-white scale-110 shadow-[0_0_20px_rgba(255,255,255,0.5)] ring-2 ring-white/50 ring-offset-2 ring-offset-purple-600'
+                        : 'bg-transparent text-white/90 border-white/30 hover:border-white hover:bg-white/10 hover:scale-105'
                     }`}
                   >
-                    {isSelected && <span className="mr-1">✓</span>}
+                    {isSelected && <span className="mr-1.5 inline-block animate-bounce">✓</span>}
                     {tag.label}
                   </button>
                 );
