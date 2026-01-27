@@ -1,18 +1,49 @@
 'use client';
 
-import Link from 'next/link';
-import { MapPin, Settings } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Settings } from 'lucide-react';
 import NavBar from '@/components/NavBar';
 import OnboardingInformation from '@/components/OnboardingInformation';
 import ForYouFeed from '@/components/ForYouFeed';
 import { useUserProfile } from '@/hooks/useUserProfile';
+import { useAuth } from '@/contexts/AuthContext';
+import { userApi } from '@/lib/api';
 
 export default function Home() {
-  const { profile, setProfile, clearProfile, isLoaded } = useUserProfile();
+  const { profile, setProfile, clearProfile, isLoaded, syncWithBackend } = useUserProfile();
+  const { netid, isLoading: authLoading } = useAuth();
+  const [checkingOnboarding, setCheckingOnboarding] = useState(true);
+  const [needsOnboarding, setNeedsOnboarding] = useState(false);
   const defaultOrgId = 'uw-seattle';
 
-  // Wait for localStorage to load before rendering content
-  if (!isLoaded) {
+  // Check onboarding status from backend
+  useEffect(() => {
+    async function checkOnboarding() {
+      if (!netid || authLoading) return;
+
+      try {
+        const result = await userApi.exists(netid);
+        if (result.exists && result.onboarded) {
+          // User is onboarded, sync profile from backend
+          await syncWithBackend(netid);
+          setNeedsOnboarding(false);
+        } else {
+          setNeedsOnboarding(true);
+        }
+      } catch (error) {
+        console.error('Failed to check onboarding status:', error);
+        // Fall back to localStorage profile check
+        setNeedsOnboarding(!profile);
+      } finally {
+        setCheckingOnboarding(false);
+      }
+    }
+
+    checkOnboarding();
+  }, [netid, authLoading]);
+
+  // Wait for auth and onboarding check
+  if (authLoading || checkingOnboarding || !isLoaded) {
     return (
       <div className="min-h-screen bg-[#0f0a1a]">
         <NavBar />
@@ -28,11 +59,14 @@ export default function Home() {
       <NavBar />
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-12">
-          {/* Conditional: No profile -> onboarding, has profile -> feed */}
-          {!profile ? (
+          {/* Conditional: Needs onboarding -> show onboarding, otherwise -> feed */}
+          {needsOnboarding || !profile ? (
             <OnboardingInformation
               organizationId={defaultOrgId}
-              onComplete={(newProfile) => setProfile(newProfile)}
+              onComplete={(newProfile) => {
+                setProfile(newProfile);
+                setNeedsOnboarding(false);
+              }}
             />
           ) : (
           <div className="space-y-6 sm:space-y-8 md:space-y-10">

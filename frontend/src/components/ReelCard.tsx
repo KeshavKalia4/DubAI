@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { MapPin, Calendar, Users, Share2, Check, Star, X as XIcon } from 'lucide-react';
 import { ContentItem, RsvpStatus } from '@/types';
 import { useRsvp } from '@/hooks/useRsvp';
-import { useUserProfile } from '@/hooks/useUserProfile';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ReelCardProps {
   event: ContentItem;
@@ -13,17 +13,17 @@ interface ReelCardProps {
 }
 
 const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
-  const { profile } = useUserProfile();
+  const { netid } = useAuth();
   const { getRsvpStatus, setRsvp, getRsvpSummary, loadEventRsvp, isRsvpLoading } = useRsvp({
-    userNetid: profile?.id,
+    userNetid: netid || undefined,
   });
 
   // Load RSVP data when card mounts or event changes
   useEffect(() => {
-    if (event.id && profile?.id) {
+    if (event.id && netid) {
       loadEventRsvp(event.id);
     }
-  }, [event.id, profile?.id, loadEventRsvp]);
+  }, [event.id, netid, loadEventRsvp]);
 
   const currentStatus = getRsvpStatus(event.id);
   const summary = getRsvpSummary(event.id, event.attendees?.count);
@@ -33,6 +33,10 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
     const newStatus = currentStatus === status ? null : status;
     try {
       await setRsvp(event.id, newStatus);
+      // If clicking "Going" and event has a link, open it in new tab
+      if (status === 'going' && newStatus === 'going' && event.link) {
+        window.open(event.link, '_blank', 'noopener,noreferrer');
+      }
     } catch (error) {
       // Error is logged in useRsvp, could add toast notification here
       console.error('RSVP failed:', error);
@@ -89,13 +93,14 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
       {/* Background Image */}
       <div className="absolute inset-0 z-[1]">
         <Image
-          src={event.imageUrl || '/placeholder.jpg'}
+          src={event.imageUrl || '/placeholder.svg'}
           alt={event.title}
           fill
           sizes="100vw"
           className="object-cover"
           priority={index === 0}
           loading={index === 0 ? 'eager' : 'lazy'}
+          unoptimized
         />
       </div>
 
@@ -139,12 +144,25 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
               <div className="flex items-center gap-1.5 bg-[#2a1f47]/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-[#8268bc]/20">
                 <Calendar className="w-4 h-4 text-[#8268bc]" />
                 <span className="font-medium">
-                  {new Date(event.date).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: 'numeric',
-                    minute: '2-digit'
-                  })}
+                  {(() => {
+                    // Parse date without timezone conversion - handle both 'T' and space separators
+                    const dateStr = event.date.replace(' ', 'T');
+                    const parts = dateStr.split('T');
+                    const datePart = parts[0];
+                    const timePart = parts[1]?.split('+')[0]?.split('-')[0]; // Remove timezone offset if present
+                    const [year, month, day] = datePart.split('-').map(Number);
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    let timeStr = '';
+                    if (timePart) {
+                      const timeParts = timePart.split(':');
+                      const hour = parseInt(timeParts[0], 10);
+                      const minute = parseInt(timeParts[1], 10) || 0;
+                      const ampm = hour >= 12 ? 'PM' : 'AM';
+                      const hour12 = hour % 12 || 12;
+                      timeStr = `, ${hour12}:${minute.toString().padStart(2, '0')} ${ampm}`;
+                    }
+                    return `${months[month - 1]} ${day}${timeStr}`;
+                  })()}
                 </span>
               </div>
             )}

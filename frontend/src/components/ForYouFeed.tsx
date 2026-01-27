@@ -238,7 +238,13 @@ const ContentCard: React.FC<{
             {item.date && (
               <span className="flex items-center gap-1.5 text-xs text-[#d4d4d4] font-bold bg-[#2a1f47]/80 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-[#8268bc]/20" suppressHydrationWarning>
                 <Calendar className="w-3 h-3" />
-                {new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                {(() => {
+                  const dateStr = item.date.replace(' ', 'T');
+                  const datePart = dateStr.split('T')[0];
+                  const [year, month, day] = datePart.split('-').map(Number);
+                  const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                  return `${months[month - 1]} ${day}`;
+                })()}
               </span>
             )}
             {isCustomEvent && (

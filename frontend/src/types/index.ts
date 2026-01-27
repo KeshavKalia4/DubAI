@@ -37,6 +37,7 @@ export interface ContentItem {
   location?: string;
   imageUrl?: string;
   rsoName?: string; // RSO/organization name from backend
+  link?: string; // External link for the event
 
   // Enhanced Features
   coordinates?: { lat: number; lng: number };
@@ -115,6 +116,8 @@ export interface BackendEvent {
   date_time: string;
   location: string;
   tags: string[];
+  image_path?: string | null;
+  link?: string | null;
   created_at: string;
   updated_at?: string | null;
   rso_name?: string;

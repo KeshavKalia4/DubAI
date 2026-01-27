@@ -5,6 +5,8 @@ import { getOrganizationById } from '../config/organizations';
 import { availableTags } from '../data/mockData';
 import { UserProfile, TagSuggestion } from '../types';
 import { tagsApi } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
+import { useUserProfile } from '@/hooks/useUserProfile';
 
 interface OnboardingInformationProps {
   organizationId: string;
@@ -16,12 +18,15 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
   onComplete,
 }) => {
   const org = getOrganizationById(organizationId);
+  const { netid, user } = useAuth();
+  const { completeOnboarding } = useUserProfile();
   const [step, setStep] = useState(1);
   const [major, setMajor] = useState('');
   const [year, setYear] = useState('');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [tags, setTags] = useState(availableTags);
   const [isLoadingTags, setIsLoadingTags] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Fetch tag suggestions from API on mount
   useEffect(() => {
@@ -51,21 +56,44 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
 
   if (!org) return <div>Organization not found</div>;
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (step < 2) {
       setStep(step + 1);
     } else {
-      // Complete
-      const profile: UserProfile = {
-        id: crypto.randomUUID(),
-        name: 'Demo User',
-        email: 'demo@' + org.domains[0],
-        organizationId: org.id,
-        major,
-        year,
-        tags: selectedTags,
-      };
-      onComplete(profile);
+      // Complete onboarding
+      if (!netid || !user) {
+        console.error('No user logged in');
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        // Call backend to complete onboarding
+        const profile = await completeOnboarding(
+          netid,
+          user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+          user.email || '',
+          major,
+          year,
+          selectedTags
+        );
+        onComplete(profile);
+      } catch (error) {
+        console.error('Failed to complete onboarding:', error);
+        // Fallback to local profile
+        const localProfile: UserProfile = {
+          id: netid,
+          name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+          email: user.email || '',
+          organizationId: org.id,
+          major,
+          year,
+          tags: selectedTags,
+        };
+        onComplete(localProfile);
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -134,8 +162,8 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
                   onClick={() => toggleTag(tag.id)}
                   className={`px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-medium border-2 transition-all duration-200 ${
                     selectedTags.includes(tag.id)
-                      ? 'bg-purple-600 text-white border-purple-600 shadow-md scale-105'
-                      : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-purple-300 dark:hover:border-purple-500 hover:bg-purple-50 dark:hover:bg-purple-900/30'
+                      ? 'bg-[#8268bc] text-black border-[#8268bc] shadow-lg shadow-[#8268bc]/40 scale-105'
+                      : 'bg-[#1a1425] text-[#d4d4d4] border-[#8268bc]/30 hover:border-[#8268bc]/60 hover:bg-[#2a1f47]'
                   }`}
                 >
                   {tag.label}
@@ -149,10 +177,10 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
       <div className="mt-8 sm:mt-10 flex justify-end">
         <button
           onClick={handleNext}
-          disabled={step === 1 && (!major || !year)}
+          disabled={(step === 1 && (!major || !year)) || isSubmitting}
           className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl hover:shadow-lg hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 transition-all duration-200 font-medium text-sm sm:text-base"
         >
-          {step === 2 ? 'Finish' : 'Next'}
+          {isSubmitting ? 'Saving...' : step === 2 ? 'Finish' : 'Next'}
         </button>
       </div>
     </div>

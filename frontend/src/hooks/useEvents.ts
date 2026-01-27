@@ -25,7 +25,9 @@ function transformBackendEvent(backendEvent: BackendEvent): ContentItem {
     tags: backendEvent.tags || [],
     date: backendEvent.date_time,
     location: backendEvent.location,
+    imageUrl: backendEvent.image_path || undefined,
     rsoName,
+    link: backendEvent.link || undefined,
     attendees: {
       count: rsvpCount,
       friends: [], // Will be populated separately if needed
