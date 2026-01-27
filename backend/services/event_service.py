@@ -2,6 +2,24 @@ from config import supabase
 from typing import List, Dict, Optional
 from datetime import datetime
 
+
+def normalize_tags(tags):
+    """Normalize tags - handle comma-separated strings in array"""
+    if not tags:
+        return []
+    # If tags is a list with a single comma-separated string, split it
+    if len(tags) == 1 and isinstance(tags[0], str) and ',' in tags[0]:
+        return [t.strip() for t in tags[0].split(',')]
+    return tags
+
+
+def process_event(event: Dict) -> Dict:
+    """Process event to normalize tags"""
+    if event and 'tags' in event:
+        event['tags'] = normalize_tags(event['tags'])
+    return event
+
+
 class EventService:
     
     # ============================================
@@ -46,24 +64,23 @@ class EventService:
                 .select('*, rsos(name, is_verified)') \
                 .eq('id', event_id) \
                 .execute()
-            
-            return result.data[0] if result.data else None
+
+            return process_event(result.data[0]) if result.data else None
         except Exception as e:
             print(f"Error getting event: {e}")
             return None
-    
+
     @staticmethod
     def get_upcoming_events(limit: int = 50) -> List[Dict]:
-        """Get all upcoming events"""
+        """Get all events (no date filter for now)"""
         try:
             result = supabase.table('events') \
                 .select('*, rsos(name, is_verified)') \
-                .gte('date_time', datetime.utcnow().isoformat()) \
-                .order('date_time') \
+                .order('date_time', desc=True) \
                 .limit(limit) \
                 .execute()
-            
-            return result.data
+
+            return [process_event(e) for e in result.data]
         except Exception as e:
             print(f"Error getting upcoming events: {e}")
             return []

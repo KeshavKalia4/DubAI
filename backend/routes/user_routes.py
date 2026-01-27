@@ -44,11 +44,11 @@ def get_user_with_tags(netid):
         return jsonify({'error': 'User not found'}), 404
     return jsonify(user), 200   
 
-# Check if user exists
+# Check if user exists and onboarding status
 @user_bp.route('/<netid>/exists', methods=['GET'])
 def check_user_exists(netid):
-    user = UserService.check_user_exists(netid)
-    return jsonify(user), 200
+    result = UserService.check_user_exists(netid)
+    return jsonify(result), 200
 
 # Update a user
 @user_bp.route('/<netid>', methods=['PUT'])
@@ -62,10 +62,8 @@ def update_user(netid):
 # Update last active
 @user_bp.route('/<netid>/last-active', methods=['PUT'])
 def update_last_active(netid):
-    user = UserService.update_last_active(netid)
-    if not user:
-        return jsonify({'error': 'User not found'}), 404
-    return jsonify(user), 200
+    UserService.update_last_active(netid)
+    return jsonify({'success': True}), 200
 
 # Delete a user
 @user_bp.route('/<netid>', methods=['DELETE'])

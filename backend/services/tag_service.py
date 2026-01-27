@@ -104,32 +104,41 @@ class TagService:
     
     @staticmethod
     def get_tag_suggestions() -> List[Dict]:
-        """Get suggested tags for onboarding"""
+        """Get suggested tags from existing events"""
         try:
-            result = supabase.table('tag_suggestions') \
-                .select('*') \
-                .order('display_order') \
-                .execute()
-            
-            return result.data
+            # Get all events and extract unique tags
+            result = supabase.table('events').select('tags').execute()
+
+            if not result.data:
+                return []
+
+            # Collect unique tags from all events
+            unique_tags = set()
+            for event in result.data:
+                tags = event.get('tags', [])
+                if tags:
+                    for tag in tags:
+                        # Handle comma-separated string (e.g., "tech,ai,coding")
+                        if isinstance(tag, str) and ',' in tag:
+                            for t in tag.split(','):
+                                unique_tags.add(t.strip())
+                        else:
+                            unique_tags.add(tag)
+
+            # Convert to list of dicts for frontend
+            suggestions = [
+                {'id': str(i), 'name': tag, 'category': 'interests', 'display_order': i}
+                for i, tag in enumerate(sorted(unique_tags), 1)
+            ]
+            return suggestions
         except Exception as e:
             print(f"Error getting tag suggestions: {e}")
             return []
-    
+
     @staticmethod
     def get_tags_by_category(category: str) -> List[Dict]:
-        """Get tag suggestions by category"""
-        try:
-            result = supabase.table('tag_suggestions') \
-                .select('*') \
-                .eq('category', category) \
-                .order('display_order') \
-                .execute()
-            
-            return result.data
-        except Exception as e:
-            print(f"Error getting tags by category: {e}")
-            return []
+        """Get tag suggestions by category (all tags are 'interests' category)"""
+        return TagService.get_tag_suggestions()
     
     # ============================================
     # DELETE

@@ -5,13 +5,15 @@ from routes import api_bp
 
 
 def create_app() -> Flask:
-    app = Flask(__name__)
-    CORS(app)
-    app.register_blueprint(api_bp, url_prefix="/api")
-    return app
+    application = Flask(__name__)
+    CORS(application)
+    application.register_blueprint(api_bp, url_prefix="/api")
+    return application
 
+
+# Create app instance for gunicorn (gunicorn app:app)
+app = create_app()
 
 if __name__ == "__main__":
-    app = create_app()
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5001, debug=True)
 
