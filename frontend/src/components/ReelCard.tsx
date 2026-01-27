@@ -66,9 +66,9 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
     const isButtonLoading = isLoading && currentStatus !== buttonStatus;
 
     if (isActive) {
-      return `px-6 py-3 rounded-lg font-semibold text-sm bg-purple-600 text-white border-2 border-purple-600 ${isButtonLoading ? 'opacity-50' : ''}`;
+      return `px-6 py-3 rounded-lg font-semibold text-sm bg-white text-purple-600 border-2 border-white ${isButtonLoading ? 'opacity-50' : ''}`;
     }
-    return `px-6 py-3 rounded-lg font-semibold text-sm bg-gray-900 text-white border-2 border-gray-700 hover:border-purple-500 ${isButtonLoading ? 'opacity-50' : ''}`;
+    return `px-6 py-3 rounded-lg font-semibold text-sm bg-purple-600 text-white border-2 border-purple-500 hover:bg-purple-500 ${isButtonLoading ? 'opacity-50' : ''}`;
   };
 
   return (
@@ -109,14 +109,14 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
           {/* Metadata */}
           <div className="flex flex-wrap items-center gap-3 text-sm">
             {event.location && (
-              <div className="flex items-center gap-1.5 bg-gray-900 px-3 py-2 rounded-lg">
-                <MapPin className="w-4 h-4 text-purple-400" />
+              <div className="flex items-center gap-1.5 bg-purple-600 px-3 py-2 rounded-lg">
+                <MapPin className="w-4 h-4 text-white" />
                 <span className="font-medium text-white">{event.location}</span>
               </div>
             )}
             {event.date && (
-              <div className="flex items-center gap-1.5 bg-gray-900 px-3 py-2 rounded-lg">
-                <Calendar className="w-4 h-4 text-purple-400" />
+              <div className="flex items-center gap-1.5 bg-purple-600 px-3 py-2 rounded-lg">
+                <Calendar className="w-4 h-4 text-white" />
                 <span className="font-medium text-white">
                   {(() => {
                     const dateStr = event.date.replace(' ', 'T');
@@ -187,7 +187,7 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
 
             <button
               onClick={handleShare}
-              className="px-6 py-3 rounded-lg font-semibold text-sm bg-gray-900 text-white border-2 border-gray-700 hover:border-purple-500"
+              className="px-6 py-3 rounded-lg font-semibold text-sm bg-purple-600 text-white border-2 border-purple-500 hover:bg-purple-500"
             >
               <div className="flex items-center justify-center gap-2">
                 <Share2 className="w-4 h-4" />

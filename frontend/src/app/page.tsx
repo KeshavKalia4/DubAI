@@ -66,32 +66,32 @@ export default function Home() {
           ) : (
           <div className="space-y-6 sm:space-y-8">
             {/* Profile Card */}
-            <div className="bg-gray-900 p-6 sm:p-8 rounded-xl shadow-lg">
+            <div className="bg-purple-600 p-6 sm:p-8 rounded-xl shadow-lg">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-white">Your Profile</h2>
                 <button
                   onClick={clearProfile}
-                  className="p-2 rounded-lg hover:bg-gray-800 transition-colors"
+                  className="p-2 rounded-lg hover:bg-purple-500 transition-colors"
                   aria-label="Reset Profile"
                 >
-                  <Settings className="w-5 h-5 text-gray-400" />
+                  <Settings className="w-5 h-5 text-white/80" />
                 </button>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-gray-800 rounded-lg p-4">
-                  <div className="text-xs text-gray-400 uppercase tracking-wider mb-1 font-medium">Major</div>
-                  <div className="text-lg font-semibold text-purple-400">{profile.major}</div>
+                <div className="bg-purple-500 rounded-lg p-4">
+                  <div className="text-xs text-white/70 uppercase tracking-wider mb-1 font-medium">Major</div>
+                  <div className="text-lg font-semibold text-white">{profile.major}</div>
                 </div>
 
-                <div className="bg-gray-800 rounded-lg p-4">
-                  <div className="text-xs text-gray-400 uppercase tracking-wider mb-1 font-medium">Year</div>
-                  <div className="text-lg font-semibold text-purple-400">{profile.year}</div>
+                <div className="bg-purple-500 rounded-lg p-4">
+                  <div className="text-xs text-white/70 uppercase tracking-wider mb-1 font-medium">Year</div>
+                  <div className="text-lg font-semibold text-white">{profile.year}</div>
                 </div>
 
-                <div className="bg-gray-800 rounded-lg p-4">
-                  <div className="text-xs text-gray-400 uppercase tracking-wider mb-1 font-medium">Interests</div>
-                  <div className="text-sm font-semibold text-purple-400 truncate">
+                <div className="bg-purple-500 rounded-lg p-4">
+                  <div className="text-xs text-white/70 uppercase tracking-wider mb-1 font-medium">Interests</div>
+                  <div className="text-sm font-semibold text-white truncate">
                     {profile.tags.map(tag => tag.charAt(0).toUpperCase() + tag.slice(1)).join(', ')}
                   </div>
                 </div>

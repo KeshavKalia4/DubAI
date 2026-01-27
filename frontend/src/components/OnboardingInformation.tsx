@@ -99,18 +99,18 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
   };
 
   return (
-    <div className="max-w-2xl mx-auto bg-gray-900 p-6 sm:p-8 md:p-10 rounded-xl shadow-lg">
+    <div className="max-w-2xl mx-auto bg-purple-600 p-6 sm:p-8 md:p-10 rounded-xl shadow-lg">
       <div className="mb-6 sm:mb-8">
         <h2 className="text-2xl sm:text-3xl font-bold text-white mb-2">Welcome to {org.name}</h2>
-        <p className="text-gray-400 text-base sm:text-lg">Let&apos;s personalize your experience.</p>
+        <p className="text-white/80 text-base sm:text-lg">Let&apos;s personalize your experience.</p>
       </div>
 
       {step === 1 && (
         <div className="space-y-5 sm:space-y-6">
           <label className="block">
-            <span className="text-gray-300 font-medium text-sm mb-2 block">What is your Major?</span>
+            <span className="text-white font-medium text-sm mb-2 block">What is your Major?</span>
             <select
-              className="block w-full rounded-lg border border-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 p-3 text-sm sm:text-base text-white bg-gray-800"
+              className="block w-full rounded-lg border border-purple-400 focus:border-white focus:ring-2 focus:ring-white/20 p-3 text-sm sm:text-base text-white bg-purple-500"
               value={major}
               onChange={(e) => setMajor(e.target.value)}
             >
@@ -121,9 +121,9 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
             </select>
           </label>
           <label className="block">
-            <span className="text-gray-300 font-medium text-sm mb-2 block">What year are you?</span>
+            <span className="text-white font-medium text-sm mb-2 block">What year are you?</span>
             <select
-              className="block w-full rounded-lg border border-gray-700 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20 p-3 text-sm sm:text-base text-white bg-gray-800"
+              className="block w-full rounded-lg border border-purple-400 focus:border-white focus:ring-2 focus:ring-white/20 p-3 text-sm sm:text-base text-white bg-purple-500"
               value={year}
               onChange={(e) => setYear(e.target.value)}
             >
@@ -138,10 +138,10 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
 
       {step === 2 && (
         <div className="space-y-4 sm:space-y-5">
-          <span className="text-gray-300 font-medium text-sm block">What are you interested in?</span>
+          <span className="text-white font-medium text-sm block">What are you interested in?</span>
           {isLoadingTags ? (
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
             </div>
           ) : (
             <div className="flex flex-wrap gap-2 sm:gap-2.5">
@@ -151,8 +151,8 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
                   onClick={() => toggleTag(tag.id)}
                   className={`px-4 py-2 rounded-full text-sm font-medium border-2 transition-all ${
                     selectedTags.includes(tag.id)
-                      ? 'bg-purple-600 text-white border-purple-600'
-                      : 'bg-gray-800 text-gray-300 border-gray-600 hover:border-purple-500'
+                      ? 'bg-white text-purple-600 border-white'
+                      : 'bg-purple-500 text-white border-purple-400 hover:border-white'
                   }`}
                 >
                   {tag.label}
@@ -167,7 +167,7 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
         <button
           onClick={handleNext}
           disabled={(step === 1 && (!major || !year)) || isSubmitting}
-          className="bg-purple-600 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm sm:text-base"
+          className="bg-white text-purple-600 px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors font-medium text-sm sm:text-base"
         >
           {isSubmitting ? 'Saving...' : step === 2 ? 'Finish' : 'Next'}
         </button>

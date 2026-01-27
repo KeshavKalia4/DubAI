@@ -54,7 +54,7 @@ export default function LoginPage() {
           <span className="font-bold text-2xl text-purple-600">FindMyEvents</span>
         </div>
 
-        <div className="bg-gray-900 rounded-xl p-8 shadow-lg">
+        <div className="bg-purple-600 rounded-xl p-8 shadow-lg">
           <h1 className="text-2xl font-bold text-white mb-6 text-center">
             {isSignUp ? 'Create Account' : 'Welcome Back'}
           </h1>
@@ -62,14 +62,14 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {isSignUp && (
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-2">
+                <label className="block text-sm font-medium text-white mb-2">
                   Name
                 </label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 rounded-lg border border-gray-700 bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                  className="w-full px-4 py-3 rounded-lg border border-purple-400 bg-purple-500 text-white placeholder-white/60 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/20"
                   placeholder="Your name"
                   required={isSignUp}
                 />
@@ -77,28 +77,28 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Email
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-gray-700 bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                className="w-full px-4 py-3 rounded-lg border border-purple-400 bg-purple-500 text-white placeholder-white/60 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/20"
                 placeholder="you@example.com"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
+              <label className="block text-sm font-medium text-white mb-2">
                 Password
               </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 rounded-lg border border-gray-700 bg-gray-800 text-white placeholder-gray-500 focus:outline-none focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
+                className="w-full px-4 py-3 rounded-lg border border-purple-400 bg-purple-500 text-white placeholder-white/60 focus:outline-none focus:border-white focus:ring-2 focus:ring-white/20"
                 placeholder="••••••••"
                 required
                 minLength={6}
@@ -112,7 +112,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-3 rounded-lg bg-purple-600 text-white font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50"
+              className="w-full py-3 rounded-lg bg-white text-purple-600 font-semibold hover:bg-gray-100 transition-colors disabled:opacity-50"
             >
               {isLoading ? 'Loading...' : isSignUp ? 'Sign Up' : 'Sign In'}
             </button>
@@ -121,7 +121,7 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <button
               onClick={() => setIsSignUp(!isSignUp)}
-              className="text-purple-400 hover:text-purple-300 text-sm font-medium"
+              className="text-white/80 hover:text-white text-sm font-medium"
             >
               {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
             </button>
