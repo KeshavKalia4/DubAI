@@ -145,19 +145,23 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
             </div>
           ) : (
             <div className="flex flex-wrap gap-2 sm:gap-2.5">
-              {tags.map((tag) => (
-                <button
-                  key={tag.id}
-                  onClick={() => toggleTag(tag.id)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium border-2 transition-all ${
-                    selectedTags.includes(tag.id)
-                      ? 'bg-white text-purple-600 border-white'
-                      : 'bg-purple-500 text-white border-purple-400 hover:border-white'
-                  }`}
-                >
-                  {tag.label}
-                </button>
-              ))}
+              {tags.map((tag) => {
+                const isSelected = selectedTags.includes(tag.id);
+                return (
+                  <button
+                    key={tag.id}
+                    onClick={() => toggleTag(tag.id)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium border-2 transition-all duration-200 ${
+                      isSelected
+                        ? 'bg-white text-purple-600 border-white scale-105 shadow-lg'
+                        : 'bg-transparent text-white border-white/40 hover:border-white hover:bg-white/10'
+                    }`}
+                  >
+                    {isSelected && <span className="mr-1">✓</span>}
+                    {tag.label}
+                  </button>
+                );
+              })}
             </div>
           )}
         </div>
