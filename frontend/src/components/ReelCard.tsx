@@ -33,9 +33,15 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
     const newStatus = currentStatus === status ? null : status;
     try {
       await setRsvp(event.id, newStatus);
-      // If clicking "Going" and event has a link, open it in new tab
+      // If clicking "Going" and event has a link, open it
       if (status === 'going' && newStatus === 'going' && event.link) {
-        window.open(event.link, '_blank', 'noopener,noreferrer');
+        // Use direct navigation for mobile compatibility (window.open can be blocked)
+        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+        if (isMobile) {
+          window.location.href = event.link;
+        } else {
+          window.open(event.link, '_blank', 'noopener,noreferrer');
+        }
       }
     } catch (error) {
       // Error is logged in useRsvp, could add toast notification here
