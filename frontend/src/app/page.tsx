@@ -66,7 +66,7 @@ export default function Home() {
           ) : (
           <div className="space-y-6 sm:space-y-8">
             {/* Profile Card */}
-            <div className="bg-purple-600 p-6 sm:p-8 rounded-xl shadow-lg">
+            <div className="bg-purple-600 p-6 sm:p-8 rounded-xl shadow-lg border-2 border-white">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-bold text-white">Your Profile</h2>
                 <button
