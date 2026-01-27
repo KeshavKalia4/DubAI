@@ -31,16 +31,24 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index, isActive = true }) =>
 
   const handleRsvpClick = async (status: RsvpStatus) => {
     const newStatus = currentStatus === status ? null : status;
+
+    // Redirect immediately for "going" - don't wait for API
+    if (status === 'going' && newStatus === 'going' && event.link) {
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      // Fire API call in background (don't await)
+      setRsvp(event.id, newStatus).catch(err => console.error('RSVP failed:', err));
+      // Redirect immediately
+      if (isMobile) {
+        window.location.href = event.link;
+      } else {
+        window.open(event.link, '_blank', 'noopener,noreferrer');
+      }
+      return;
+    }
+
+    // For other statuses, wait for API
     try {
       await setRsvp(event.id, newStatus);
-      if (status === 'going' && newStatus === 'going' && event.link) {
-        const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-        if (isMobile) {
-          window.location.href = event.link;
-        } else {
-          window.open(event.link, '_blank', 'noopener,noreferrer');
-        }
-      }
     } catch (error) {
       console.error('RSVP failed:', error);
     }
