@@ -66,9 +66,9 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
     const isButtonLoading = isLoading && currentStatus !== buttonStatus;
 
     if (isActive) {
-      return `px-6 py-3 rounded-lg font-semibold text-sm bg-white text-purple-600 border-2 border-white ${isButtonLoading ? 'opacity-50' : ''}`;
+      return `px-6 py-3 rounded-lg font-semibold text-sm bg-white text-black border-2 border-white ${isButtonLoading ? 'opacity-50' : ''}`;
     }
-    return `px-6 py-3 rounded-lg font-semibold text-sm bg-purple-500 text-white border-2 border-white/50 hover:bg-purple-400 ${isButtonLoading ? 'opacity-50' : ''}`;
+    return `px-6 py-3 rounded-lg font-semibold text-sm bg-gray-800 text-white border-2 border-white/50 hover:bg-gray-700 ${isButtonLoading ? 'opacity-50' : ''}`;
   };
 
   return (
@@ -95,7 +95,7 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
 
       {/* Content */}
       <div className="absolute inset-0 z-[3] flex flex-col justify-end p-4 sm:p-6 pb-8 sm:pb-12">
-        <div className="bg-purple-600 rounded-xl p-4 sm:p-6 border-2 border-white space-y-3 sm:space-y-4">
+        <div className="bg-black rounded-xl p-4 sm:p-6 border-2 border-white space-y-3 sm:space-y-4">
           {/* Title */}
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight line-clamp-2">
             {event.title}
@@ -109,13 +109,13 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
           {/* Metadata */}
           <div className="flex flex-wrap items-center gap-3 text-sm">
             {event.location && (
-              <div className="flex items-center gap-1.5 bg-purple-500 px-3 py-2 rounded-lg border border-white/50">
+              <div className="flex items-center gap-1.5 bg-gray-800 px-3 py-2 rounded-lg border border-white/50">
                 <MapPin className="w-4 h-4 text-white" />
                 <span className="font-medium text-white">{event.location}</span>
               </div>
             )}
             {event.date && (
-              <div className="flex items-center gap-1.5 bg-purple-500 px-3 py-2 rounded-lg border border-white/50">
+              <div className="flex items-center gap-1.5 bg-gray-800 px-3 py-2 rounded-lg border border-white/50">
                 <Calendar className="w-4 h-4 text-white" />
                 <span className="font-medium text-white">
                   {(() => {
@@ -187,7 +187,7 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
 
             <button
               onClick={handleShare}
-              className="px-6 py-3 rounded-lg font-semibold text-sm bg-purple-500 text-white border-2 border-white/50 hover:bg-purple-400"
+              className="px-6 py-3 rounded-lg font-semibold text-sm bg-gray-800 text-white border-2 border-white/50 hover:bg-gray-700"
             >
               <div className="flex items-center justify-center gap-2">
                 <Share2 className="w-4 h-4" />
@@ -201,7 +201,7 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
             {event.tags.slice(0, 4).map((tag) => (
               <span
                 key={tag}
-                className="text-xs font-semibold px-3 py-1.5 rounded-full bg-purple-500 text-white border border-white/50"
+                className="text-xs font-semibold px-3 py-1.5 rounded-full bg-gray-800 text-white border border-white/50"
               >
                 #{tag}
               </span>
