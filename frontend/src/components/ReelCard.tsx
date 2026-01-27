@@ -75,12 +75,12 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index, isActive = true }) =>
     const isButtonLoading = isLoading && currentStatus !== buttonStatus;
 
     if (isActive && buttonStatus === 'going') {
-      return `flex-1 py-3 rounded-xl font-semibold text-sm bg-green-500 text-white shadow-lg transition-all ${isButtonLoading ? 'opacity-50' : ''}`;
+      return `flex-1 py-4 rounded-xl font-bold text-base bg-green-500 text-white shadow-lg transition-all ${isButtonLoading ? 'opacity-50' : ''}`;
     }
     if (isActive) {
-      return `flex-1 py-3 rounded-xl font-semibold text-sm bg-purple-600 text-white shadow-lg transition-all ${isButtonLoading ? 'opacity-50' : ''}`;
+      return `flex-1 py-4 rounded-xl font-bold text-base bg-purple-600 text-white shadow-lg transition-all ${isButtonLoading ? 'opacity-50' : ''}`;
     }
-    return `flex-1 py-3 rounded-xl font-semibold text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all ${isButtonLoading ? 'opacity-50' : ''}`;
+    return `flex-1 py-4 rounded-xl font-bold text-base bg-purple-600 text-white hover:bg-purple-700 transition-all shadow-md ${isButtonLoading ? 'opacity-50' : ''}`;
   };
 
   // Format date
@@ -105,7 +105,7 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index, isActive = true }) =>
   };
 
   return (
-    <div className="h-full w-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+    <div className="h-full w-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col border border-gray-200">
       {/* Image Section */}
       <div className="relative h-56 sm:h-64 flex-shrink-0">
         <Image
@@ -210,7 +210,7 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index, isActive = true }) =>
 
             <button
               onClick={handleShare}
-              className="flex-1 py-3 rounded-xl font-semibold text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all"
+              className="flex-1 py-3 rounded-xl font-semibold text-sm bg-gray-200 text-gray-800 hover:bg-gray-300 transition-all shadow-sm"
             >
               <div className="flex items-center justify-center gap-1.5">
                 <Share2 className="w-4 h-4" />
