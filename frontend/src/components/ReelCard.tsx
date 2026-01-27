@@ -1,5 +1,5 @@
 'use client';
-
+// Flash card v3 - vertical card with horizontal swipe
 import React, { useEffect } from 'react';
 import Image from 'next/image';
 import { MapPin, Calendar, Users, Share2, Check, Star, X as XIcon, ExternalLink } from 'lucide-react';
