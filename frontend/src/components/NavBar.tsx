@@ -40,7 +40,7 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
 
     return (
         <nav
-            className="sticky top-0 z-50 w-full bg-[#1a0f2e]/85 backdrop-blur-xl shadow-sm"
+            className="sticky top-0 z-50 w-full bg-[#1a0f2e]/85 backdrop-blur-xl shadow-sm overflow-visible"
             style={{
                 paddingLeft: '24px',
                 paddingRight: '24px',
@@ -50,7 +50,8 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
                 minHeight: '72px',
                 maxHeight: '72px',
                 borderBottom: '1px solid #362955',
-                boxSizing: 'border-box'
+                boxSizing: 'border-box',
+                overflow: 'visible'
             }}
         >
             <div className="flex items-center justify-between relative" style={{ gap: '24px', height: '40px' }}>
