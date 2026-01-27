@@ -95,7 +95,7 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
 
       {/* Content */}
       <div className="absolute inset-0 z-[3] flex flex-col justify-end p-4 sm:p-6 pb-8 sm:pb-12">
-        <div className="bg-black rounded-xl p-4 sm:p-6 border-2 border-white space-y-3 sm:space-y-4">
+        <div className="bg-black/95 rounded-xl p-4 sm:p-6 border-4 border-white space-y-3 sm:space-y-4">
           {/* Title */}
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight line-clamp-2">
             {event.title}
