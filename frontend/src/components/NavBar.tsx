@@ -47,25 +47,25 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
     };
 
     return (
-        <nav className="sticky top-0 z-50 w-full bg-white border-b border-gray-200 overflow-visible px-6 py-4">
+        <nav className="sticky top-0 z-50 w-full bg-purple-600 overflow-visible px-6 py-4">
             <div className="flex items-center justify-between">
                 {/* Left Section */}
                 <div className="flex items-center">
                     {showMenuButton && (
                         <button
                             onClick={onMenuClick}
-                            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 mr-2"
+                            className="lg:hidden p-2 rounded-lg hover:bg-purple-500 mr-2"
                             aria-label="Toggle sidebar"
                         >
-                            <Menu className="w-6 h-6 text-purple-600" />
+                            <Menu className="w-6 h-6 text-white" />
                         </button>
                     )}
 
                     <Link href="/" className="flex items-center gap-2">
-                        <div className="w-9 h-9 bg-purple-600 rounded-lg flex items-center justify-center">
-                            <Sparkles className="w-5 h-5 text-white" />
+                        <div className="w-9 h-9 bg-white rounded-lg flex items-center justify-center">
+                            <Sparkles className="w-5 h-5 text-purple-600" />
                         </div>
-                        <span className="font-bold text-xl text-purple-600">FindMyEvents</span>
+                        <span className="font-bold text-xl text-white">FindMyEvents</span>
                     </Link>
                 </div>
 
@@ -73,7 +73,7 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
                 <div className="flex items-center gap-6">
                     <Link
                         href="/chat"
-                        className={`flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors ${showMenuButton ? 'hidden lg:flex' : ''}`}
+                        className={`flex items-center gap-2 text-white/90 hover:text-white transition-colors ${showMenuButton ? 'hidden lg:flex' : ''}`}
                     >
                         <MessageCircle className="w-5 h-5" />
                         <span className="font-medium hidden md:inline">Chat</span>
@@ -81,7 +81,7 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
 
                     <Link
                         href="/experiments/map"
-                        className={`flex items-center gap-2 text-gray-600 hover:text-purple-600 transition-colors ${showMenuButton ? 'hidden lg:flex' : ''}`}
+                        className={`flex items-center gap-2 text-white/90 hover:text-white transition-colors ${showMenuButton ? 'hidden lg:flex' : ''}`}
                     >
                         <MapPin className="w-5 h-5" />
                         <span className="font-medium hidden md:inline">Campus Map</span>
@@ -91,7 +91,7 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
                     <div className="relative" ref={dropdownRef}>
                         <button
                             onClick={handleProfileClick}
-                            className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors"
+                            className="w-10 h-10 bg-white rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors"
                             aria-label="Profile"
                         >
                             <svg
@@ -100,7 +100,7 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
                                 viewBox="0 0 24 24"
                                 strokeWidth={2}
                                 stroke="currentColor"
-                                className="w-5 h-5 text-white"
+                                className="w-5 h-5 text-purple-600"
                             >
                                 <path
                                     strokeLinecap="round"
