@@ -99,7 +99,7 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index, isActive = true }) =>
   return (
     <div className="h-full w-full bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col">
       {/* Image Section */}
-      <div className="relative h-48 sm:h-56 flex-shrink-0">
+      <div className="relative h-56 sm:h-64 flex-shrink-0">
         <Image
           src={event.imageUrl || '/placeholder.svg'}
           alt={event.title}
@@ -125,14 +125,14 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index, isActive = true }) =>
       </div>
 
       {/* Content Section */}
-      <div className="flex-1 p-5 flex flex-col overflow-y-auto">
+      <div className="flex-1 p-6 flex flex-col overflow-y-auto">
         {/* Title */}
-        <h2 className="text-xl font-bold text-gray-900 leading-tight mb-2 line-clamp-2">
+        <h2 className="text-2xl font-bold text-gray-900 leading-tight mb-3 line-clamp-2">
           {event.title}
         </h2>
 
         {/* Description */}
-        <p className="text-sm text-gray-600 mb-4 line-clamp-3">
+        <p className="text-base text-gray-600 mb-4 line-clamp-3">
           {event.description}
         </p>
 

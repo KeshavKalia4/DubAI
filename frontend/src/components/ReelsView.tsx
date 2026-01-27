@@ -181,7 +181,7 @@ const ReelsView: React.FC<ReelsViewProps> = ({ events, onClose }) => {
       {/* Card Container */}
       <div
         ref={containerRef}
-        className="relative w-full max-w-md mx-4 h-[85vh] max-h-[700px]"
+        className="relative w-full max-w-lg mx-auto px-4 h-[90vh] max-h-[800px]"
         onTouchStart={onTouchStart}
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
@@ -190,11 +190,9 @@ const ReelsView: React.FC<ReelsViewProps> = ({ events, onClose }) => {
         {events.map((event, index) => {
           const offset = index - currentIndex;
           const isActive = offset === 0;
-          const isPrev = offset < 0;
-          const isNext = offset > 0;
 
-          // Only render nearby cards for performance
-          if (Math.abs(offset) > 2) return null;
+          // Only render current and adjacent cards
+          if (Math.abs(offset) > 1) return null;
 
           return (
             <div
@@ -202,13 +200,13 @@ const ReelsView: React.FC<ReelsViewProps> = ({ events, onClose }) => {
               className="absolute inset-0 transition-all duration-300 ease-out"
               style={{
                 transform: `
-                  translateX(${offset * 100 + (isActive ? swipeOffset * 0.3 : 0)}%)
-                  scale(${isActive ? 1 : 0.9})
-                  rotateY(${offset * -5}deg)
+                  translateX(${offset * 85 + (isActive ? swipeOffset * 0.3 : 0)}%)
+                  scale(${isActive ? 1 : 0.85})
                 `,
-                opacity: isActive ? 1 : 0.5,
-                zIndex: isActive ? 10 : 5 - Math.abs(offset),
+                opacity: isActive ? 1 : 0.3,
+                zIndex: isActive ? 10 : 5,
                 pointerEvents: isActive ? 'auto' : 'none',
+                filter: isActive ? 'none' : 'blur(2px)',
               }}
             >
               <ReelCard event={event} index={index} isActive={isActive} />
