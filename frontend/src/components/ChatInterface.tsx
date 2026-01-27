@@ -263,7 +263,7 @@ export default function ChatInterface({ isSidebarOpen, setIsSidebarOpen }: ChatI
               <Sparkles style={{ width: '20px', height: '20px' }} className="text-white" strokeWidth={2.5} />
             </div>
             <span className="font-bold bg-linear-to-r from-[#8268bc] to-[#9982d0] bg-clip-text text-transparent" style={{ fontSize: '24px', lineHeight: '32px' }}>
-              DubAI
+              FindMyEvents
             </span>
           </Link>
           <button
@@ -365,7 +365,7 @@ export default function ChatInterface({ isSidebarOpen, setIsSidebarOpen }: ChatI
                     </div>
 
                     <h2 className="text-4xl sm:text-5xl font-bold bg-linear-to-r from-[#4B2E83] via-[#5d3a9b] to-[#B7A57A] bg-clip-text text-transparent mb-4">
-                      DubAI
+                      FindMyEvents
                     </h2>
 
                     <p className="text-base sm:text-lg text-[#d4d4d4] mb-8 leading-relaxed">
@@ -450,7 +450,7 @@ export default function ChatInterface({ isSidebarOpen, setIsSidebarOpen }: ChatI
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyPress}
-                placeholder="Message DubAI..."
+                placeholder="Message FindMyEvents..."
                 rows={1}
                 className="max-h-32 flex-1 resize-none border-none bg-transparent px-2 py-2 text-sm sm:text-base text-[#f5f5f5] placeholder-[#a3a3a3] outline-none! focus:outline-none! focus-visible:outline-none!"
                 style={{ outline: 'none !important', boxShadow: 'none !important' }}

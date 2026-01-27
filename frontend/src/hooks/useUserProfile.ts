@@ -22,7 +22,7 @@ function transformBackendUser(backendUser: BackendUser): UserProfile {
 
 export function useUserProfile() {
   const [profile, setProfileLocal, isLoaded] = useLocalStorage<UserProfile | null>(
-    'dubai-user-profile',
+    'findmyevents-user-profile',
     null
   );
   const [isSyncing, setIsSyncing] = useState(false);

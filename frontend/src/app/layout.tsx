@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DubAI",
-  description: "Personalized campus engagement platform",
+  title: "FindMyEvents",
+  description: "Discover and track campus events personalized for you",
 };
 
 export const viewport: Viewport = {

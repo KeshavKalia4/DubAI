@@ -86,7 +86,7 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
                                 <Sparkles style={{ width: '20px', height: '20px' }} className="text-white" strokeWidth={2.5} />
                             </div>
                             <span className="font-bold bg-linear-to-r from-[#8268bc] to-[#9982d0] bg-clip-text text-transparent" style={{ fontSize: '24px', lineHeight: '32px' }}>
-                                DubAI
+                                FindMyEvents
                             </span>
                         </Link>
                     )}
@@ -98,7 +98,7 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
                                 <Sparkles style={{ width: '20px', height: '20px' }} className="text-white" strokeWidth={2.5} />
                             </div>
                             <span className="font-bold bg-linear-to-r from-[#8268bc] to-[#9982d0] bg-clip-text text-transparent" style={{ fontSize: '24px', lineHeight: '32px' }}>
-                                DubAI
+                                FindMyEvents
                             </span>
                         </Link>
                     )}
