@@ -19,17 +19,27 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
 
     // Close dropdown when clicking outside
     useEffect(() => {
+        if (!isDropdownOpen) return;
+
         function handleClickOutside(event: MouseEvent) {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
                 setIsDropdownOpen(false);
             }
         }
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
+        // Use setTimeout to avoid the click that opened the dropdown from closing it
+        const timer = setTimeout(() => {
+            document.addEventListener('click', handleClickOutside);
+        }, 0);
 
-    const handleProfileClick = () => {
-        setIsDropdownOpen(!isDropdownOpen);
+        return () => {
+            clearTimeout(timer);
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, [isDropdownOpen]);
+
+    const handleProfileClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+        setIsDropdownOpen(prev => !prev);
     };
 
     const handleLogout = async () => {
