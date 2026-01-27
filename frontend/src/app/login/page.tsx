@@ -28,18 +28,23 @@ const GoogleIcon = () => (
 export default function LoginPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState<'signin' | 'signup' | null>(null);
+  const [signedUp, setSignedUp] = useState(false);
   const { signInWithGoogle } = useAuth();
 
-  const handleGoogleAuth = async (type: 'signin' | 'signup') => {
+  const handleSignUp = () => {
     setError('');
-    setIsLoading(type);
+    setSignedUp(true);
+  };
+
+  const handleSignIn = async () => {
+    setError('');
+    setIsLoading('signin');
 
     try {
       const { error } = await signInWithGoogle();
       if (error) {
         setError(error.message);
       }
-      // Google OAuth automatically signs in after signup
     } catch (err) {
       setError('An unexpected error occurred');
     } finally {
@@ -70,10 +75,18 @@ export default function LoginPage() {
             <p className="text-red-300 text-sm text-center mb-4 bg-red-500/20 p-2 rounded-lg">{error}</p>
           )}
 
+          {signedUp && (
+            <div className="bg-green-500/20 border border-green-400/50 rounded-lg p-3 mb-4">
+              <p className="text-green-300 text-sm text-center font-medium">
+                Signed up successfully! Now sign in below.
+              </p>
+            </div>
+          )}
+
           <div className="space-y-4">
             {/* Sign In Button */}
             <button
-              onClick={() => handleGoogleAuth('signin')}
+              onClick={handleSignIn}
               disabled={isLoading !== null}
               className="w-full py-3 px-4 rounded-lg bg-white text-gray-800 font-semibold hover:bg-gray-100 transition-colors disabled:opacity-50 flex items-center justify-center gap-3"
             >
@@ -81,22 +94,25 @@ export default function LoginPage() {
               {isLoading === 'signin' ? 'Signing in...' : 'Sign in with Google'}
             </button>
 
-            {/* Divider */}
-            <div className="flex items-center gap-4">
-              <div className="flex-1 h-px bg-white/30"></div>
-              <span className="text-white/60 text-sm">or</span>
-              <div className="flex-1 h-px bg-white/30"></div>
-            </div>
+            {!signedUp && (
+              <>
+                {/* Divider */}
+                <div className="flex items-center gap-4">
+                  <div className="flex-1 h-px bg-white/30"></div>
+                  <span className="text-white/60 text-sm">or</span>
+                  <div className="flex-1 h-px bg-white/30"></div>
+                </div>
 
-            {/* Sign Up Button */}
-            <button
-              onClick={() => handleGoogleAuth('signup')}
-              disabled={isLoading !== null}
-              className="w-full py-3 px-4 rounded-lg bg-purple-500 text-white font-semibold hover:bg-purple-400 transition-colors disabled:opacity-50 flex items-center justify-center gap-3 border-2 border-white/30"
-            >
-              <GoogleIcon />
-              {isLoading === 'signup' ? 'Creating account...' : 'Sign up with Google'}
-            </button>
+                {/* Sign Up Button */}
+                <button
+                  onClick={handleSignUp}
+                  className="w-full py-3 px-4 rounded-lg bg-purple-500 text-white font-semibold hover:bg-purple-400 transition-colors flex items-center justify-center gap-3 border-2 border-white/30"
+                >
+                  <GoogleIcon />
+                  Sign up with Google
+                </button>
+              </>
+            )}
           </div>
 
           <p className="text-white/60 text-xs text-center mt-6">
