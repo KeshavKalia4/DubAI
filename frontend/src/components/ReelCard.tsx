@@ -18,7 +18,6 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
     userNetid: netid || undefined,
   });
 
-  // Load RSVP data when card mounts or event changes
   useEffect(() => {
     if (event.id && netid) {
       loadEventRsvp(event.id);
@@ -33,9 +32,7 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
     const newStatus = currentStatus === status ? null : status;
     try {
       await setRsvp(event.id, newStatus);
-      // If clicking "Going" and event has a link, open it
       if (status === 'going' && newStatus === 'going' && event.link) {
-        // Use direct navigation for mobile compatibility (window.open can be blocked)
         const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
         if (isMobile) {
           window.location.href = event.link;
@@ -44,7 +41,6 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
         }
       }
     } catch (error) {
-      // Error is logged in useRsvp, could add toast notification here
       console.error('RSVP failed:', error);
     }
   };
@@ -61,9 +57,7 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
         console.log('Share cancelled');
       }
     } else {
-      // Fallback: Copy to clipboard
       navigator.clipboard.writeText(window.location.href);
-      // Could add toast notification here
     }
   };
 
@@ -71,30 +65,16 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
     const isActive = currentStatus === buttonStatus;
     const isButtonLoading = isLoading && currentStatus !== buttonStatus;
 
-    return `
-      px-6 py-3 rounded-xl font-bold text-sm
-      transition-all duration-200
-      border-2
-      hover:scale-105 active:scale-95
-      ${isButtonLoading ? 'opacity-50 cursor-wait' : ''}
-      ${isActive
-        ? 'bg-[#8268bc] text-white border-[#8268bc] shadow-lg shadow-[#8268bc]/50'
-        : 'bg-[#2a1f47]/80 backdrop-blur-sm text-[#8268bc] border-[#8268bc]/30 hover:border-[#8268bc]/60'
-      }
-    `;
+    if (isActive) {
+      return `px-6 py-3 rounded-lg font-semibold text-sm bg-purple-600 text-white border-2 border-purple-600 ${isButtonLoading ? 'opacity-50' : ''}`;
+    }
+    return `px-6 py-3 rounded-lg font-semibold text-sm bg-white/90 text-purple-600 border-2 border-purple-300 hover:border-purple-600 ${isButtonLoading ? 'opacity-50' : ''}`;
   };
 
   return (
     <div
-      className="
-        relative w-full
-        h-screen h-[100dvh]
-        overflow-hidden
-      "
-      style={{
-        scrollSnapAlign: 'start',
-        scrollSnapStop: 'always'
-      }}
+      className="relative w-full h-screen h-[100dvh] overflow-hidden"
+      style={{ scrollSnapAlign: 'start', scrollSnapStop: 'always' }}
     >
       {/* Background Image */}
       <div className="absolute inset-0 z-[1]">
@@ -110,23 +90,11 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
         />
       </div>
 
-      {/* Gradient Overlay */}
-      <div
-        className="absolute inset-0 z-[2]"
-        style={{
-          background: `linear-gradient(
-            180deg,
-            rgba(15, 10, 26, 0.4) 0%,
-            rgba(15, 10, 26, 0.1) 30%,
-            rgba(15, 10, 26, 0.8) 70%,
-            rgba(15, 10, 26, 0.95) 100%
-          )`
-        }}
-      />
+      {/* Simple dark overlay for readability */}
+      <div className="absolute inset-0 z-[2] bg-black/50" />
 
       {/* Content */}
       <div className="absolute inset-0 z-[3] flex flex-col justify-end p-4 sm:p-6 pb-8 sm:pb-12">
-        {/* Event Info */}
         <div className="space-y-3 sm:space-y-4">
           {/* Title */}
           <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-white leading-tight line-clamp-2">
@@ -134,29 +102,28 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
           </h1>
 
           {/* Description */}
-          <p className="text-sm sm:text-base text-[#d4d4d4] line-clamp-2 leading-relaxed">
+          <p className="text-sm sm:text-base text-gray-200 line-clamp-2">
             {event.description}
           </p>
 
-          {/* Metadata Row */}
-          <div className="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-[#d4d4d4]">
+          {/* Metadata */}
+          <div className="flex flex-wrap items-center gap-3 text-sm">
             {event.location && (
-              <div className="flex items-center gap-1.5 bg-[#2a1f47]/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-[#8268bc]/20">
-                <MapPin className="w-4 h-4 text-[#8268bc]" />
-                <span className="font-medium">{event.location}</span>
+              <div className="flex items-center gap-1.5 bg-white/90 px-3 py-2 rounded-lg">
+                <MapPin className="w-4 h-4 text-purple-600" />
+                <span className="font-medium text-gray-800">{event.location}</span>
               </div>
             )}
             {event.date && (
-              <div className="flex items-center gap-1.5 bg-[#2a1f47]/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-[#8268bc]/20">
-                <Calendar className="w-4 h-4 text-[#8268bc]" />
-                <span className="font-medium">
+              <div className="flex items-center gap-1.5 bg-white/90 px-3 py-2 rounded-lg">
+                <Calendar className="w-4 h-4 text-purple-600" />
+                <span className="font-medium text-gray-800">
                   {(() => {
-                    // Parse date without timezone conversion - handle both 'T' and space separators
                     const dateStr = event.date.replace(' ', 'T');
                     const parts = dateStr.split('T');
                     const datePart = parts[0];
-                    const timePart = parts[1]?.split('+')[0]?.split('-')[0]; // Remove timezone offset if present
-                    const [year, month, day] = datePart.split('-').map(Number);
+                    const timePart = parts[1]?.split('+')[0]?.split('-')[0];
+                    const [, month, day] = datePart.split('-').map(Number);
                     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                     let timeStr = '';
                     if (timePart) {
@@ -174,16 +141,12 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
             )}
           </div>
 
-          {/* Attendees Count */}
-          <div className="flex items-center gap-2 text-[#d4d4d4]">
-            <Users className="w-5 h-5 text-[#8268bc]" />
-            <span className="font-semibold text-sm sm:text-base">
-              {summary.going} attending
-            </span>
+          {/* Attendees */}
+          <div className="flex items-center gap-2 text-white">
+            <Users className="w-5 h-5" />
+            <span className="font-semibold">{summary.going} attending</span>
             {summary.interested > 0 && (
-              <span className="text-[#a3a3a3] text-sm">
-                · {summary.interested} interested
-              </span>
+              <span className="text-gray-300">· {summary.interested} interested</span>
             )}
           </div>
 
@@ -224,14 +187,7 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
 
             <button
               onClick={handleShare}
-              className="
-                px-6 py-3 rounded-xl font-bold text-sm
-                bg-[#2a1f47]/80 backdrop-blur-sm text-[#d4c79f]
-                border-2 border-[#d4c79f]/30
-                hover:border-[#d4c79f]/60 hover:scale-105
-                active:scale-95
-                transition-all duration-200
-              "
+              className="px-6 py-3 rounded-lg font-semibold text-sm bg-white/90 text-gray-700 border-2 border-gray-300 hover:border-gray-500"
             >
               <div className="flex items-center justify-center gap-2">
                 <Share2 className="w-4 h-4" />
@@ -245,11 +201,7 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
             {event.tags.slice(0, 4).map((tag) => (
               <span
                 key={tag}
-                className="
-                  text-xs font-bold px-3 py-1.5 rounded-lg
-                  bg-[#362955]/80 backdrop-blur-sm
-                  text-[#8268bc] border border-[#8268bc]/30
-                "
+                className="text-xs font-semibold px-3 py-1.5 rounded-full bg-purple-600 text-white"
               >
                 #{tag}
               </span>
