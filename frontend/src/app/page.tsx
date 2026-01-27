@@ -79,17 +79,17 @@ export default function Home() {
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-purple-500 rounded-lg p-4">
+                <div className="bg-purple-500 rounded-lg p-4 border-2 border-white">
                   <div className="text-xs text-white/70 uppercase tracking-wider mb-1 font-medium">Major</div>
                   <div className="text-lg font-semibold text-white">{profile.major}</div>
                 </div>
 
-                <div className="bg-purple-500 rounded-lg p-4">
+                <div className="bg-purple-500 rounded-lg p-4 border-2 border-white">
                   <div className="text-xs text-white/70 uppercase tracking-wider mb-1 font-medium">Year</div>
                   <div className="text-lg font-semibold text-white">{profile.year}</div>
                 </div>
 
-                <div className="bg-purple-500 rounded-lg p-4">
+                <div className="bg-purple-500 rounded-lg p-4 border-2 border-white">
                   <div className="text-xs text-white/70 uppercase tracking-wider mb-1 font-medium">Interests</div>
                   <div className="text-sm font-semibold text-white truncate">
                     {profile.tags.map(tag => tag.charAt(0).toUpperCase() + tag.slice(1)).join(', ')}
