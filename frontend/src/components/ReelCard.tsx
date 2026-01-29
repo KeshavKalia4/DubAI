@@ -2,7 +2,7 @@
 // Flash card v3 - vertical card with horizontal swipe
 import React from 'react';
 import Image from 'next/image';
-import { MapPin, Calendar, Users, Share2, ExternalLink } from 'lucide-react';
+import { MapPin, Calendar, Users, ExternalLink } from 'lucide-react';
 import { ContentItem } from '@/types';
 
 interface ReelCardProps {
@@ -12,22 +12,6 @@ interface ReelCardProps {
 }
 
 const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: event.title,
-          text: event.description,
-          url: window.location.href,
-        });
-      } catch (err) {
-        console.log('Share cancelled');
-      }
-    } else {
-      navigator.clipboard.writeText(window.location.href);
-    }
-  };
-
   // Format date
   const formatDate = () => {
     if (!event.date) return null;
@@ -115,33 +99,20 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
         <div className="flex-1" />
 
         {/* Action Buttons */}
-        <div className="space-y-3 mt-auto">
-          <div className="flex gap-2">
-            {/* Event Link */}
-            {event.link && (
-              <a
-                href={event.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex-1 py-4 rounded-xl font-bold text-base bg-purple-600 text-white text-center hover:bg-purple-700 transition-all shadow-md"
-              >
-                <div className="flex items-center justify-center gap-1.5">
-                  <ExternalLink className="w-4 h-4" />
-                  <span>View Event</span>
-                </div>
-              </a>
-            )}
-
-            <button
-              onClick={handleShare}
-              className="flex-1 py-4 rounded-xl font-bold text-base bg-gray-200 text-gray-800 hover:bg-gray-300 transition-all shadow-sm"
+        <div className="mt-auto">
+          {event.link && (
+            <a
+              href={event.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block w-full py-4 rounded-xl font-bold text-base bg-purple-600 text-white text-center hover:bg-purple-700 transition-all shadow-md"
             >
               <div className="flex items-center justify-center gap-1.5">
-                <Share2 className="w-4 h-4" />
-                <span>Share</span>
+                <ExternalLink className="w-4 h-4" />
+                <span>View Event</span>
               </div>
-            </button>
-          </div>
+            </a>
+          )}
         </div>
       </div>
     </div>
