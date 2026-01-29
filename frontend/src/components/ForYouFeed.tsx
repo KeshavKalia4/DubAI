@@ -2,14 +2,9 @@
 
 import React, { useMemo, useState, useCallback } from 'react';
 import { MapPin, Trash2, Calendar, Sparkles, Loader2, AlertCircle, Users } from 'lucide-react';
-import { ContentItem, UserProfile } from '../types';
+import { ContentItem } from '../types';
 import { useEvents } from '../hooks/useEvents';
-import { generateReelsOrder } from '@/utils/reelsRecommendations';
 import ReelsView from './ReelsView';
-
-interface ForYouFeedProps {
-  user: UserProfile;
-}
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -41,9 +36,8 @@ const typeColors: Record<string, { border: string; bg: string; text: string; acc
   },
 };
 
-const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
-  // Pass user.id to useEvents for personalized feed from API
-  const { events, deleteEvent, isLoaded, isLoading, error } = useEvents({ userNetid: user.id });
+const ForYouFeed: React.FC = () => {
+  const { events, deleteEvent, isLoaded, isLoading, error } = useEvents();
 
   // Reels state
   const [reelsState, setReelsState] = useState<{
@@ -56,51 +50,33 @@ const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
     sortedEvents: []
   });
 
-  const recommendations = useMemo(() => {
+  // Sort events by date (upcoming first)
+  const sortedEvents = useMemo(() => {
     if (!isLoaded) return [];
 
-    // Skip organization filter for now - show all events
-    // TODO: Re-enable organization filtering when backend supports it
-    // const orgContent = events.filter(
-    //   (item) => item.organizationId === user.organizationId
-    // );
-
-    // 2. Score Content
-    const scoredContent = events.map((item) => {
-      let score = 0;
-
-      // Exact tag matches
-      const matchingTags = item.tags.filter((tag) => user.tags.includes(tag));
-      score += matchingTags.length * 5;
-
-      // Major match (if content tag matches user major)
-      if (user.major && item.tags.includes(user.major.toLowerCase())) {
-        score += 10;
-      }
-
-      // Identity match (simple check for now)
-      if (user.year === 'Freshman' && item.tags.includes('freshman')) {
-        score += 5;
-      }
-
-      return { item, score };
+    return [...events].sort((a, b) => {
+      if (!a.date && !b.date) return 0;
+      if (!a.date) return 1;
+      if (!b.date) return -1;
+      return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
-
-    // 3. Sort by Score (Descending)
-    return scoredContent
-      .sort((a, b) => b.score - a.score)
-      .map((entry) => entry.item);
-  }, [user, events, isLoaded]);
+  }, [events, isLoaded]);
 
   // Reels handlers
   const handleOpenReels = useCallback((eventId: string) => {
-    const sortedReels = generateReelsOrder(recommendations, eventId, user);
+    const clickedEvent = sortedEvents.find(e => e.id === eventId);
+    if (!clickedEvent) return;
+
+    // Put clicked event first, then the rest
+    const otherEvents = sortedEvents.filter(e => e.id !== eventId);
+    const reelsOrder = [clickedEvent, ...otherEvents];
+
     setReelsState({
       isOpen: true,
       startingEventId: eventId,
-      sortedEvents: sortedReels
+      sortedEvents: reelsOrder
     });
-  }, [recommendations, user]);
+  }, [sortedEvents]);
 
   const handleCloseReels = useCallback(() => {
     setReelsState({
@@ -115,9 +91,9 @@ const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
       {/* Hero Header Section */}
       <div>
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-linear-to-r from-[#f5f5f5] via-[#e0e0e0] to-[#d4d4d4] bg-clip-text text-transparent tracking-tight mb-2">
-          For You
+          Events
         </h2>
-        <p className="text-sm sm:text-base text-[#a3a3a3]">Personalized recommendations based on your interests</p>
+        <p className="text-sm sm:text-base text-[#a3a3a3]">Discover upcoming campus events</p>
       </div>
 
       {/* Loading State */}
@@ -149,9 +125,9 @@ const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
       )}
 
       {/* Content Grid */}
-      {!isLoading && recommendations.length > 0 ? (
+      {!isLoading && sortedEvents.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 sm:gap-6">
-          {recommendations.map((item, index) => (
+          {sortedEvents.map((item, index) => (
             <ContentCard
               key={item.id}
               item={item}
@@ -167,8 +143,8 @@ const ForYouFeed: React.FC<ForYouFeedProps> = ({ user }) => {
             <div className="absolute inset-0 bg-[#8268bc]/20 rounded-full blur-3xl"></div>
             <div className="relative bg-[#2a1f47]/80 backdrop-blur-sm border-2 border-[#8268bc]/30 rounded-3xl p-12">
               <Sparkles className="w-16 h-16 text-[#8268bc] mx-auto mb-4 opacity-50" />
-              <p className="text-[#d4d4d4] text-lg sm:text-xl font-semibold mb-2">No recommendations yet</p>
-              <p className="text-[#a3a3a3] text-sm sm:text-base">Try adding more interests to see personalized content!</p>
+              <p className="text-[#d4d4d4] text-lg sm:text-xl font-semibold mb-2">No events yet</p>
+              <p className="text-[#a3a3a3] text-sm sm:text-base">Check back soon for upcoming events!</p>
             </div>
           </div>
         </div>

@@ -1,11 +1,9 @@
 'use client';
 // Flash card v3 - vertical card with horizontal swipe
-import React, { useEffect } from 'react';
+import React from 'react';
 import Image from 'next/image';
-import { MapPin, Calendar, Users, Share2, Check, Star, X as XIcon, ExternalLink } from 'lucide-react';
-import { ContentItem, RsvpStatus } from '@/types';
-import { useRsvp } from '@/hooks/useRsvp';
-import { useAuth } from '@/contexts/AuthContext';
+import { MapPin, Calendar, Users, Share2, ExternalLink } from 'lucide-react';
+import { ContentItem } from '@/types';
 
 interface ReelCardProps {
   event: ContentItem;
@@ -13,47 +11,7 @@ interface ReelCardProps {
   isActive?: boolean;
 }
 
-const ReelCard: React.FC<ReelCardProps> = ({ event, index, isActive = true }) => {
-  const { netid } = useAuth();
-  const { getRsvpStatus, setRsvp, getRsvpSummary, loadEventRsvp, isRsvpLoading } = useRsvp({
-    userNetid: netid || undefined,
-  });
-
-  useEffect(() => {
-    if (event.id && netid && isActive) {
-      loadEventRsvp(event.id);
-    }
-  }, [event.id, netid, loadEventRsvp, isActive]);
-
-  const currentStatus = getRsvpStatus(event.id);
-  const summary = getRsvpSummary(event.id, event.attendees?.count);
-  const isLoading = isRsvpLoading(event.id);
-
-  const handleRsvpClick = async (status: RsvpStatus) => {
-    const newStatus = currentStatus === status ? null : status;
-
-    // Redirect immediately for "going" - don't wait for API
-    if (status === 'going' && newStatus === 'going' && event.link) {
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      // Fire API call in background (don't await)
-      setRsvp(event.id, newStatus).catch(err => console.error('RSVP failed:', err));
-      // Redirect immediately
-      if (isMobile) {
-        window.location.href = event.link;
-      } else {
-        window.open(event.link, '_blank', 'noopener,noreferrer');
-      }
-      return;
-    }
-
-    // For other statuses, wait for API
-    try {
-      await setRsvp(event.id, newStatus);
-    } catch (error) {
-      console.error('RSVP failed:', error);
-    }
-  };
-
+const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
   const handleShare = async () => {
     if (navigator.share) {
       try {
@@ -68,19 +26,6 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index, isActive = true }) =>
     } else {
       navigator.clipboard.writeText(window.location.href);
     }
-  };
-
-  const getRsvpButtonStyle = (buttonStatus: RsvpStatus) => {
-    const isActive = currentStatus === buttonStatus;
-    const isButtonLoading = isLoading && currentStatus !== buttonStatus;
-
-    if (isActive && buttonStatus === 'going') {
-      return `flex-1 py-4 rounded-xl font-bold text-base bg-green-500 text-white shadow-lg transition-all ${isButtonLoading ? 'opacity-50' : ''}`;
-    }
-    if (isActive) {
-      return `flex-1 py-4 rounded-xl font-bold text-base bg-purple-600 text-white shadow-lg transition-all ${isButtonLoading ? 'opacity-50' : ''}`;
-    }
-    return `flex-1 py-4 rounded-xl font-bold text-base bg-purple-600 text-white hover:bg-purple-700 transition-all shadow-md ${isButtonLoading ? 'opacity-50' : ''}`;
   };
 
   // Format date
@@ -158,59 +103,38 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index, isActive = true }) =>
               <span className="text-sm">{formatDate()}</span>
             </div>
           )}
-          <div className="flex items-center gap-2 text-gray-600">
-            <Users className="w-4 h-4 text-purple-600 flex-shrink-0" />
-            <span className="text-sm font-medium">{summary.going} attending</span>
-            {summary.interested > 0 && (
-              <span className="text-gray-400">· {summary.interested} interested</span>
-            )}
-          </div>
+          {event.attendees && event.attendees.count > 0 && (
+            <div className="flex items-center gap-2 text-gray-600">
+              <Users className="w-4 h-4 text-purple-600 flex-shrink-0" />
+              <span className="text-sm font-medium">{event.attendees.count} attending</span>
+            </div>
+          )}
         </div>
 
         {/* Spacer */}
         <div className="flex-1" />
 
-        {/* RSVP Buttons */}
+        {/* Action Buttons */}
         <div className="space-y-3 mt-auto">
           <div className="flex gap-2">
-            <button
-              onClick={() => handleRsvpClick('going')}
-              disabled={isLoading}
-              className={getRsvpButtonStyle('going')}
-            >
-              <div className="flex items-center justify-center gap-1.5">
-                <Check className="w-4 h-4" />
-                <span>Going</span>
-              </div>
-            </button>
-
-            <button
-              onClick={() => handleRsvpClick('interested')}
-              disabled={isLoading}
-              className={getRsvpButtonStyle('interested')}
-            >
-              <div className="flex items-center justify-center gap-1.5">
-                <Star className="w-4 h-4" />
-                <span>Interested</span>
-              </div>
-            </button>
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={() => handleRsvpClick('not_going')}
-              disabled={isLoading}
-              className={getRsvpButtonStyle('not_going')}
-            >
-              <div className="flex items-center justify-center gap-1.5">
-                <XIcon className="w-4 h-4" />
-                <span>Not Going</span>
-              </div>
-            </button>
+            {/* Event Link */}
+            {event.link && (
+              <a
+                href={event.link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex-1 py-4 rounded-xl font-bold text-base bg-purple-600 text-white text-center hover:bg-purple-700 transition-all shadow-md"
+              >
+                <div className="flex items-center justify-center gap-1.5">
+                  <ExternalLink className="w-4 h-4" />
+                  <span>View Event</span>
+                </div>
+              </a>
+            )}
 
             <button
               onClick={handleShare}
-              className="flex-1 py-3 rounded-xl font-semibold text-sm bg-gray-200 text-gray-800 hover:bg-gray-300 transition-all shadow-sm"
+              className="flex-1 py-4 rounded-xl font-bold text-base bg-gray-200 text-gray-800 hover:bg-gray-300 transition-all shadow-sm"
             >
               <div className="flex items-center justify-center gap-1.5">
                 <Share2 className="w-4 h-4" />
@@ -218,21 +142,6 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index, isActive = true }) =>
               </div>
             </button>
           </div>
-
-          {/* Event Link */}
-          {event.link && (
-            <a
-              href={event.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block w-full py-3 rounded-xl font-semibold text-sm bg-purple-600 text-white text-center hover:bg-purple-700 transition-all"
-            >
-              <div className="flex items-center justify-center gap-1.5">
-                <ExternalLink className="w-4 h-4" />
-                <span>View Event</span>
-              </div>
-            </a>
-          )}
         </div>
       </div>
     </div>
