@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
-import { MapPin, Trash2, Calendar, Sparkles, Loader2, AlertCircle, Users } from 'lucide-react';
+import { MapPin, Trash2, Calendar, Sparkles, Loader2, AlertCircle, Users, Settings } from 'lucide-react';
+import Link from 'next/link';
 import { ContentItem } from '../types';
 import { useEvents } from '../hooks/useEvents';
 import ReelsView from './ReelsView';
@@ -131,15 +132,24 @@ const ForYouFeed: React.FC = () => {
   return (
     <div className="space-y-8 sm:space-y-10">
       {/* Hero Header Section */}
-      <div>
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-linear-to-r from-[#f5f5f5] via-[#e0e0e0] to-[#d4d4d4] bg-clip-text text-transparent tracking-tight mb-2">
-          {userTags.length > 0 ? 'For You' : 'Events'}
-        </h2>
-        <p className="text-sm sm:text-base text-[#a3a3a3]">
-          {userTags.length > 0
-            ? 'Personalized recommendations based on your interests'
-            : 'Discover upcoming campus events'}
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-linear-to-r from-[#f5f5f5] via-[#e0e0e0] to-[#d4d4d4] bg-clip-text text-transparent tracking-tight mb-2">
+            {userTags.length > 0 ? 'For You' : 'Events'}
+          </h2>
+          <p className="text-sm sm:text-base text-[#a3a3a3]">
+            {userTags.length > 0
+              ? 'Personalized recommendations based on your interests'
+              : 'Discover upcoming campus events'}
+          </p>
+        </div>
+        <Link
+          href="/preferences"
+          className="flex items-center gap-2 px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-xl font-semibold transition-all shadow-lg hover:shadow-xl whitespace-nowrap"
+        >
+          <Settings className="w-5 h-5" />
+          <span>{userTags.length > 0 ? 'Edit Preferences' : 'Set Preferences'}</span>
+        </Link>
       </div>
 
       {/* Loading State */}

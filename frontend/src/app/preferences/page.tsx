@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import NavBar from '@/components/NavBar';
 import { Sparkles, Check } from 'lucide-react';
 
@@ -37,6 +38,7 @@ const defaultTags: Tag[] = [
 ];
 
 export default function PreferencesPage() {
+  const router = useRouter();
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [saved, setSaved] = useState(false);
 
@@ -60,7 +62,10 @@ export default function PreferencesPage() {
   const handleSave = () => {
     localStorage.setItem('user-tags', JSON.stringify(selectedTags));
     setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    // Redirect to home after a short delay
+    setTimeout(() => {
+      router.push('/');
+    }, 500);
   };
 
   const groupedTags = defaultTags.reduce((acc, tag) => {
