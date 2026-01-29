@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { MessageCircle, Sparkles, Menu, MapPin } from 'lucide-react';
+import { MessageCircle, Sparkles, Menu, MapPin, Settings } from 'lucide-react';
 
 interface NavBarProps {
     onMenuClick?: () => void;
@@ -48,6 +48,14 @@ export default function NavBar({ onMenuClick, showMenuButton = false }: NavBarPr
                     >
                         <MapPin className="w-5 h-5" />
                         <span className="font-medium hidden md:inline">Campus Map</span>
+                    </Link>
+
+                    <Link
+                        href="/preferences"
+                        className="flex items-center gap-2 text-white/90 hover:text-white transition-colors"
+                    >
+                        <Settings className="w-5 h-5" />
+                        <span className="font-medium hidden md:inline">Preferences</span>
                     </Link>
                 </div>
             </div>

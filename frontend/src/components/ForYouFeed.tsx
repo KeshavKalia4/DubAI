@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { MapPin, Trash2, Calendar, Sparkles, Loader2, AlertCircle, Users } from 'lucide-react';
 import { ContentItem } from '../types';
 import { useEvents } from '../hooks/useEvents';
@@ -38,6 +38,7 @@ const typeColors: Record<string, { border: string; bg: string; text: string; acc
 
 const ForYouFeed: React.FC = () => {
   const { events, deleteEvent, isLoaded, isLoading, error } = useEvents();
+  const [userTags, setUserTags] = useState<string[]>([]);
 
   // Reels state
   const [reelsState, setReelsState] = useState<{
@@ -50,17 +51,58 @@ const ForYouFeed: React.FC = () => {
     sortedEvents: []
   });
 
-  // Sort events by date (upcoming first)
+  // Load user tags from localStorage
+  useEffect(() => {
+    const savedTags = localStorage.getItem('user-tags');
+    if (savedTags) {
+      setUserTags(JSON.parse(savedTags));
+    }
+  }, []);
+
+  // Sort events with personalization based on user tags
   const sortedEvents = useMemo(() => {
     if (!isLoaded) return [];
 
+    // If user has tags, personalize the feed
+    if (userTags.length > 0) {
+      const scoredEvents = events.map((event) => {
+        let score = 0;
+
+        // Tag matches (5 points each)
+        const matchingTags = event.tags.filter((tag) => userTags.includes(tag));
+        score += matchingTags.length * 5;
+
+        // Date proximity bonus (upcoming events)
+        if (event.date) {
+          const daysUntil = (new Date(event.date).getTime() - Date.now()) / (1000 * 60 * 60 * 24);
+          if (daysUntil >= 0 && daysUntil <= 7) score += 3; // This week
+          if (daysUntil > 7 && daysUntil <= 30) score += 1; // This month
+        }
+
+        return { event, score };
+      });
+
+      return scoredEvents
+        .sort((a, b) => {
+          // Sort by score first
+          if (b.score !== a.score) return b.score - a.score;
+          // Then by date
+          if (!a.event.date && !b.event.date) return 0;
+          if (!a.event.date) return 1;
+          if (!b.event.date) return -1;
+          return new Date(a.event.date).getTime() - new Date(b.event.date).getTime();
+        })
+        .map((entry) => entry.event);
+    }
+
+    // No tags - just sort by date
     return [...events].sort((a, b) => {
       if (!a.date && !b.date) return 0;
       if (!a.date) return 1;
       if (!b.date) return -1;
       return new Date(a.date).getTime() - new Date(b.date).getTime();
     });
-  }, [events, isLoaded]);
+  }, [events, isLoaded, userTags]);
 
   // Reels handlers
   const handleOpenReels = useCallback((eventId: string) => {
@@ -91,9 +133,13 @@ const ForYouFeed: React.FC = () => {
       {/* Hero Header Section */}
       <div>
         <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-linear-to-r from-[#f5f5f5] via-[#e0e0e0] to-[#d4d4d4] bg-clip-text text-transparent tracking-tight mb-2">
-          Events
+          {userTags.length > 0 ? 'For You' : 'Events'}
         </h2>
-        <p className="text-sm sm:text-base text-[#a3a3a3]">Discover upcoming campus events</p>
+        <p className="text-sm sm:text-base text-[#a3a3a3]">
+          {userTags.length > 0
+            ? 'Personalized recommendations based on your interests'
+            : 'Discover upcoming campus events'}
+        </p>
       </div>
 
       {/* Loading State */}
