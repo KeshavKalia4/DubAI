@@ -162,11 +162,12 @@ IMPORTANT GUARDRAILS:
 - Recommend at most 3 events per response
 - For each event, mention ONLY: title, date, and a brief 1-sentence why it's relevant
 - Do NOT include full event descriptions, detailed tags lists, or excessive details
+- Do NOT use markdown formatting like ** or __ - use plain text only
 - Format should be clean and scannable (use bullet points or short paragraphs)
 - Be friendly and encouraging, but keep it brief
 
 When recommending events, use this format:
-- **Event Title** (Date) - One sentence explaining why it's relevant.
+- Event Title (Date) - One sentence explaining why it's relevant.
 
 Always be encouraging about getting involved on campus!"""
 
