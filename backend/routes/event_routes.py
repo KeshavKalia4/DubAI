@@ -55,6 +55,15 @@ def get_personalized_feed(user_netid):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
+#Get events by RSO
+@event_bp.route('/rso/<rso_id>', methods=['GET'])
+def get_events_by_rso(rso_id):
+    try:
+        events = EventService.get_events_by_rso(rso_id)
+        return jsonify(events), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 #Search events by tag
 @event_bp.route('/search', methods=['GET'])
 def search_events_by_tag():

@@ -64,6 +64,12 @@ export const eventsApi = {
     api.get<BackendEvent[]>(`/events/search?tag=${encodeURIComponent(tag)}`),
 
   /**
+   * Get events by RSO ID (for contributor dashboard)
+   */
+  getByRso: (rsoId: string) =>
+    api.get<BackendEvent[]>(`/events/rso/${rsoId}`),
+
+  /**
    * Get user's RSVP'd events
    */
   getUserRsvps: (userNetid: string) =>

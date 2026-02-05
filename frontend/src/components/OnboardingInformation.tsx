@@ -56,28 +56,38 @@ const OnboardingInformation: React.FC<OnboardingInformationProps> = ({
     if (step < 2) {
       setStep(step + 1);
     } else {
-      if (!netid || !user) {
-        console.error('No user logged in');
-        return;
-      }
-
       setIsSubmitting(true);
       try {
-        const profile = await completeOnboarding(
-          netid,
-          user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-          user.email || '',
-          major,
-          year,
-          selectedTags
-        );
-        onComplete(profile);
+        // If user is logged in, sync to backend
+        if (netid && user) {
+          const profile = await completeOnboarding(
+            netid,
+            user.user_metadata?.name || user.email?.split('@')[0] || 'User',
+            user.email || '',
+            major,
+            year,
+            selectedTags
+          );
+          onComplete(profile);
+        } else {
+          // No auth - just save locally
+          const localProfile: UserProfile = {
+            id: 'guest',
+            name: 'Guest',
+            email: '',
+            organizationId: org.id,
+            major,
+            year,
+            tags: selectedTags,
+          };
+          onComplete(localProfile);
+        }
       } catch (error) {
         console.error('Failed to complete onboarding:', error);
         const localProfile: UserProfile = {
-          id: netid,
-          name: user.user_metadata?.name || user.email?.split('@')[0] || 'User',
-          email: user.email || '',
+          id: netid || 'guest',
+          name: user?.user_metadata?.name || user?.email?.split('@')[0] || 'Guest',
+          email: user?.email || '',
           organizationId: org.id,
           major,
           year,

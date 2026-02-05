@@ -436,6 +436,27 @@ export default function ChatInterface({ isSidebarOpen, setIsSidebarOpen }: ChatI
                   </div>
                 </div>
               ))}
+
+              {/* Typing Indicator - iMessage style */}
+              {isLoading && (
+                <div className="flex gap-3 sm:gap-4 items-start animate-fade-in">
+                  {/* Avatar */}
+                  <div className="shrink-0 w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center shadow-lg bg-linear-to-br from-[#B7A57A] to-[#d4c79f] text-white">
+                    <Sparkles className="w-5 h-5 sm:w-6 sm:h-6" strokeWidth={2} />
+                  </div>
+
+                  {/* Typing Bubble */}
+                  <div className="flex flex-col items-start">
+                    <div className="px-5 py-4 rounded-2xl rounded-tl-md bg-[#1e1432] border border-[#362955]/50 shadow-md">
+                      <div className="flex items-center gap-1">
+                        <span className="w-2 h-2 bg-[#8268bc] rounded-full animate-bounce" style={{ animationDelay: '0ms', animationDuration: '1s' }}></span>
+                        <span className="w-2 h-2 bg-[#8268bc] rounded-full animate-bounce" style={{ animationDelay: '150ms', animationDuration: '1s' }}></span>
+                        <span className="w-2 h-2 bg-[#8268bc] rounded-full animate-bounce" style={{ animationDelay: '300ms', animationDuration: '1s' }}></span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div ref={messagesEndRef} />

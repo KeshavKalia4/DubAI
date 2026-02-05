@@ -1,237 +1,149 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import NavBar from '@/components/NavBar';
-import { useEvents } from '@/hooks/useEvents';
-import { ContentType } from '@/types';
-import { useUserProfile } from '@/hooks/useUserProfile';
+import { ArrowLeft, Clock } from 'lucide-react';
+import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
+import VerificationRequestForm from '@/components/VerificationRequestForm';
+import ContributorDashboard from '@/components/ContributorDashboard';
 
 export default function ContributePage() {
   const router = useRouter();
-  const { addEvent } = useEvents();
-  const { profile } = useUserProfile();
+  const { user, isLoading, isContributor, contributorStatus } = useAuth();
 
-  // Get current date/time in the format required for datetime-local input
-  const getCurrentDateTime = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const hours = String(now.getHours()).padStart(2, '0');
-    const minutes = String(now.getMinutes()).padStart(2, '0');
-    return `${year}-${month}-${day}T${hours}:${minutes}`;
-  };
+  // Redirect to login if not authenticated
+  useEffect(() => {
+    if (!isLoading && !user) {
+      router.push('/login?redirect=/contribute');
+    }
+  }, [isLoading, user, router]);
 
-  const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    type: 'event' as ContentType,
-    tags: '',
-    date: getCurrentDateTime(),
-    location: '',
-  });
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#1a1025] flex items-center justify-center relative overflow-hidden">
+        {/* Background glow effects */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-[#8268bc]/20 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2"></div>
+          <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-purple-600/15 rounded-full blur-[100px] translate-x-1/3 translate-y-1/3"></div>
+        </div>
+        <div className="text-center relative z-10">
+          <svg className="animate-spin h-10 w-10 text-[#8268bc] mx-auto mb-4" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+          </svg>
+          <p className="text-[#d4d4d4]">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Don't render content if not authenticated (will redirect)
+  if (!user) {
+    return null;
+  }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // Check if user has a pending request
+  const pendingRequest = contributorStatus?.pending_request;
 
-    // Validate date is not in the past
-    if (formData.date) {
-      const selectedDate = new Date(formData.date);
-      const now = new Date();
-      if (selectedDate < now) {
-        alert('Event date cannot be in the past');
-        return;
-      }
+  // Render content based on user's contributor status
+  const renderContent = () => {
+    // Case 1: User is a verified contributor
+    if (isContributor) {
+      return <ContributorDashboard />;
     }
 
-    setIsSubmitting(true);
+    // Case 2: User has a pending request
+    if (pendingRequest) {
+      return (
+        <div className="bg-gradient-to-br from-[#1e1432]/95 to-[#2a1f47]/80 backdrop-blur-md border-2 border-[#8268bc]/30 rounded-2xl p-6 sm:p-8 shadow-[0_8px_30px_rgba(107,78,168,0.25)]">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Clock className="w-8 h-8 text-yellow-400" />
+            </div>
+            <h2 className="text-xl font-semibold text-[#f5f5f5] mb-2">
+              Verification Pending
+            </h2>
+            <p className="text-[#d4d4d4] mb-6">
+              Your request to be verified for <span className="font-medium text-[#8268bc]">{pendingRequest.rso_name}</span> is being reviewed.
+            </p>
 
-    // Parse tags from comma-separated string
-    const tagsArray = formData.tags
-      .split(',')
-      .map(tag => tag.trim().toLowerCase())
-      .filter(tag => tag.length > 0);
+            <div className="bg-[#1a1025]/80 rounded-xl p-4 text-left mb-6 border border-[#8268bc]/20">
+              <h3 className="text-sm font-medium text-[#8268bc] mb-2">Your Request Details</h3>
+              <div className="space-y-2 text-sm">
+                <p className="text-[#d4d4d4]">
+                  <span className="text-[#a3a3a3]">Organization:</span> {pendingRequest.rso_name}
+                </p>
+                <p className="text-[#d4d4d4]">
+                  <span className="text-[#a3a3a3]">Reason:</span> {pendingRequest.reason}
+                </p>
+                {pendingRequest.proof && (
+                  <p className="text-[#d4d4d4]">
+                    <span className="text-[#a3a3a3]">Proof:</span>{' '}
+                    <a href={pendingRequest.proof} target="_blank" rel="noopener noreferrer" className="text-[#8268bc] hover:underline">
+                      View Link
+                    </a>
+                  </p>
+                )}
+                <p className="text-[#d4d4d4]">
+                  <span className="text-[#a3a3a3]">Submitted:</span> {new Date(pendingRequest.created_at).toLocaleDateString()}
+                </p>
+              </div>
+            </div>
 
-    // Create the event
-    addEvent({
-      organizationId: profile?.organizationId || 'uw-seattle',
-      type: formData.type,
-      title: formData.title,
-      description: formData.description,
-      tags: tagsArray,
-      date: formData.date ? new Date(formData.date).toISOString() : undefined,
-      location: formData.location || undefined,
-    });
+            <p className="text-sm text-[#a3a3a3]">
+              We'll notify you once your request has been reviewed.
+            </p>
+          </div>
+        </div>
+      );
+    }
 
-    // Reset form
-    setFormData({
-      title: '',
-      description: '',
-      type: 'event',
-      tags: '',
-      date: getCurrentDateTime(),
-      location: '',
-    });
-
-    setIsSubmitting(false);
-
-    // Redirect to home page
-    router.push('/');
-  };
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    // Case 3: User is not a contributor and has no pending request
+    return <VerificationRequestForm />;
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-white to-blue-50 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900">
-      <NavBar />
-      <div className="max-w-2xl mx-auto px-6 py-12">
-        <div className="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-[0_1px_3px_rgba(0,0,0,0.3)] border border-white/20 dark:border-gray-700/50">
-          <h1 className="text-3xl font-semibold text-gray-900 dark:text-white mb-2">
-            Create Event
-          </h1>
-          <p className="text-gray-500 dark:text-gray-400 mb-8">
-            Contribute to the community by creating a new event
-          </p>
+    <div className="min-h-screen bg-[#1a1025] relative overflow-hidden">
+      {/* Background glow effects */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-[#8268bc]/20 rounded-full blur-[120px] -translate-x-1/2 -translate-y-1/2"></div>
+        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-purple-600/15 rounded-full blur-[100px] translate-x-1/3 translate-y-1/3"></div>
+        <div className="absolute top-1/2 left-1/2 w-[400px] h-[400px] bg-[#6b4ea8]/10 rounded-full blur-[80px] -translate-x-1/2 -translate-y-1/2"></div>
+      </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Title */}
-            <div>
-              <label
-                htmlFor="title"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
-                Title *
-              </label>
-              <input
-                type="text"
-                id="title"
-                name="title"
-                required
-                value={formData.title}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent outline-none transition-all"
-                placeholder="Event title"
-              />
-            </div>
-
-            {/* Description */}
-            <div>
-              <label
-                htmlFor="description"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
-                Description *
-              </label>
-              <textarea
-                id="description"
-                name="description"
-                required
-                value={formData.description}
-                onChange={handleChange}
-                rows={4}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent outline-none transition-all resize-none"
-                placeholder="Describe your event"
-              />
-            </div>
-
-            {/* Type */}
-            <div>
-              <label
-                htmlFor="type"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
-                Type *
-              </label>
-              <select
-                id="type"
-                name="type"
-                value={formData.type}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent outline-none transition-all"
-              >
-                <option value="event">Event</option>
-                <option value="club">Club</option>
-                <option value="announcement">Announcement</option>
-              </select>
-            </div>
-
-            {/* Tags */}
-            <div>
-              <label
-                htmlFor="tags"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
-                Tags * <span className="text-gray-400 dark:text-gray-500 font-normal">(comma-separated)</span>
-              </label>
-              <input
-                type="text"
-                id="tags"
-                name="tags"
-                required
-                value={formData.tags}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent outline-none transition-all"
-                placeholder="tech, social, career"
-              />
-            </div>
-
-            {/* Date */}
-            <div>
-              <label
-                htmlFor="date"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
-                Date *
-              </label>
-              <input
-                type="datetime-local"
-                id="date"
-                name="date"
-                required
-                value={formData.date}
-                onChange={handleChange}
-                min={getCurrentDateTime()}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent outline-none transition-all"
-              />
-            </div>
-
-            {/* Location (optional) */}
-            <div>
-              <label
-                htmlFor="location"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
-                Location <span className="text-gray-400 dark:text-gray-500 font-normal">(optional)</span>
-              </label>
-              <input
-                type="text"
-                id="location"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                className="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-purple-500 dark:focus:ring-purple-400 focus:border-transparent outline-none transition-all"
-                placeholder="HUB, Mary Gates Hall, etc."
-              />
-            </div>
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white px-6 py-3 rounded-lg hover:shadow-lg hover:scale-[1.02] transition-all duration-200 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? 'Creating...' : 'Create Event'}
-            </button>
-          </form>
+      {/* Header */}
+      <div className="relative z-10 border-b border-[#8268bc]/20">
+        <div className="max-w-3xl mx-auto px-4 py-4">
+          <Link
+            href="/"
+            className="inline-flex items-center gap-2 text-[#d4d4d4] hover:text-[#f5f5f5] transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to Home</span>
+          </Link>
         </div>
+      </div>
+
+      <div className="relative z-10 max-w-3xl mx-auto px-4 py-8 sm:py-12">
+        {/* Title */}
+        <div className="text-center mb-8">
+          <h1 className="text-3xl sm:text-4xl font-bold mb-2">
+            <span className="bg-gradient-to-r from-[#f5f5f5] via-[#e0e0e0] to-[#d4d4d4] bg-clip-text text-transparent">
+              {isContributor ? 'Contributor Dashboard' : 'Submit an Event'}
+            </span>
+          </h1>
+          <p className="text-[#a3a3a3]">
+            {isContributor
+              ? 'Share your RSO\'s events with the UW community'
+              : 'Verify your RSO affiliation to submit events'
+            }
+          </p>
+        </div>
+
+        {/* Main Content */}
+        {renderContent()}
       </div>
     </div>
   );

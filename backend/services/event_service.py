@@ -142,6 +142,43 @@ class EventService:
             return EventService.get_upcoming_events(limit)
     
     @staticmethod
+    def get_events_by_rso(rso_id: str) -> List[Dict]:
+        """Get all events for a specific RSO with attendee counts"""
+        try:
+            # Get events for this RSO
+            result = supabase.table('events') \
+                .select('*') \
+                .eq('rso_id', rso_id) \
+                .order('date_time', desc=True) \
+                .execute()
+
+            events = [process_event(e) for e in result.data]
+
+            # Get attendee counts for each event
+            for event in events:
+                # Get going count
+                going_result = supabase.table('user_event_interactions') \
+                    .select('id', count='exact') \
+                    .eq('event_id', event['id']) \
+                    .eq('status', 'rsvp') \
+                    .execute()
+
+                # Get interested count
+                interested_result = supabase.table('user_event_interactions') \
+                    .select('id', count='exact') \
+                    .eq('event_id', event['id']) \
+                    .eq('status', 'maybe') \
+                    .execute()
+
+                event['going_count'] = going_result.count or 0
+                event['interested_count'] = interested_result.count or 0
+
+            return events
+        except Exception as e:
+            print(f"Error getting events by RSO: {e}")
+            return []
+
+    @staticmethod
     def search_events_by_tag(tag: str) -> List[Dict]:
         """Search events by tag"""
         try:
@@ -158,7 +195,7 @@ class EventService:
             return []
     
     @staticmethod
-    def get_user_rsvp_events(user_netid: str) -> List[Dict]:
+    def get_user_rsvp_events(user_netid: str, include_past: bool = True) -> List[Dict]:
         """Get events user has RSVP'd to"""
         try:
             interactions = supabase.table('user_event_interactions') \
@@ -166,26 +203,29 @@ class EventService:
                 .eq('user_netid', user_netid) \
                 .in_('status', ['rsvp', 'maybe']) \
                 .execute()
-            
+
             if not interactions.data:
                 return []
-            
+
             event_ids = [i['event_id'] for i in interactions.data]
-            
-            events = supabase.table('events') \
+
+            query = supabase.table('events') \
                 .select('*, rsos(name, is_verified)') \
-                .in_('id', event_ids) \
-                .gte('date_time', datetime.utcnow().isoformat()) \
-                .order('date_time') \
-                .execute()
-            
+                .in_('id', event_ids)
+
+            if not include_past:
+                query = query.gte('date_time', datetime.utcnow().isoformat())
+
+            events = query.order('date_time', desc=True).execute()
+
             # Add status to each event
             for event in events.data:
+                event = process_event(event)
                 for interaction in interactions.data:
                     if interaction['event_id'] == event['id']:
                         event['user_status'] = interaction['status']
                         break
-            
+
             return events.data
         except Exception as e:
             print(f"Error getting user RSVP events: {e}")

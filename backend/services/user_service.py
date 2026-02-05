@@ -154,3 +154,35 @@ class UserService:
         except Exception as e:
             print(f"Error deleting user: {e}")
             return False
+
+    # ============================================
+    # CONTRIBUTOR STATUS
+    # ============================================
+
+    @staticmethod
+    def get_contributor_status(netid: str) -> Dict:
+        """Get user's contributor status"""
+        try:
+            result = supabase.table('users').select('is_contributor').eq('netid', netid).execute()
+            if result.data:
+                user = result.data[0]
+                return {
+                    'is_contributor': user.get('is_contributor', False) or False,
+                    'is_admin': False
+                }
+            return {'is_contributor': False, 'is_admin': False}
+        except Exception as e:
+            print(f"Error getting contributor status: {e}")
+            return {'is_contributor': False, 'is_admin': False}
+
+    @staticmethod
+    def set_contributor_status(netid: str, is_contributor: bool) -> Optional[Dict]:
+        """Update user's contributor status"""
+        try:
+            result = supabase.table('users').update({
+                'is_contributor': is_contributor
+            }).eq('netid', netid).execute()
+            return result.data[0] if result.data else None
+        except Exception as e:
+            print(f"Error setting contributor status: {e}")
+            raise

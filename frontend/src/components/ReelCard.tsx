@@ -1,9 +1,12 @@
 'use client';
 // Flash card v3 - vertical card with horizontal swipe
-import React from 'react';
+import React, { useEffect } from 'react';
 import Image from 'next/image';
-import { MapPin, Calendar, Users, ExternalLink } from 'lucide-react';
-import { ContentItem } from '@/types';
+import { useRouter } from 'next/navigation';
+import { MapPin, Calendar, Users, ExternalLink, Check, Star } from 'lucide-react';
+import { ContentItem, RsvpStatus } from '@/types';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRsvp } from '@/hooks/useRsvp';
 
 interface ReelCardProps {
   event: ContentItem;
@@ -12,6 +15,43 @@ interface ReelCardProps {
 }
 
 const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
+  const router = useRouter();
+  const { netid, user, setPendingAction } = useAuth();
+  const { getRsvpStatus, setRsvp, getRsvpSummary, isRsvpLoading, loadEventRsvp } = useRsvp({ userNetid: netid || undefined });
+
+  // Load RSVP status when card mounts or netid changes
+  useEffect(() => {
+    if (event.id) {
+      loadEventRsvp(event.id);
+    }
+  }, [event.id, netid, loadEventRsvp]);
+
+  const currentStatus = getRsvpStatus(event.id);
+  const summary = getRsvpSummary(event.id, event.attendees?.count);
+  const isLoading = isRsvpLoading(event.id);
+
+  // Handle RSVP button click
+  const handleRsvp = async (status: 'going' | 'interested') => {
+    // If not logged in, store pending action and redirect to login
+    if (!user) {
+      setPendingAction({
+        type: 'rsvp',
+        eventId: event.id,
+        status: status,
+      });
+      router.push('/login?redirect=/explore');
+      return;
+    }
+
+    // Toggle off if already selected
+    const newStatus: RsvpStatus = currentStatus === status ? null : status;
+    try {
+      await setRsvp(event.id, newStatus);
+    } catch (error) {
+      console.error('Failed to update RSVP:', error);
+    }
+  };
+
   // Format date
   const formatDate = () => {
     if (!event.date) return null;
@@ -87,10 +127,14 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
               <span className="text-sm">{formatDate()}</span>
             </div>
           )}
-          {event.attendees && event.attendees.count > 0 && (
+          {(summary.going > 0 || summary.interested > 0) && (
             <div className="flex items-center gap-2 text-gray-600">
               <Users className="w-4 h-4 text-purple-600 flex-shrink-0" />
-              <span className="text-sm font-medium">{event.attendees.count} attending</span>
+              <span className="text-sm font-medium">
+                {summary.going > 0 && `${summary.going} going`}
+                {summary.going > 0 && summary.interested > 0 && ' · '}
+                {summary.interested > 0 && `${summary.interested} interested`}
+              </span>
             </div>
           )}
         </div>
@@ -99,7 +143,36 @@ const ReelCard: React.FC<ReelCardProps> = ({ event, index }) => {
         <div className="flex-1" />
 
         {/* Action Buttons */}
-        <div className="mt-auto">
+        <div className="mt-auto space-y-3">
+          {/* RSVP Buttons */}
+          <div className="flex gap-2">
+            <button
+              onClick={() => handleRsvp('going')}
+              disabled={isLoading}
+              className={`flex-1 py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
+                currentStatus === 'going'
+                  ? 'bg-green-500 text-white shadow-md'
+                  : 'bg-green-50 text-green-700 hover:bg-green-100 border border-green-200'
+              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <Check className="w-4 h-4" />
+              {currentStatus === 'going' ? 'Going!' : 'Going'}
+            </button>
+            <button
+              onClick={() => handleRsvp('interested')}
+              disabled={isLoading}
+              className={`flex-1 py-3 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
+                currentStatus === 'interested'
+                  ? 'bg-yellow-500 text-white shadow-md'
+                  : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100 border border-yellow-200'
+              } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <Star className="w-4 h-4" />
+              {currentStatus === 'interested' ? 'Interested!' : 'Interested'}
+            </button>
+          </div>
+
+          {/* View Event Link */}
           {event.link && (
             <a
               href={event.link}

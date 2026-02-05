@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, useMap } from 'react-leaflet';
 import L from 'leaflet';
-import { Users, MapPin, X, Navigation, Clock } from 'lucide-react';
+import { Users, MapPin, X, Navigation, Calendar } from 'lucide-react';
 import { ContentItem } from '@/types';
 import 'leaflet/dist/leaflet.css';
 
@@ -246,71 +246,87 @@ export default function InteractiveMapInterface({ items }: InteractiveMapInterfa
         </div>
       </div>
 
-      {/* Selected Item Card */}
+      {/* Selected Item Card - Styled like ForYouFeed */}
       {selectedItem && (
-        <div className="absolute bottom-4 right-4 left-auto z-[1000] w-80 bg-white rounded-2xl shadow-2xl overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-300">
+        <div className="absolute bottom-4 right-4 left-auto z-[1000] w-80 bg-gradient-to-br from-[#1e1432]/95 to-[#2a1f47]/95 backdrop-blur-md rounded-2xl shadow-[0_8px_30px_rgba(107,78,168,0.4)] border-2 border-[#8268bc]/40 overflow-hidden animate-in slide-in-from-bottom-10 fade-in duration-300">
           <button
             onClick={() => setSelectedItem(null)}
-            className="absolute top-3 right-3 p-1 text-gray-400 hover:text-gray-600 rounded-full hover:bg-gray-100 z-10"
+            className="absolute top-3 right-3 p-1.5 text-gray-400 hover:text-white rounded-lg hover:bg-[#8268bc]/30 z-10 transition-all"
           >
             <X className="w-5 h-5" />
           </button>
 
-          {selectedItem.imageUrl && (
-            <div className="h-32 w-full overflow-hidden">
-              <img
-                src={selectedItem.imageUrl}
-                alt={selectedItem.title}
-                className="w-full h-full object-cover"
-              />
-            </div>
-          )}
-
-          <div className="p-4">
-            <div className="flex items-center gap-2 mb-2">
-              <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                selectedItem.type === 'event' ? 'bg-orange-100 text-orange-700' : 'bg-purple-100 text-purple-700'
+          <div className="p-5">
+            {/* Header with Type Badge and Date */}
+            <div className="flex items-start gap-2 mb-4">
+              <span className={`text-xs font-bold px-3 py-1.5 rounded-lg border-2 ${
+                selectedItem.type === 'event'
+                  ? 'bg-[#f5f0ff] text-[#4B2E83] border-[#4B2E83]/30'
+                  : 'bg-[#faf8f3] text-[#8b7a5a] border-[#B7A57A]/30'
               }`}>
                 {selectedItem.type === 'event' ? 'Event' : 'Club'}
               </span>
               {selectedItem.date && (
-                <span className="text-xs text-gray-500 flex items-center gap-1">
-                  <Clock className="w-3 h-3" />
-                  {new Date(selectedItem.date).toLocaleDateString('en-US', {
-                    weekday: 'short',
-                    month: 'short',
-                    day: 'numeric',
-                    hour: 'numeric',
-                    minute: '2-digit'
-                  })}
+                <span className="flex items-center gap-1.5 text-xs text-[#d4d4d4] font-bold bg-[#2a1f47]/80 px-3 py-1.5 rounded-lg border border-[#8268bc]/20">
+                  <Calendar className="w-3 h-3" />
+                  {(() => {
+                    const dateStr = selectedItem.date.replace(' ', 'T');
+                    const datePart = dateStr.split('T')[0];
+                    const [, month, day] = datePart.split('-').map(Number);
+                    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                    return `${months[month - 1]} ${day}`;
+                  })()}
                 </span>
               )}
             </div>
 
-            <h3 className="text-lg font-bold text-gray-900 mb-1">{selectedItem.title}</h3>
-            <p className="text-sm text-gray-600 line-clamp-2 mb-3">{selectedItem.description}</p>
+            {/* Title */}
+            <h3 className="font-bold text-[#f5f5f5] text-lg leading-tight mb-2">{selectedItem.title}</h3>
 
-            {selectedItem.aiSummary && (
-              <p className="text-xs text-gray-500 italic mb-3 bg-gray-50 p-2 rounded-lg">
-                {selectedItem.aiSummary}
-              </p>
+            {/* RSO Name */}
+            {selectedItem.rsoName && (
+              <div className="flex items-center gap-2 text-[#8268bc] mb-2">
+                <Users className="w-4 h-4 shrink-0" />
+                <span className="text-sm font-medium">{selectedItem.rsoName}</span>
+              </div>
             )}
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1 text-xs text-gray-500">
-                <MapPin className="w-3 h-3" />
-                {selectedItem.location || 'On Campus'}
+            {/* Description */}
+            <p className="text-[#d4d4d4] text-sm leading-relaxed line-clamp-2 mb-3">{selectedItem.description}</p>
+
+            {/* Location */}
+            {selectedItem.location && (
+              <div className="flex items-center gap-2.5 bg-[#2a1f47]/60 px-3 py-2 rounded-xl border border-[#8268bc]/20 mb-3">
+                <MapPin className="w-4 h-4 text-[#8268bc] shrink-0" />
+                <span className="text-sm text-[#d4d4d4] font-medium truncate">
+                  {selectedItem.location}
+                </span>
               </div>
+            )}
 
-              {selectedItem.attendees && (
-                <div className="flex items-center gap-1 text-xs text-gray-500">
-                  <Users className="w-3 h-3" />
-                  {selectedItem.attendees.count} attending
-                </div>
-              )}
-            </div>
+            {/* Attendees */}
+            {selectedItem.attendees && selectedItem.attendees.count > 0 && (
+              <div className="flex items-center gap-2 text-[#a3a3a3] text-sm mb-4">
+                <Users className="w-4 h-4" />
+                <span>{selectedItem.attendees.count} attending</span>
+              </div>
+            )}
 
-            <button className="w-full mt-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white font-semibold py-2.5 rounded-xl hover:opacity-90 transition-opacity">
+            {/* Tags */}
+            {selectedItem.tags && selectedItem.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4 pt-3 border-t border-[#362955]/50">
+                {selectedItem.tags.slice(0, 3).map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-xs font-bold px-2.5 py-1 rounded-lg bg-[#362955]/60 text-[#8268bc] border border-[#8268bc]/30"
+                  >
+                    #{tag.charAt(0).toUpperCase() + tag.slice(1)}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <button className="w-full bg-gradient-to-r from-[#8268bc] to-[#6b4ea8] text-white font-semibold py-2.5 rounded-xl hover:opacity-90 transition-opacity shadow-lg">
               View Details
             </button>
           </div>
