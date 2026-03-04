@@ -8,17 +8,17 @@ event_bp = Blueprint('events', __name__)
 def create_event():
     try:
         data = request.json
-        required = ['rso_id', 'title', 'description', 'date_time', 'location', 'tags']
+        required = ['title', 'description', 'date_time', 'location']
         if not all(data.get(field) for field in required):
-            return jsonify({'error': 'Missing required fields'}), 400
-        
+            return jsonify({'error': 'Missing required fields: title, description, date_time, location'}), 400
+
         event = EventService.create_event(
-            rso_id=data['rso_id'],
+            rso_id=data.get('rso_id'),
             title=data['title'],
             description=data['description'],
             date_time=data['date_time'],
             location=data['location'],
-            tags=data['tags']
+            tags=data.get('tags', [])
         )
         return jsonify(event), 201
     except Exception as e:
@@ -163,10 +163,50 @@ def cancel_rsvp(event_id):
         data = request.json
         if not data.get('user_netid'):
             return jsonify({'error': 'user_netid is required'}), 400
-        
+
         success = EventService.cancel_rsvp(data['user_netid'], event_id)
         if not success:
             return jsonify({'error': 'Failed to cancel RSVP'}), 500
         return jsonify({'success': True}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# ── Saved Events ──────────────────────────────────────────────────────────────
+
+@event_bp.route('/<event_id>/save', methods=['POST'])
+def save_event(event_id):
+    try:
+        data = request.json
+        if not data.get('user_netid'):
+            return jsonify({'error': 'user_netid is required'}), 400
+        result = EventService.save_event(data['user_netid'], event_id)
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@event_bp.route('/<event_id>/save', methods=['DELETE'])
+def unsave_event(event_id):
+    try:
+        data = request.json
+        if not data.get('user_netid'):
+            return jsonify({'error': 'user_netid is required'}), 400
+        EventService.unsave_event(data['user_netid'], event_id)
+        return jsonify({'success': True}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@event_bp.route('/saved/<user_netid>', methods=['GET'])
+def get_saved_events(user_netid):
+    try:
+        events = EventService.get_saved_events(user_netid)
+        return jsonify(events), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@event_bp.route('/saved/<user_netid>/ids', methods=['GET'])
+def get_saved_event_ids(user_netid):
+    try:
+        ids = EventService.get_saved_event_ids(user_netid)
+        return jsonify(ids), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500

@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { eventsApi } from '@/lib/api'
+import { useNavigate } from 'react-router'
 import {
   Sparkles, BookOpen, Users, Wand2, ChevronRight, Copy, Check,
   Upload, Loader2, ArrowRight, Star, Clock, DollarSign,
@@ -1114,12 +1116,15 @@ function ContentStudio() {
 // ── Main Studio Page ───────────────────────────────────────────────────────────
 
 export function Studio() {
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<Tab>('ideas')
 
   // Create Event state
   const [ceDate, setCeDate] = useState<Date>()
   const [ceShowCalendar, setCeShowCalendar] = useState(false)
   const [ceIsImporting, setCeIsImporting] = useState(false)
+  const [ceIsSubmitting, setCeIsSubmitting] = useState(false)
+  const [ceSubmitError, setCeSubmitError] = useState<string | null>(null)
   const [ceSelectedRoom, setCeSelectedRoom] = useState<string | null>(null)
   const [ceMazevoRequestId, setCeMazevoRequestId] = useState("")
   const [ceIsVerifyingMazevo, setCeIsVerifyingMazevo] = useState(false)
@@ -1150,9 +1155,33 @@ export function Studio() {
     }, 1500)
   }
 
-  const onCeSubmit = (data: any) => {
-    console.log(data)
-    alert("Event Created Successfully! (Mock)")
+  const onCeSubmit = async (data: any) => {
+    if (!ceDate) {
+      setCeSubmitError('Please select a date for the event.')
+      return
+    }
+    setCeIsSubmitting(true)
+    setCeSubmitError(null)
+
+    // Combine date + startTime into ISO datetime
+    const [hours, minutes] = (data.startTime || '12:00').split(':').map(Number)
+    const dateTime = new Date(ceDate)
+    dateTime.setHours(hours, minutes, 0, 0)
+
+    try {
+      await eventsApi.createEvent({
+        title: data.title,
+        description: data.description || '',
+        date_time: dateTime.toISOString(),
+        location: data.location || '',
+        tags: [],
+      })
+      navigate('/contributor/events')
+    } catch (err: any) {
+      setCeSubmitError(err?.message || 'Failed to create event. Please try again.')
+    } finally {
+      setCeIsSubmitting(false)
+    }
   }
 
   const tabs: { id: Tab; icon: React.ReactNode; label: string }[] = [
@@ -1466,18 +1495,20 @@ export function Studio() {
                     </div>
 
                     <div className="mt-5 space-y-2.5">
-                      <div className="flex items-center gap-2 text-xs text-white/25">
-                        <CheckCircle size={13} className="text-emerald-500/50" />
-                        <span>Draft saved automatically</span>
-                      </div>
+                      {ceSubmitError && (
+                        <p className="text-xs text-red-400/80">{ceSubmitError}</p>
+                      )}
                       <button
                         onClick={ceHandleSubmit(onCeSubmit)}
-                        className="w-full py-2.5 bg-[#4b2e83]/60 hover:bg-[#4b2e83]/80 border border-[#4b2e83]/40 text-white/90 rounded-lg text-sm font-medium transition-colors cursor-pointer"
+                        disabled={ceIsSubmitting}
+                        className="w-full py-2.5 bg-[#4b2e83]/60 hover:bg-[#4b2e83]/80 border border-[#4b2e83]/40 text-white/90 rounded-lg text-sm font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                       >
-                        Publish Event
-                      </button>
-                      <button className="w-full py-2.5 bg-white/5 hover:bg-white/8 border border-white/10 text-white/50 hover:text-white/70 rounded-lg text-sm font-medium transition-colors cursor-pointer">
-                        Save as Draft
+                        {ceIsSubmitting ? (
+                          <>
+                            <Loader2 size={14} className="animate-spin" />
+                            Publishing…
+                          </>
+                        ) : 'Publish Event'}
                       </button>
                     </div>
                   </div>

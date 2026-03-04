@@ -33,4 +33,14 @@ export const API_ENDPOINTS = {
   isFollowingRso: (userNetid: string, rsoId: string) => `/api/follows/users/${userNetid}/is-following-rso/${rsoId}`,
   eventRsvpCount: (eventId: string) => `/api/follows/events/${eventId}/rsvp-count`,
   friendsGoingToEvent: (eventId: string, userNetid: string) => `/api/follows/events/${eventId}/friends/${userNetid}`,
+
+  // Saved events
+  saveEvent: (eventId: string) => `/api/events/${eventId}/save`,
+  savedEvents: (userNetid: string) => `/api/events/saved/${userNetid}`,
+  savedEventIds: (userNetid: string) => `/api/events/saved/${userNetid}/ids`,
+
+  // Analytics
+  analyticsSummary: '/api/analytics/summary',
+  analyticsRsvpByEvent: '/api/analytics/rsvp-by-event',
+  analyticsUsersTotal: '/api/analytics/users/total',
 };

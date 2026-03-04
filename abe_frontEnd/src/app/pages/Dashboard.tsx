@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
+import { analyticsApi, type AnalyticsSummary } from "@/lib/api"
 import { Link, useNavigate } from "react-router"
 import { motion } from "framer-motion"
 import GridLayout, { type Layout } from 'react-grid-layout'
@@ -742,6 +743,14 @@ function getEventsForDate(date: string): DayEvent[] {
 
 export function Dashboard() {
   const navigate = useNavigate()
+  const [analyticsSummary, setAnalyticsSummary] = useState<AnalyticsSummary | null>(null)
+
+  useEffect(() => {
+    analyticsApi.getSummary()
+      .then(setAnalyticsSummary)
+      .catch(() => {/* keep null - will show mock data */})
+  }, [])
+
   const [visibleWidgetIds, setVisibleWidgetIds] = useState<string[]>(() => {
     const stored = localStorage.getItem(STORAGE_KEY)
     if (!stored) return defaultVisibleWidgetIds
@@ -896,10 +905,20 @@ export function Dashboard() {
   }
 
   const kpis = [
-    { label: "Total RSVPs", value: "1,842", trend: "+12.4%", note: "last 30 days" },
-    { label: "Avg. Show Rate", value: "89.6%", trend: "+4.1%", note: "across all events" },
-    { label: "Active Events", value: "14", trend: "+3", note: "published + scheduled" },
-    { label: "Engagement Index", value: "78", trend: "+6.8%", note: "quality weighted" },
+    {
+      label: "Total RSVPs",
+      value: analyticsSummary ? analyticsSummary.total_rsvps.toLocaleString() : "—",
+      trend: "",
+      note: "across all events",
+    },
+    { label: "Avg. Show Rate", value: "—", trend: "", note: "coming soon" },
+    {
+      label: "Active Events",
+      value: analyticsSummary ? analyticsSummary.total_events.toLocaleString() : "—",
+      trend: "",
+      note: "total events",
+    },
+    { label: "Engagement Index", value: "—", trend: "", note: "coming soon" },
   ]
 
   const baselineEvent = eventPerformance.find((event) => event.id === baselineEventId) ?? eventPerformance[0]

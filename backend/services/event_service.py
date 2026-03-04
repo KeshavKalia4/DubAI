@@ -28,7 +28,7 @@ class EventService:
     
     @staticmethod
     def create_event(
-        rso_id: str,
+        rso_id: Optional[str],
         title: str,
         description: str,
         date_time: str,
@@ -383,8 +383,89 @@ class EventService:
                 .eq('user_netid', user_netid) \
                 .eq('event_id', event_id) \
                 .execute()
-            
+
             return result.data[0]['status'] if result.data else None
         except Exception as e:
             print(f"Error getting user event status: {e}")
             return None
+
+    # ============================================
+    # SAVED EVENTS
+    # ============================================
+
+    @staticmethod
+    def save_event(user_netid: str, event_id: str) -> Dict:
+        """Save an event for a user"""
+        try:
+            result = supabase.table('saved_events').upsert({
+                'user_netid': user_netid,
+                'event_id': event_id,
+            }, on_conflict='user_netid,event_id').execute()
+            return result.data[0] if result.data else {'user_netid': user_netid, 'event_id': event_id}
+        except Exception as e:
+            print(f"Error saving event: {e}")
+            raise
+
+    @staticmethod
+    def unsave_event(user_netid: str, event_id: str) -> bool:
+        """Remove a saved event for a user"""
+        try:
+            supabase.table('saved_events') \
+                .delete() \
+                .eq('user_netid', user_netid) \
+                .eq('event_id', event_id) \
+                .execute()
+            return True
+        except Exception as e:
+            print(f"Error unsaving event: {e}")
+            return False
+
+    @staticmethod
+    def get_saved_events(user_netid: str) -> List[Dict]:
+        """Get all saved events for a user"""
+        try:
+            saved = supabase.table('saved_events') \
+                .select('event_id') \
+                .eq('user_netid', user_netid) \
+                .execute()
+
+            if not saved.data:
+                return []
+
+            event_ids = [s['event_id'] for s in saved.data]
+            result = supabase.table('events') \
+                .select('*, rsos(name, is_verified)') \
+                .in_('id', event_ids) \
+                .execute()
+
+            return [process_event(e) for e in result.data]
+        except Exception as e:
+            print(f"Error getting saved events: {e}")
+            return []
+
+    @staticmethod
+    def is_event_saved(user_netid: str, event_id: str) -> bool:
+        """Check if an event is saved by a user"""
+        try:
+            result = supabase.table('saved_events') \
+                .select('event_id') \
+                .eq('user_netid', user_netid) \
+                .eq('event_id', event_id) \
+                .execute()
+            return len(result.data) > 0
+        except Exception as e:
+            print(f"Error checking saved event: {e}")
+            return False
+
+    @staticmethod
+    def get_saved_event_ids(user_netid: str) -> List[str]:
+        """Get just the IDs of all saved events for a user"""
+        try:
+            result = supabase.table('saved_events') \
+                .select('event_id') \
+                .eq('user_netid', user_netid) \
+                .execute()
+            return [r['event_id'] for r in result.data]
+        except Exception as e:
+            print(f"Error getting saved event IDs: {e}")
+            return []

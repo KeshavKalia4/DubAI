@@ -3,6 +3,15 @@ import { API_ENDPOINTS } from './config';
 import { BackendEvent, mapEventsToContentItems, mapEventToContentItem } from './mappers';
 import { ContentItem } from '@/types';
 
+export interface CreateEventPayload {
+  title: string;
+  description: string;
+  date_time: string;
+  location: string;
+  tags?: string[];
+  rso_id?: string;
+}
+
 export const eventsApi = {
   // Get personalized feed for a user
   async getFeed(userNetid: string, limit = 20): Promise<ContentItem[]> {
@@ -53,5 +62,32 @@ export const eventsApi = {
       API_ENDPOINTS.userRsvpEvents(userNetid)
     );
     return mapEventsToContentItems(events);
+  },
+
+  // Create a new event
+  async createEvent(payload: CreateEventPayload): Promise<ContentItem> {
+    const event = await apiClient.post<BackendEvent>(API_ENDPOINTS.events, payload);
+    return mapEventToContentItem(event);
+  },
+
+  // Save an event for a user
+  async saveEvent(eventId: string, userNetid: string): Promise<void> {
+    await apiClient.post(API_ENDPOINTS.saveEvent(eventId), { user_netid: userNetid });
+  },
+
+  // Unsave an event for a user
+  async unsaveEvent(eventId: string, userNetid: string): Promise<void> {
+    await apiClient.delete(API_ENDPOINTS.saveEvent(eventId), { user_netid: userNetid });
+  },
+
+  // Get saved events for a user
+  async getSavedEvents(userNetid: string): Promise<ContentItem[]> {
+    const events = await apiClient.get<BackendEvent[]>(API_ENDPOINTS.savedEvents(userNetid));
+    return mapEventsToContentItems(events);
+  },
+
+  // Get just saved event IDs
+  async getSavedEventIds(userNetid: string): Promise<string[]> {
+    return apiClient.get<string[]>(API_ENDPOINTS.savedEventIds(userNetid));
   },
 };

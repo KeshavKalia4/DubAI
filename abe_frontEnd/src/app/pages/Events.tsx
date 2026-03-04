@@ -1,56 +1,10 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Filter, MapPin, PlusCircle, Search, Users, Wand2 } from "lucide-react"
 import { Link, useNavigate } from "react-router"
 import { WaveDivider } from "@/components/ui/wave-divider"
 import { GridPatternCard } from "@/components/ui/card-with-grid-ellipsis-pattern"
-
-const events = [
-  {
-    id: 1,
-    title: "Founder Sprint Night",
-    date: "MAR 6",
-    time: "6:00 PM – 8:30 PM",
-    location: "Innovation Studio",
-    status: "Published",
-    rsvps: 142,
-    capacity: 200,
-    image: "https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    id: 2,
-    title: "Career Story Lab",
-    date: "MAR 9",
-    time: "4:00 PM – 5:30 PM",
-    location: "North Hall 105",
-    status: "Published",
-    rsvps: 89,
-    capacity: 120,
-    image: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    id: 3,
-    title: "Campus Research Social",
-    date: "MAR 13",
-    time: "2:00 PM – 5:00 PM",
-    location: "Learning Commons",
-    status: "Draft",
-    rsvps: 0,
-    capacity: 80,
-    image: "https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=1200&q=80",
-  },
-  {
-    id: 4,
-    title: "Spring Community Mixer",
-    date: "MAR 20",
-    time: "7:00 PM – 10:00 PM",
-    location: "Student Center Atrium",
-    status: "Scheduled",
-    rsvps: 34,
-    capacity: 300,
-    image: "https://images.unsplash.com/photo-1491438590914-bc09fcaaf77a?auto=format&fit=crop&w=1200&q=80",
-  },
-]
-
+import { eventsApi } from "@/lib/api"
+import { ContentItem } from "@/types"
 
 const statusConfig: Record<string, { dot: string; label: string; text: string }> = {
   Published: { dot: "#10b981", label: "PUBLISHED", text: "text-emerald-400" },
@@ -60,7 +14,32 @@ const statusConfig: Record<string, { dot: string; label: string; text: string }>
 
 export function Events() {
   const navigate = useNavigate()
-  const [hoveredId, setHoveredId] = useState<number | null>(null)
+  const [events, setEvents] = useState<ContentItem[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
+  const [searchQuery, setSearchQuery] = useState("")
+
+  useEffect(() => {
+    eventsApi.getUpcoming(50)
+      .then(setEvents)
+      .catch(() => setEvents([]))
+      .finally(() => setIsLoading(false))
+  }, [])
+
+  const filteredEvents = searchQuery
+    ? events.filter(e =>
+        e.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (e.location ?? '').toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : events
+
+  if (isLoading) {
+    return (
+      <div className="flex h-64 items-center justify-center">
+        <div className="h-6 w-6 animate-spin rounded-full border border-[#4b2e83]/40 border-t-[#b7a57a]" />
+      </div>
+    )
+  }
 
   return (
     <div className="space-y-6">
@@ -92,7 +71,9 @@ export function Events() {
 
       {/* Events subheader */}
       <div className="flex items-center justify-between px-1">
-        <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/25">My Events</p>
+        <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/25">
+          All Events · {events.length} total
+        </p>
         <Link
           to="/contributor/studio"
           className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-[#4b2e83]/40 bg-[#4b2e83]/20 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-[#4b2e83]/35"
@@ -109,7 +90,9 @@ export function Events() {
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/25" size={15} />
             <input
               type="text"
-              placeholder="Search by title, location, or format"
+              placeholder="Search by title or location"
+              value={searchQuery}
+              onChange={e => setSearchQuery(e.target.value)}
               className="w-full rounded-lg border border-white/8 bg-white/5 py-2 pl-9 pr-4 text-sm text-white/80 placeholder-white/25 outline-none transition focus:border-[#4b2e83]/50 focus:ring-1 focus:ring-[#4b2e83]/30"
             />
           </div>
@@ -118,12 +101,6 @@ export function Events() {
               <Filter size={14} />
               Filter
             </button>
-            <select className="cursor-pointer rounded-lg border border-white/8 bg-[#0d0a1a] px-3 py-2 text-sm text-white/50 outline-none focus:border-[#4b2e83]/50">
-              <option>All Statuses</option>
-              <option>Published</option>
-              <option>Draft</option>
-              <option>Scheduled</option>
-            </select>
           </div>
         </div>
       </section>
@@ -133,10 +110,14 @@ export function Events() {
 
       {/* Editorial event list */}
       <section>
-        {events.map((event, i) => {
-          const s = statusConfig[event.status] ?? statusConfig.Draft
+        {filteredEvents.map((event, i) => {
+          const s = statusConfig['Published']
           const isHovered = hoveredId === event.id
-          const fillPct = Math.round((event.rsvps / event.capacity) * 100)
+          const rsvpCount = event.attendees?.count ?? 0
+          const dateStr = event.date
+            ? new Date(event.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }).toUpperCase()
+            : 'TBD'
+          const fillPct = 0 // capacity not tracked yet
 
           return (
             <div key={event.id}>
@@ -148,11 +129,11 @@ export function Events() {
                 onClick={() => navigate(`/contributor/events/${event.id}`)}
               >
                 {/* Hover image bleed — very faint */}
-                {isHovered && (
+                {isHovered && event.imageUrl && (
                   <div
                     className="pointer-events-none absolute inset-0 rounded-lg opacity-[0.06] transition-opacity duration-300"
                     style={{
-                      backgroundImage: `url(${event.image})`,
+                      backgroundImage: `url(${event.imageUrl})`,
                       backgroundSize: "cover",
                       backgroundPosition: "center",
                       filter: "blur(2px)",
@@ -171,11 +152,7 @@ export function Events() {
                   <div className="mb-1.5 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                       <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-white/25">
-                        {event.date}
-                      </span>
-                      <span className="text-white/10">·</span>
-                      <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/20">
-                        {event.time}
+                        {dateStr}
                       </span>
                     </div>
                     <div className="flex items-center gap-1.5">
@@ -202,13 +179,15 @@ export function Events() {
                     className="mt-2 flex flex-wrap items-center gap-4 transition-opacity duration-200"
                     style={{ opacity: isHovered ? 0.8 : 0.4 }}
                   >
-                    <span className="flex items-center gap-1.5 text-xs text-white/60">
-                      <MapPin size={11} className="text-[#b7a57a]/60" />
-                      {event.location}
-                    </span>
+                    {event.location && (
+                      <span className="flex items-center gap-1.5 text-xs text-white/60">
+                        <MapPin size={11} className="text-[#b7a57a]/60" />
+                        {event.location}
+                      </span>
+                    )}
                     <span className="flex items-center gap-1.5 text-xs text-white/50">
                       <Users size={11} className="text-[#b7a57a]/60" />
-                      {event.rsvps} / {event.capacity}
+                      {rsvpCount} RSVPs
                     </span>
                     {/* Inline progress */}
                     <div className="flex items-center gap-2">
@@ -218,7 +197,6 @@ export function Events() {
                           style={{ width: `${fillPct}%` }}
                         />
                       </div>
-                      <span className="font-mono text-[10px] text-white/20">{fillPct}%</span>
                     </div>
                   </div>
 
@@ -245,7 +223,7 @@ export function Events() {
               </GridPatternCard>
 
               {/* Wave divider between rows */}
-              {i < events.length - 1 && (
+              {i < filteredEvents.length - 1 && (
                 <WaveDivider height={16} speed={18} opacity={0.35} />
               )}
             </div>
