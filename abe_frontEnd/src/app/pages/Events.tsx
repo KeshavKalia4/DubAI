@@ -5,6 +5,7 @@ import { WaveDivider } from "@/components/ui/wave-divider"
 import { GridPatternCard } from "@/components/ui/card-with-grid-ellipsis-pattern"
 import { eventsApi } from "@/lib/api"
 import { ContentItem } from "@/types"
+import { useContributor } from "@/app/layouts/DashboardLayout"
 
 const statusConfig: Record<string, { dot: string; label: string; text: string }> = {
   Published: { dot: "#10b981", label: "PUBLISHED", text: "text-emerald-400" },
@@ -14,17 +15,21 @@ const statusConfig: Record<string, { dot: string; label: string; text: string }>
 
 export function Events() {
   const navigate = useNavigate()
+  const contributor = useContributor()
   const [events, setEvents] = useState<ContentItem[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   const [searchQuery, setSearchQuery] = useState("")
 
   useEffect(() => {
-    eventsApi.getUpcoming(50)
+    const fetch = contributor?.rso_id
+      ? eventsApi.getByRso(contributor.rso_id)
+      : eventsApi.getUpcoming(50)
+    fetch
       .then(setEvents)
       .catch(() => setEvents([]))
       .finally(() => setIsLoading(false))
-  }, [])
+  }, [contributor?.rso_id])
 
   const filteredEvents = searchQuery
     ? events.filter(e =>
@@ -72,7 +77,7 @@ export function Events() {
       {/* Events subheader */}
       <div className="flex items-center justify-between px-1">
         <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-white/25">
-          All Events · {events.length} total
+          {contributor?.rso_name ?? 'My Events'} · {events.length} total
         </p>
         <Link
           to="/contributor/studio"

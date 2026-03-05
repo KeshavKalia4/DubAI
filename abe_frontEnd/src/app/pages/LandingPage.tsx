@@ -74,7 +74,7 @@ export function LandingPage() {
           </button>
 
           <button
-            onClick={() => navigate('/contributor')}
+            onClick={() => navigate('/contributor/auth')}
             className="group flex cursor-pointer items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-6 py-3.5 backdrop-blur-sm transition-all duration-200 hover:border-[#4b2e83]/50 hover:bg-white/10"
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#b7a57a]/10 transition-colors group-hover:bg-[#b7a57a]/20">

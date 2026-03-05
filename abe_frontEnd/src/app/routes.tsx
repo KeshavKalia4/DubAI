@@ -12,6 +12,7 @@ import { Attendees } from "./pages/Attendees";
 import { Studio } from "./pages/Studio";
 import { ComparativeAnalytics } from "./pages/ComparativeAnalytics";
 import { NotFound } from "./pages/NotFound";
+import { ContributorAuth } from "./pages/ContributorAuth";
 
 export const router = createBrowserRouter([
   {
@@ -35,6 +36,10 @@ export const router = createBrowserRouter([
         element: <StudentEventDetail />,
       },
     ],
+  },
+  {
+    path: "/contributor/auth",
+    element: <ContributorAuth />,
   },
   {
     path: "/contributor",

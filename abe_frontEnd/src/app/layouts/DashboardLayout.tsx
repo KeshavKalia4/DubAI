@@ -1,4 +1,5 @@
-import { NavLink, Outlet, useNavigate } from "react-router";
+import { NavLink, Outlet, useNavigate, useOutletContext } from "react-router";
+import type { ContributorProfile as ContribProfile } from "@/lib/api/contributorApi";
 import { MadrLogo } from "@/components/ui/madr-logo";
 import {
   LayoutDashboard,
@@ -14,11 +15,29 @@ import {
   GraduationCap
 } from "lucide-react";
 import { cn } from "../../lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { contributorApi, type ContributorProfile } from "@/lib/api/contributorApi";
 
 export function DashboardLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [contributor, setContributor] = useState<ContributorProfile | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const session = contributorApi.getSession();
+    if (!session) {
+      navigate('/contributor/auth');
+      return;
+    }
+    setContributor(session);
+  }, [navigate]);
+
+  const handleSignOut = () => {
+    contributorApi.clearSession();
+    navigate('/contributor/auth');
+  };
+
+  if (!contributor) return null;
 
   return (
     <div className="flex h-screen bg-[#08060f] overflow-hidden font-sans text-white">
@@ -88,7 +107,10 @@ export function DashboardLayout() {
             <Settings size={15} />
             <span>Settings</span>
           </button>
-          <button className="flex items-center gap-3 w-full px-3 py-2 text-xs font-medium text-white/30 hover:text-white/60 hover:bg-white/5 rounded-md transition-colors cursor-pointer">
+          <button
+            onClick={handleSignOut}
+            className="flex items-center gap-3 w-full px-3 py-2 text-xs font-medium text-white/30 hover:text-white/60 hover:bg-white/5 rounded-md transition-colors cursor-pointer"
+          >
             <LogOut size={15} />
             <span>Sign Out</span>
           </button>
@@ -124,11 +146,11 @@ export function DashboardLayout() {
 
             <div className="flex items-center gap-2 pl-3 border-l border-white/8">
               <div className="text-right hidden lg:block">
-                <p className="text-xs font-medium text-white/70">Faculty Staff</p>
-                <p className="text-[10px] text-white/30">Event Coordinator</p>
+                <p className="text-xs font-medium text-white/70">{contributor.name}</p>
+                <p className="text-[10px] text-white/30">{contributor.rso_name ?? 'Contributor'}</p>
               </div>
               <div className="w-8 h-8 rounded-full bg-[#4b2e83]/30 border border-[#4b2e83]/40 text-[#b7a57a] flex items-center justify-center font-medium text-xs">
-                FS
+                {contributor.name.charAt(0).toUpperCase()}
               </div>
             </div>
           </div>
@@ -137,12 +159,16 @@ export function DashboardLayout() {
         {/* Page Content */}
         <main className="relative flex-1 overflow-y-auto p-4 md:p-6">
           <div className="relative z-10 max-w-7xl mx-auto space-y-4 md:space-y-6">
-            <Outlet />
+            <Outlet context={contributor} />
           </div>
         </main>
       </div>
     </div>
   );
+}
+
+export function useContributor() {
+  return useOutletContext<ContribProfile>();
 }
 
 function NavItem({ to, icon, label, onClick, end }: { to: string; icon: React.ReactNode; label: string; onClick?: () => void; end?: boolean }) {

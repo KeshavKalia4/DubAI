@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react"
 import { analyticsApi, type AnalyticsSummary } from "@/lib/api"
 import { Link, useNavigate } from "react-router"
+import { useContributor } from "@/app/layouts/DashboardLayout"
 import { motion } from "framer-motion"
 import GridLayout, { type Layout } from 'react-grid-layout'
 import 'react-grid-layout/css/styles.css'
@@ -743,13 +744,14 @@ function getEventsForDate(date: string): DayEvent[] {
 
 export function Dashboard() {
   const navigate = useNavigate()
+  const contributor = useContributor()
   const [analyticsSummary, setAnalyticsSummary] = useState<AnalyticsSummary | null>(null)
 
   useEffect(() => {
-    analyticsApi.getSummary()
+    analyticsApi.getSummary(contributor?.rso_id ?? undefined)
       .then(setAnalyticsSummary)
-      .catch(() => {/* keep null - will show mock data */})
-  }, [])
+      .catch(() => {/* keep null */})
+  }, [contributor?.rso_id])
 
   const [visibleWidgetIds, setVisibleWidgetIds] = useState<string[]>(() => {
     const stored = localStorage.getItem(STORAGE_KEY)

@@ -39,6 +39,10 @@ export const API_ENDPOINTS = {
   savedEvents: (userNetid: string) => `/api/events/saved/${userNetid}`,
   savedEventIds: (userNetid: string) => `/api/events/saved/${userNetid}/ids`,
 
+  // Contributors
+  contributorStatus: (netid: string) => `/api/contributors/user/${netid}/status`,
+  contributorApply: '/api/contributors/request',
+
   // Analytics
   analyticsSummary: '/api/analytics/summary',
   analyticsRsvpByEvent: '/api/analytics/rsvp-by-event',

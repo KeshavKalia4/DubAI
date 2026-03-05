@@ -7,6 +7,8 @@ export { followsApi } from './followsApi';
 export { analyticsApi } from './analyticsApi';
 export type { AnalyticsSummary, RsvpByEvent } from './analyticsApi';
 export type { CreateEventPayload } from './eventsApi';
+export { contributorApi } from './contributorApi';
+export type { ContributorProfile, ContributorStatus, ContributorRequest } from './contributorApi';
 
 // API Client & Config
 export { apiClient, ApiError } from './client';

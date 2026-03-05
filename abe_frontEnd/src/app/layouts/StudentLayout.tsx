@@ -20,7 +20,7 @@ export function StudentLayout() {
 
           {/* Switch to Contributor */}
           <Link
-            to="/contributor"
+            to="/contributor/auth"
             className="hidden sm:flex justify-self-end items-center gap-1.5 text-xs text-white/30 hover:text-white/60 transition-colors border border-white/10 hover:border-white/20 rounded-lg px-3 py-1.5 cursor-pointer"
           >
             <LayoutDashboard size={12} />
